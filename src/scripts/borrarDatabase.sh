@@ -1,0 +1,1 @@
+mongo tocgame --eval "db.dropDatabase()"
