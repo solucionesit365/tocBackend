@@ -82,7 +82,7 @@ class PaytefClass {
         }
         catch (err) {
             const params = parametros_clase_1.parametrosInstance.getParametros();
-            await axios_1.default.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { "pinpad": "*" });
+            axios_1.default.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { "pinpad": "*" });
             console.log(err.message);
             client.emit('consultaPaytef', { error: true, mensaje: err.message });
             logs_class_1.LogsClass.newLog('iniciarTransaccion PayTefClass', err.message);
@@ -137,6 +137,8 @@ class PaytefClass {
         }
         catch (err) {
             console.log(err);
+            const ipDatafono = parametros_clase_1.parametrosInstance.getParametros().ipTefpay;
+            axios_1.default.post(`http://${ipDatafono}:8887/pinpad/cancel`, { "pinpad": "*" });
             logs_class_1.LogsClass.newLog('Error backend paytefClass consultarEstadoOperacion', err.message);
             client.emit('consultaPaytef', { error: true, mensaje: 'Error ' + err.message });
         }
