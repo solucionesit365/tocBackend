@@ -38,7 +38,7 @@ async function setPagada(idTransaccion) {
     const transacciones = database.collection('transacciones');
     const resultado = await transacciones.updateOne({
         _id: new mongodb_1.ObjectId(idTransaccion)
-    }, { $set: { 'pagado': false } });
+    }, { $set: { 'pagado': true } });
     return resultado;
 }
 exports.setPagada = setPagada;

@@ -38,7 +38,7 @@ export async function setPagada(idTransaccion: string) {
     const transacciones = database.collection('transacciones');
     const resultado = await transacciones.updateOne({
         _id: new ObjectId(idTransaccion)
-    }, { $set: { 'pagado': false } });
+    }, { $set: { 'pagado': true } });
     
     return resultado;
 }
