@@ -81,6 +81,8 @@ class PaytefClass {
             }
         }
         catch (err) {
+            const params = parametros_clase_1.parametrosInstance.getParametros();
+            await axios_1.default.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { "pinpad": "*" });
             console.log(err.message);
             client.emit('consultaPaytef', { error: true, mensaje: err.message });
             logs_class_1.LogsClass.newLog('iniciarTransaccion PayTefClass', err.message);
@@ -147,6 +149,7 @@ class PaytefClass {
                 }
                 catch (err) {
                     console.log(err);
+                    logs_class_1.LogsClass.newLog('No se ha podido establecer como pagada', 'idTransaccion: ' + idTransaccion);
                     return { error: true, mensaje: 'Error, no se ha podido marcar como pagada la transacción ' + idTransaccion };
                 }
                 const parametros = parametros_clase_1.parametrosInstance.getParametros();

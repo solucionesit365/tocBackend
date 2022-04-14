@@ -86,6 +86,8 @@ class PaytefClass {
         client.emit('consultaPaytef', { error: true, mensaje: 'No existe el trabajador activo' });
       }
     } catch(err) {
+      const params = parametrosInstance.getParametros();
+      await axios.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { "pinpad": "*" });
       console.log(err.message);
       client.emit('consultaPaytef', { error: true, mensaje: err.message });
       LogsClass.newLog('iniciarTransaccion PayTefClass', err.message)
@@ -160,6 +162,7 @@ class PaytefClass {
           await transaccionesInstance.setPagada(idTransaccion);
         } catch(err) {
           console.log(err);
+          LogsClass.newLog('No se ha podido establecer como pagada', 'idTransaccion: ' + idTransaccion);
           return { error: true, mensaje: 'Error, no se ha podido marcar como pagada la transacción ' + idTransaccion };
         }
         
