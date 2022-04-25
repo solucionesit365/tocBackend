@@ -188,10 +188,11 @@ export class TicketsClase {
     }
 
     async crearTicketTKRS(total: number, totalTkrs: number, idCesta: number, idCliente: string) {
+        console.log("funcion crear tickets")
         const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
         const nuevoIdTicket = (await this.getUltimoTicket()) + 1;
         const cesta = await cestas.getCesta(idCesta);
-;
+
         if (cesta == null || cesta.lista.length == 0) {
             console.log("Error, la cesta es null o está vacía");
             return false;
