@@ -109,7 +109,7 @@ class PaytefClass {
           /* ¿La transacción de PayTef es exactamente la misma que la última obtenida desde MongoDB? */
           if (resEstadoPaytef.data.result.transactionReference === ultimaTransaccion._id.toString()) {
             /* ¿Venta aprobada sin fallos? */
-            if (resEstadoPaytef.data.result.approved && !resEstadoPaytef.data.result.failed) {
+            if (resEstadoPaytef.data.result.approved) {
               // Añadir que la transacción ya ha sido cobrada => pagada: true (antes de que pueda fallar la inserción de ticket) !!!!!!
               /* Cierro ticket */
               const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference);
