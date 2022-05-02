@@ -96,7 +96,7 @@ class PaytefClass {
             if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
                 if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.result.transactionReference) && resEstadoPaytef.data.result.transactionReference != '') {
                     if (resEstadoPaytef.data.result.transactionReference === ultimaTransaccion._id.toString()) {
-                        if (resEstadoPaytef.data.result.approved && !resEstadoPaytef.data.result.failed) {
+                        if (resEstadoPaytef.data.result.approved) {
                             const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference);
                             if (resCierreTicket.error === false) {
                                 client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
