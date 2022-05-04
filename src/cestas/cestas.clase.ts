@@ -38,6 +38,16 @@ export class CestaClase {
       return false;
     })
   }
+  async updateIdCestaTrabajadoMesa(id: string, idCesta: number) {
+    return schCestas.updateIdCestaTrabajadorMesas(id , idCesta).then((res) => {
+      return res.acknowledged;
+    }).catch((err) => {
+      console.log(err);
+      return false;
+    })
+  }
+
+
 
   getCesta(idCesta: number): Promise<CestasInterface> {
     return schCestas.getCestaConcreta(idCesta);
@@ -116,6 +126,16 @@ export class CestaClase {
     };
     return nuevaCesta;
   }
+  async insertarCestas(cestas) {
+    cestas.info = [];
+    for(let i = 1; i <= 100; i++) {
+      await this.crearNuevaCesta(`TaulaNom${i}`, `Taula ${i}`)
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    // if(cestas.info.length <= 0) return [];
+    // return cestas.info.map(async item => await this.crearNuevaCesta(item.valor, item.variable));
+    return true;
+  }
 
   getTodasCestas(): Promise<CestasInterface[]> {
     return schCestas.getAllCestas();
@@ -157,10 +177,10 @@ export class CestaClase {
     });
   }
 
-  async crearNuevaCesta(nombreCesta: string) {
-    if(!nombreCesta || nombreCesta === '' || nombreCesta === ' ') return false;
+  async crearNuevaCesta(nombreCesta: string, idCestaSincro = null) {
     const nuevaCesta = this.nuevaCestaVacia();
     nuevaCesta.nombreCesta = nombreCesta;
+    if(idCestaSincro !== null) nuevaCesta.idCestaSincro = idCestaSincro;
     return this.setCesta(nuevaCesta).then((res) => {
       if (res) {
         return nuevaCesta;
@@ -172,6 +192,7 @@ export class CestaClase {
       return false;
     });
   }
+
 
   async crearCestaParaTrabajador(idTrabajador: number) {
     if(typeof idTrabajador == 'number') {

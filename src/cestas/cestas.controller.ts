@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Console } from 'console';
 import { UtilesModule } from 'src/utiles/utiles.module';
 import { trabajadoresInstance } from '../trabajadores/trabajadores.clase';
 import { cestas } from './cestas.clase';
@@ -115,18 +116,53 @@ export class CestasController {
 
     @Post('getCestaByID')
     getCestaByID(@Body() params) {
-        return trabajadoresInstance.getCurrentTrabajador().then((res) => {
-            return cestas.getCesta(res._id).then((res) => {
-                if (res) {
-                    return { error: false, info: res };
-                }
-                return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
-            }).catch((err) => {
-                console.log(err);
-                return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
-            });
-        });            
+        console.log('Get cesta by id')
+        console.log(params)
+
+        if (params.idCesta != undefined && params.idCesta != null) {
+            console.log('primer if')
+            if (params.idCesta == -1) {
+                console.log('segundo  if')
+                return trabajadoresInstance.getCurrentTrabajador().then((res) => {
+                    console.log('Hola', res)
+                    return cestas.getCesta(res._id).then((res) => {
+                        if (res) {
+                            return { error: false, info: res };
+                        }
+                        console.log('Holaa',res);
+                        return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
+                    }).catch((err) => {
+                        console.log(err);
+                        return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
+                    });
+                })
+                // return cestas.getCestaRandom().then((res) => {
+                //     return { error: false, info: res };
+                // }).catch((err) => {
+                //     console.log(err);
+                //     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID > getCestaRandom CATCH' };
+                // });
+            } else {
+                console.log('es el else')
+                return cestas.getCesta(params.idCesta).then((res) => {
+                    if (res) {
+                        console.log('este es el result ')
+                        console.log(res)
+                        return { error: false, info: res };
+                    }
+                    
+                    console.log(res);
+                    return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
+                }).catch((err) => {
+                    console.log(err);
+                    return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
+                });
+            }
+        } else {
+            return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID FALTAN DATOS' };
+        }
     }
+
     @Get('getCestaCurrentTrabajador')
     getCestaCurrentTrabajador() {
         return trabajadoresInstance.getCurrentTrabajador().then((res) => {
@@ -160,6 +196,24 @@ export class CestasController {
             return { error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS' };
         }
     }
+
+    @Post('cambiarCestaTrabajador')
+    cambiarCestaTrabajador(@Body() params) {
+        console.log(params)
+        if (params.id_cesta != undefined && params.id_cesta != null) {
+            return cestas.updateIdCestaTrabajadoMesa(params.id, params.id_cesta).then((res) => {
+                if (res) {
+                    return { error: false, info: res };
+                } else {
+                    return { error: true, mensaje: 'Backend: Error en cestas/crearCesta. No se ha podido crear la nueva cesta' };
+                }
+            })
+        } else {
+            return { error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS' };
+        }
+    }
+
+
 
     @Get('getCestas')
     getCestas() {

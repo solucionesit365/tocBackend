@@ -33,6 +33,14 @@ class CestaClase {
             return false;
         });
     }
+    async updateIdCestaTrabajadoMesa(id, idCesta) {
+        return schCestas.updateIdCestaTrabajadorMesas(id, idCesta).then((res) => {
+            return res.acknowledged;
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
     getCesta(idCesta) {
         return schCestas.getCestaConcreta(idCesta);
     }
@@ -103,6 +111,14 @@ class CestaClase {
         };
         return nuevaCesta;
     }
+    async insertarCestas(cestas) {
+        cestas.info = [];
+        for (let i = 1; i <= 100; i++) {
+            await this.crearNuevaCesta(`TaulaNom${i}`, `Taula ${i}`);
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        return true;
+    }
     getTodasCestas() {
         return schCestas.getAllCestas();
     }
@@ -138,11 +154,11 @@ class CestaClase {
             return false;
         });
     }
-    async crearNuevaCesta(nombreCesta) {
-        if (!nombreCesta || nombreCesta === '' || nombreCesta === ' ')
-            return false;
+    async crearNuevaCesta(nombreCesta, idCestaSincro = null) {
         const nuevaCesta = this.nuevaCestaVacia();
         nuevaCesta.nombreCesta = nombreCesta;
+        if (idCestaSincro !== null)
+            nuevaCesta.idCestaSincro = idCestaSincro;
         return this.setCesta(nuevaCesta).then((res) => {
             if (res) {
                 return nuevaCesta;

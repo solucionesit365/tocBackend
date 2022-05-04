@@ -25,6 +25,7 @@ const params_ticket_class_1 = require("../params-ticket/params-ticket.class");
 const menus_clase_1 = require("../menus/menus.clase");
 const teclado_clase_1 = require("../teclado/teclado.clase");
 const doble_menus_clase_1 = require("../doble-menus/doble-menus.clase");
+const cestas_clase_1 = require("../cestas/cestas.clase");
 let InstaladorController = class InstaladorController {
     instalador(params) {
         return axios_1.default.post('parametros/instaladorLicencia', {
@@ -85,7 +86,9 @@ let InstaladorController = class InstaladorController {
                 const info6 = await params_ticket_class_1.paramsTicketInstance.insertarParametrosTicket(res.data.info.parametrosTicket);
                 const info7 = await menus_clase_1.menusInstance.insertarMenus(res.data.info.menus);
                 const info8 = await teclado_clase_1.tecladoInstance.insertarTeclas(res.data.info.teclas);
+                const info9 = await cestas_clase_1.cestas.insertarCestas(res.data.info.cestas);
                 const info10 = await doble_menus_clase_1.dobleMenusInstance.insertarMenus(res.data.info.dobleMenus);
+                console.log(res.data.info.dobleMenus);
                 if (info1 && info2 && info3 && info4 && info5 && info6 && info7 && info8 && info10) {
                     return { error: false };
                 }

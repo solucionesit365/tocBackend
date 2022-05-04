@@ -5,6 +5,7 @@ export declare function getCestaByTrabajadorID(idTrabajador: number): Promise<im
 export declare function eliminarCesta(nombre: string): Promise<import("mongodb").DeleteResult>;
 export declare function eliminarCestaByIdTrabajador(idTrabajador: number): Promise<import("mongodb").DeleteResult>;
 export declare function updateIdCestaTrabajador(id: string): Promise<import("mongodb").InsertOneResult<import("bson").Document>>;
+export declare function updateIdCestaTrabajadorMesas(id: string, idCesta: number): Promise<import("mongodb").UpdateResult>;
 export declare function getAllCestas(): Promise<any>;
 export declare function borrarCesta(idCesta: number): Promise<import("mongodb").UpdateResult>;
 export declare function setCesta(cesta: CestasInterface): Promise<import("bson").Document | import("mongodb").UpdateResult>;

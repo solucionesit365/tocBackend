@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCestaDiferente = exports.setCesta = exports.borrarCesta = exports.getAllCestas = exports.updateIdCestaTrabajador = exports.eliminarCestaByIdTrabajador = exports.eliminarCesta = exports.getCestaByTrabajadorID = exports.getCestaConcreta = exports.getUnaCesta = void 0;
+exports.getCestaDiferente = exports.setCesta = exports.borrarCesta = exports.getAllCestas = exports.updateIdCestaTrabajadorMesas = exports.updateIdCestaTrabajador = exports.eliminarCestaByIdTrabajador = exports.eliminarCesta = exports.getCestaByTrabajadorID = exports.getCestaConcreta = exports.getUnaCesta = void 0;
 const mongodb_1 = require("../conexion/mongodb");
 async function getUnaCesta() {
     const database = (await mongodb_1.conexion).db('tocgame');
@@ -50,6 +50,24 @@ async function updateIdCestaTrabajador(id) {
     return resultado;
 }
 exports.updateIdCestaTrabajador = updateIdCestaTrabajador;
+async function updateIdCestaTrabajadorMesas(id, idCesta) {
+    console.log('updateIdCestaTrabajador');
+    console.log(id);
+    console.log(idCesta);
+    const database = (await mongodb_1.conexion).db('tocgame');
+    const cesta = database.collection('cestas');
+    const mesa = await cesta.findOne({ _id: idCesta });
+    console.log('La lista de las mesas ------------------------------------------');
+    console.log(mesa.lista);
+    const resultado = await cesta.updateOne({ _id: `${id}` }, { $set: { lista: mesa.lista } });
+    const cestaTrabajadors = await cesta.findOne({ _id: `${id}` });
+    console.log('--------------------------');
+    console.log(cestaTrabajadors);
+    console.log('El resultado del update ------------------------------------------');
+    console.log(resultado);
+    return resultado;
+}
+exports.updateIdCestaTrabajadorMesas = updateIdCestaTrabajadorMesas;
 async function getAllCestas() {
     const database = (await mongodb_1.conexion).db('tocgame');
     const cesta = database.collection('cestas');
