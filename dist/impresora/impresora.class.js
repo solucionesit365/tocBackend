@@ -102,6 +102,9 @@ class Impresora {
                     }
                 };
                 this._venta(sendObject);
+                if (infoTicket.recibo != null && infoTicket.recibo != undefined) {
+                    this.imprimirRecibo(infoTicket.recibo);
+                }
             }
             else {
                 sendObject = {
@@ -119,6 +122,29 @@ class Impresora {
                 };
                 this._venta(sendObject);
             }
+        }
+    }
+    async imprimirRecibo(recibo) {
+        try {
+            permisosImpresora();
+            const device = await dispositivos.getDevice();
+            if (device == null) {
+                throw 'Error controlado: El dispositivo es null';
+            }
+            var printer = new escpos.Printer(device);
+            device.open(function () {
+                printer
+                    .encode('latin1')
+                    .font('a')
+                    .style('b')
+                    .size(0, 0)
+                    .text(recibo.replace('€', 'EUR'))
+                    .cut('PAPER_FULL_CUT')
+                    .close();
+            });
+        }
+        catch (err) {
+            console.log("Error impresora: ", err);
         }
     }
     async _venta(info) {
