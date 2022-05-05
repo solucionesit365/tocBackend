@@ -138,7 +138,7 @@ class Impresora {
                     .font('a')
                     .style('b')
                     .size(0, 0)
-                    .text(recibo)
+                    .text(recibo.replace('€', 'EUR'))
                     .cut('PAPER_FULL_CUT')
                     .close();
             });
