@@ -3,7 +3,7 @@ import { Socket } from 'dgram';
 declare class PaytefClass {
     iniciarTransaccion(client: Socket, idCliente: string): Promise<void>;
     consultarEstadoOperacion(client: Socket): Promise<void>;
-    cerrarTicket(idTransaccion: string): Promise<{
+    cerrarTicket(idTransaccion: string, recibo: string): Promise<{
         error: boolean;
         mensaje: string;
     } | {
