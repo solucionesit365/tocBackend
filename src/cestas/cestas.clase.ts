@@ -30,7 +30,7 @@ export class CestaClase {
     this.udsAplicar = 1;
   }
 
-  async updateIdCestaTrabajador(id: string) {
+  async updateIdCestaTrabajador(id: number) {
     return schCestas.updateIdCestaTrabajador(id).then((res) => {
       return res.acknowledged;
     }).catch((err) => {
@@ -38,14 +38,14 @@ export class CestaClase {
       return false;
     })
   }
-  async updateIdCestaTrabajadoMesa(id: string, idCesta: number) {
-    return schCestas.updateIdCestaTrabajadorMesas(id , idCesta).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    })
-  }
+  // async updateIdCestaTrabajadoMesa(id: string, idCesta: number) {
+  //   return schCestas.updateIdCestaTrabajadorMesas(id , idCesta).then((res) => {
+  //     return res.acknowledged;
+  //   }).catch((err) => {
+  //     console.log(err);
+  //     return false;
+  //   })
+  // }
 
 
 
@@ -129,18 +129,21 @@ export class CestaClase {
   async insertarCestas(cestas) {
     cestas.info = [];
     for(let i = 1; i <= 100; i++) {
-      await this.crearNuevaCesta(`TaulaNom${i}`, `Taula ${i}`)
+      await this.crearNuevaCesta(`Mesa ${i}`, `Mesa ${i}`)
       await new Promise(resolve => setTimeout(resolve, 10));
     }
-    // if(cestas.info.length <= 0) return [];
-    // return cestas.info.map(async item => await this.crearNuevaCesta(item.valor, item.variable));
+    if(cestas.info.length <= 0) return [];
+    return cestas.info.map(async item => await this.crearNuevaCesta(item.valor, item.variable));
     return true;
   }
 
   getTodasCestas(): Promise<CestasInterface[]> {
     return schCestas.getAllCestas();
   }
+  cerarCestaMesas(idTrabajador: number, nombreMesa: string){
+    this.crearNuevaCesta(nombreMesa)
 
+  }
   borrarCesta(idCestaBorrar): Promise<boolean> {
     return schCestas.borrarCesta(idCestaBorrar).then((res) => {
       return res.acknowledged;
@@ -198,9 +201,10 @@ export class CestaClase {
     if(typeof idTrabajador == 'number') {
       let nuevaCesta = this.nuevaCestaVacia();
       nuevaCesta.idTrabajador = idTrabajador;
-
+      console.log(idTrabajador);
       return this.setCesta(nuevaCesta).then((res) => {
         if (res) {
+          console.log(nuevaCesta )
           return nuevaCesta;
         } else {
           return false;

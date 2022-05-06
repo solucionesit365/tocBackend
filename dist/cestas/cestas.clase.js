@@ -33,14 +33,6 @@ class CestaClase {
             return false;
         });
     }
-    async updateIdCestaTrabajadoMesa(id, idCesta) {
-        return schCestas.updateIdCestaTrabajadorMesas(id, idCesta).then((res) => {
-            return res.acknowledged;
-        }).catch((err) => {
-            console.log(err);
-            return false;
-        });
-    }
     getCesta(idCesta) {
         return schCestas.getCestaConcreta(idCesta);
     }
@@ -114,13 +106,19 @@ class CestaClase {
     async insertarCestas(cestas) {
         cestas.info = [];
         for (let i = 1; i <= 100; i++) {
-            await this.crearNuevaCesta(`TaulaNom${i}`, `Taula ${i}`);
+            await this.crearNuevaCesta(`Mesa ${i}`, `Mesa ${i}`);
             await new Promise(resolve => setTimeout(resolve, 10));
         }
+        if (cestas.info.length <= 0)
+            return [];
+        return cestas.info.map(async (item) => await this.crearNuevaCesta(item.valor, item.variable));
         return true;
     }
     getTodasCestas() {
         return schCestas.getAllCestas();
+    }
+    cerarCestaMesas(idTrabajador, nombreMesa) {
+        this.crearNuevaCesta(nombreMesa);
     }
     borrarCesta(idCestaBorrar) {
         return schCestas.borrarCesta(idCestaBorrar).then((res) => {
@@ -175,8 +173,10 @@ class CestaClase {
         if (typeof idTrabajador == 'number') {
             let nuevaCesta = this.nuevaCestaVacia();
             nuevaCesta.idTrabajador = idTrabajador;
+            console.log(idTrabajador);
             return this.setCesta(nuevaCesta).then((res) => {
                 if (res) {
+                    console.log(nuevaCesta);
                     return nuevaCesta;
                 }
                 else {

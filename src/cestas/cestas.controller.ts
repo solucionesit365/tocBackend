@@ -201,13 +201,22 @@ export class CestasController {
     cambiarCestaTrabajador(@Body() params) {
         console.log(params)
         if (params.id_cesta != undefined && params.id_cesta != null) {
-            return cestas.updateIdCestaTrabajadoMesa(params.id, params.id_cesta).then((res) => {
+            return cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
                     return { error: false, info: res };
                 } else {
                     return { error: true, mensaje: 'Backend: Error en cestas/crearCesta. No se ha podido crear la nueva cesta' };
                 }
             })
+        } else {
+            return { error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS' };
+        }
+    }
+    @Post('cerarCestaMesas')
+    cerarCestaMesas(@Body() params) {
+        console.log(params)
+        if (params.id_cesta != undefined && params.id_cesta != null) {
+            return cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa)
         } else {
             return { error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS' };
         }

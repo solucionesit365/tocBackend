@@ -92,6 +92,10 @@ export declare class CestasController {
         error: boolean;
         mensaje: string;
     };
+    cerarCestaMesas(params: any): void | {
+        error: boolean;
+        mensaje: string;
+    };
     getCestas(): Promise<{
         error: boolean;
         info: import("./cestas.interface").CestasInterface[];

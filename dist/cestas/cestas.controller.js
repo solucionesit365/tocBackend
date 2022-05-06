@@ -190,7 +190,7 @@ let CestasController = class CestasController {
     cambiarCestaTrabajador(params) {
         console.log(params);
         if (params.id_cesta != undefined && params.id_cesta != null) {
-            return cestas_clase_1.cestas.updateIdCestaTrabajadoMesa(params.id, params.id_cesta).then((res) => {
+            return cestas_clase_1.cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
                     return { error: false, info: res };
                 }
@@ -198,6 +198,15 @@ let CestasController = class CestasController {
                     return { error: true, mensaje: 'Backend: Error en cestas/crearCesta. No se ha podido crear la nueva cesta' };
                 }
             });
+        }
+        else {
+            return { error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS' };
+        }
+    }
+    cerarCestaMesas(params) {
+        console.log(params);
+        if (params.id_cesta != undefined && params.id_cesta != null) {
+            return cestas_clase_1.cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa);
         }
         else {
             return { error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS' };
@@ -365,6 +374,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], CestasController.prototype, "cambiarCestaTrabajador", null);
+__decorate([
+    (0, common_1.Post)('cerarCestaMesas'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CestasController.prototype, "cerarCestaMesas", null);
 __decorate([
     (0, common_1.Get)('getCestas'),
     __metadata("design:type", Function),

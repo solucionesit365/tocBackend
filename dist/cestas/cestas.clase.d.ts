@@ -3,15 +3,15 @@ export declare class CestaClase {
     private cesta;
     private udsAplicar;
     constructor();
-    updateIdCestaTrabajador(id: string): Promise<boolean>;
-    updateIdCestaTrabajadoMesa(id: string, idCesta: number): Promise<boolean>;
+    updateIdCestaTrabajador(id: number): Promise<boolean>;
     getCesta(idCesta: number): Promise<CestasInterface>;
     getCestaRandom(): Promise<CestasInterface>;
     reiniciarCesta(idCestaBorrar: any): Promise<CestasInterface>;
     borrarCestaActiva(): Promise<boolean>;
     nuevaCestaVacia(): CestasInterface;
-    insertarCestas(cestas: any): Promise<boolean>;
+    insertarCestas(cestas: any): Promise<any>;
     getTodasCestas(): Promise<CestasInterface[]>;
+    cerarCestaMesas(idTrabajador: number, nombreMesa: string): void;
     borrarCesta(idCestaBorrar: any): Promise<boolean>;
     eliminarCesta(nombreCesta: any): Promise<boolean>;
     setCesta(cesta: CestasInterface): Promise<boolean>;
