@@ -24,13 +24,20 @@ function limpiarNombreTienda(cadena) {
     }
 }
 class PaytefClass {
+    getTotal(cesta) {
+        let total = 0;
+        cesta.lista.forEach(itemLista => {
+            total += itemLista.subtotal;
+        });
+        return total;
+    }
     async iniciarTransaccion(client, idCliente) {
         try {
             const idTrabajadorActivo = await trabajadores_clase_1.trabajadoresInstance.getCurrentIdTrabajador();
             if (idTrabajadorActivo != null) {
                 const cesta = await cestas_clase_1.cestas.getCestaByTrabajadorID(idTrabajadorActivo);
                 if (cesta != null) {
-                    const total = cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
+                    const total = this.getTotal(cesta);
                     if (cesta.lista.length > 0 && total > 0) {
                         const resTransaccion = await transacciones_class_1.transaccionesInstance.crearTransaccion(cesta, total, idCliente);
                         if (resTransaccion.error === false) {

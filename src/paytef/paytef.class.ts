@@ -24,6 +24,14 @@ function limpiarNombreTienda(cadena: string) {
 }
 
 class PaytefClass {
+  getTotal(cesta: CestasInterface): number {
+    let total = 0;
+    cesta.lista.forEach(itemLista => {
+      total += itemLista.subtotal;
+    });
+    return total;
+  }
+
   async iniciarTransaccion(client: Socket, idCliente: string): Promise<void> {
     try {
       /* Obtengo el trabajador actual */
@@ -35,7 +43,7 @@ class PaytefClass {
         /* ¿Existe la cesta del trabajador activo? */
         if (cesta != null) {
           /* Consigo el total de la cesta para enviarlo a PayTef */
-          const total = cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
+          const total = this.getTotal(cesta); //cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
           // La lista no puede estar vacía ni el total puede ser cero.
           if (cesta.lista.length > 0 && total > 0) {
             /* Creo la transacción con los datos de la cesta, total e idCliente => MongoDB */
