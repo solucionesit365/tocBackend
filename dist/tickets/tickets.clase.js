@@ -184,6 +184,7 @@ class TicketsClase {
         return false;
     }
     async crearTicketTKRS(total, totalTkrs, idCesta, idCliente) {
+        console.log("funcion crear tickets");
         const infoTrabajador = await trabajadores_clase_1.trabajadoresInstance.getCurrentTrabajador();
         const nuevoIdTicket = (await this.getUltimoTicket()) + 1;
         const cesta = await cestas_clase_1.cestas.getCesta(idCesta);

@@ -24,13 +24,20 @@ function limpiarNombreTienda(cadena) {
     }
 }
 class PaytefClass {
+    getTotal(cesta) {
+        let total = 0;
+        cesta.lista.forEach(itemLista => {
+            total += itemLista.subtotal;
+        });
+        return total;
+    }
     async iniciarTransaccion(client, idCliente) {
         try {
             const idTrabajadorActivo = await trabajadores_clase_1.trabajadoresInstance.getCurrentIdTrabajador();
             if (idTrabajadorActivo != null) {
                 const cesta = await cestas_clase_1.cestas.getCestaByTrabajadorID(idTrabajadorActivo);
                 if (cesta != null) {
-                    const total = cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
+                    const total = this.getTotal(cesta);
                     if (cesta.lista.length > 0 && total > 0) {
                         const resTransaccion = await transacciones_class_1.transaccionesInstance.crearTransaccion(cesta, total, idCliente);
                         if (resTransaccion.error === false) {
@@ -97,7 +104,7 @@ class PaytefClass {
                 if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.result.transactionReference) && resEstadoPaytef.data.result.transactionReference != '') {
                     if (resEstadoPaytef.data.result.transactionReference === ultimaTransaccion._id.toString()) {
                         if (resEstadoPaytef.data.result.approved) {
-                            const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference);
+                            const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference, resEstadoPaytef.data.result.receipts.clientReceipt);
                             if (resCierreTicket.error === false) {
                                 client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
                             }
@@ -143,7 +150,7 @@ class PaytefClass {
             client.emit('consultaPaytef', { error: true, mensaje: 'Error ' + err.message });
         }
     }
-    async cerrarTicket(idTransaccion) {
+    async cerrarTicket(idTransaccion, recibo) {
         return transacciones_class_1.transaccionesInstance.getTransaccionById(idTransaccion).then(async (infoTransaccion) => {
             if (infoTransaccion != null) {
                 try {
@@ -176,7 +183,8 @@ class PaytefClass {
                     enTransito: false,
                     intentos: 0,
                     comentario: '',
-                    regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false)
+                    regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false),
+                    recibo: recibo
                 };
                 if (await tickets_clase_1.ticketsInstance.insertarTicket(nuevoTicket)) {
                     if (await cestas_clase_1.cestas.borrarCestaActiva()) {
