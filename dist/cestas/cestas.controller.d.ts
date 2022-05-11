@@ -41,6 +41,18 @@ export declare class CestasController {
         okey: boolean;
         error: string;
     }>;
+    PostCestaCurrent(params: any): Promise<{
+        error: boolean;
+        info: import("./cestas.interface").CestasInterface;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+        info?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+    }>;
     getCestaByID(params: any): Promise<{
         error: boolean;
         info: import("./cestas.interface").CestasInterface;

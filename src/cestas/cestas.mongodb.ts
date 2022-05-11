@@ -21,6 +21,12 @@ export async function getCestaByTrabajadorID(idTrabajador: number) {
     let resultado = await cesta.findOne({idTrabajador: idTrabajador});
     return resultado;
 }
+export async function getCestaByID(idTrabajador: number) {
+    const database = (await conexion).db('tocgame');
+    const cesta = database.collection('cestas');
+    let resultado = await cesta.findOne({_id: idTrabajador});
+    return resultado;
+}
 
 export async function eliminarCesta(nombre: string) {
     const database = (await conexion).db('tocgame');

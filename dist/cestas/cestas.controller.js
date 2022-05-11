@@ -113,6 +113,20 @@ let CestasController = class CestasController {
             });
         }
     }
+    PostCestaCurrent(params) {
+        console.log('get cesta ');
+        console.log(params);
+        return cestas_clase_1.cestas.getCestaByID(params.idCesta).then((res) => {
+            console.log(res);
+            if (res) {
+                return { error: false, info: res };
+            }
+            return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
+        }).catch((err) => {
+            console.log(err);
+            return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
+        });
+    }
     getCestaByID(params) {
         console.log('Get cesta by id');
         console.log(params);
@@ -347,6 +361,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], CestasController.prototype, "getCestaDiferent", null);
+__decorate([
+    (0, common_1.Post)('getCestaCurrent'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CestasController.prototype, "PostCestaCurrent", null);
 __decorate([
     (0, common_1.Post)('getCestaByID'),
     __param(0, (0, common_1.Body)()),

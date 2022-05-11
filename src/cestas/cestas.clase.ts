@@ -559,7 +559,26 @@ export class CestaClase {
         return null;
       });
     }
-}
+    getCestaByID(idCesta: number): Promise<CestasInterface> {
+      return schCestas.getCestaByID(idCesta).then((res) => {
+        if (res != null) {
+          return res;
+        } else { // Si la cesta no existe, crearla para este trabajador
+          return this.crearCestaParaTrabajador(idCesta).then((resCesta) => {
+            if (resCesta) {
+              return resCesta;
+            }
+            return null;
+          })
+        }
+      }).catch((err) => {
+        console.log(err);
+        return null;
+      });
+    }
+    
+  }
+
 
 const cestas = new CestaClase();
 

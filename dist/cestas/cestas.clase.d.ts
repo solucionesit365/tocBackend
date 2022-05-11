@@ -36,6 +36,7 @@ export declare class CestaClase {
     enviarACocina(idCesta: any): Promise<boolean>;
     getCestaDiferente(id_cesta: any): Promise<false | import("bson").Document>;
     getCestaByTrabajadorID(idTrabajador: number): Promise<CestasInterface>;
+    getCestaByID(idCesta: number): Promise<CestasInterface>;
 }
 declare const cestas: CestaClase;
 export { cestas };

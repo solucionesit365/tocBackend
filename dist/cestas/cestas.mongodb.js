@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCestaDiferente = exports.setCesta = exports.borrarCesta = exports.getAllCestas = exports.updateIdCestaTrabajador = exports.eliminarCestaByIdTrabajador = exports.eliminarCesta = exports.getCestaByTrabajadorID = exports.getCestaConcreta = exports.getUnaCesta = void 0;
+exports.getCestaDiferente = exports.setCesta = exports.borrarCesta = exports.getAllCestas = exports.updateIdCestaTrabajador = exports.eliminarCestaByIdTrabajador = exports.eliminarCesta = exports.getCestaByID = exports.getCestaByTrabajadorID = exports.getCestaConcreta = exports.getUnaCesta = void 0;
 const mongodb_1 = require("../conexion/mongodb");
 async function getUnaCesta() {
     const database = (await mongodb_1.conexion).db('tocgame');
@@ -25,6 +25,13 @@ async function getCestaByTrabajadorID(idTrabajador) {
     return resultado;
 }
 exports.getCestaByTrabajadorID = getCestaByTrabajadorID;
+async function getCestaByID(idTrabajador) {
+    const database = (await mongodb_1.conexion).db('tocgame');
+    const cesta = database.collection('cestas');
+    let resultado = await cesta.findOne({ _id: idTrabajador });
+    return resultado;
+}
+exports.getCestaByID = getCestaByID;
 async function eliminarCesta(nombre) {
     const database = (await mongodb_1.conexion).db('tocgame');
     const cesta = database.collection('cestas');

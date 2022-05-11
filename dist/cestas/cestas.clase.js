@@ -495,6 +495,24 @@ class CestaClase {
             return null;
         });
     }
+    getCestaByID(idCesta) {
+        return schCestas.getCestaByID(idCesta).then((res) => {
+            if (res != null) {
+                return res;
+            }
+            else {
+                return this.crearCestaParaTrabajador(idCesta).then((resCesta) => {
+                    if (resCesta) {
+                        return resCesta;
+                    }
+                    return null;
+                });
+            }
+        }).catch((err) => {
+            console.log(err);
+            return null;
+        });
+    }
 }
 exports.CestaClase = CestaClase;
 const cestas = new CestaClase();

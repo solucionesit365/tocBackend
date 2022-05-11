@@ -113,6 +113,23 @@ export class CestasController {
             });
         }
     }
+    @Post('getCestaCurrent')
+    PostCestaCurrent(@Body() params) {
+    console.log('get cesta ')
+    console.log(params)
+                return cestas.getCestaByID(params.idCesta).then((res) => {
+                    console.log(res)
+                    if (res) {
+                        return { error: false, info: res };
+                    }
+                    return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
+                }).catch((err) => {
+                    console.log(err);
+                    return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
+                });
+           
+                 
+    }
 
     @Post('getCestaByID')
     getCestaByID(@Body() params) {
