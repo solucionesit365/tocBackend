@@ -1,9 +1,10 @@
 /// <reference types="node" />
+import { CestasInterface } from "src/cestas/cestas.interface";
 import { Socket } from 'dgram';
 declare class PaytefClass {
     iniciarTransaccion(client: Socket, idCliente: string, idCesta: number): Promise<void>;
     consultarEstadoOperacion(client: Socket): Promise<void>;
-    cerrarTicket(idTransaccion: string): Promise<{
+    cerrarTicket(idTransaccion: string, recibo: string): Promise<{
         error: boolean;
         mensaje: string;
     } | {

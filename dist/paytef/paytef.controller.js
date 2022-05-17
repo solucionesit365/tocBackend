@@ -17,57 +17,9 @@ const transacciones_class_1 = require("../transacciones/transacciones.class");
 const transacciones_interface_1 = require("../transacciones/transacciones.interface");
 const utiles_module_1 = require("../utiles/utiles.module");
 const parametros_clase_1 = require("../parametros/parametros.clase");
-const paytef_class_1 = require("./paytef.class");
 const exec = require('child_process').exec;
 const os = require('os');
 let PaytefController = class PaytefController {
-    async comprobarEstado() {
-        const ipDatafono = parametros_clase_1.parametrosInstance.getParametros().ipTefpay;
-        const ultimaTransaccion = await transacciones_class_1.transaccionesInstance.getUltimaTransaccion();
-        return axios_1.default.post(`http://${ipDatafono}:8887/transaction/poll`, {
-            pinpad: "*"
-        }).then((res) => {
-            if (res.data.result != null && res.data.result != undefined) {
-                if (res.data.result.transactionReference === ultimaTransaccion._id.toString()) {
-                    if (res.data.result.approved && !res.data.result.failed) {
-                        return paytef_class_1.paytefInstance.cerrarTicket(res.data.result.transactionReference).then((resCierreTicket) => {
-                            if (resCierreTicket.error) {
-                                return { error: true, mensaje: resCierreTicket.mensaje };
-                            }
-                            return { error: false, continuo: false };
-                        });
-                    }
-                    else {
-                        return { error: true, mensaje: 'Operación denegada' };
-                    }
-                }
-                else {
-                    return { error: false, continuo: true };
-                }
-            }
-            else {
-                if (res.data.info != null && res.data.info != undefined) {
-                    if (res.data.info.transactionStatus === 'cancelling') {
-                        return { error: true, mensaje: 'Operación cancelada' };
-                    }
-                    else {
-                        return { error: false, continuo: true };
-                    }
-                }
-                else {
-                    return { error: false, continuo: true };
-                }
-            }
-        }).catch((err) => {
-            if (err.message == 'Request failed with status code 500') {
-                return { error: false, continuo: true };
-            }
-            else {
-                console.log(err.message);
-                return { error: true, mensaje: "Error catch cobro paytef controller" };
-            }
-        });
-    }
     cancelarOperacionActual() {
         const ipDatafono = parametros_clase_1.parametrosInstance.getParametros().ipTefpay;
         return axios_1.default.post(`http://${ipDatafono}:8887/pinpad/cancel`, { pinpad: "*" }).then((res) => {
@@ -101,12 +53,6 @@ let PaytefController = class PaytefController {
         });
     }
 };
-__decorate([
-    (0, common_1.Get)('polling'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], PaytefController.prototype, "comprobarEstado", null);
 __decorate([
     (0, common_1.Get)('cancelarOperacionActual'),
     __metadata("design:type", Function),

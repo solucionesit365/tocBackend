@@ -102,6 +102,9 @@ class Impresora {
                     }
                 };
                 this._venta(sendObject);
+                if (infoTicket.recibo != null && infoTicket.recibo != undefined) {
+                    this.imprimirRecibo(infoTicket.recibo);
+                }
             }
             else {
                 sendObject = {
@@ -119,6 +122,30 @@ class Impresora {
                 };
                 this._venta(sendObject);
             }
+        }
+    }
+    async imprimirRecibo(recibo) {
+        try {
+            permisosImpresora();
+            const device = await dispositivos.getDevice();
+            if (device == null) {
+                throw 'Error controlado: El dispositivo es null';
+            }
+            var printer = new escpos.Printer(device);
+            device.open(function () {
+                printer
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
+                    .font('a')
+                    .style('b')
+                    .size(0, 0)
+                    .text(recibo)
+                    .cut('PAPER_FULL_CUT')
+                    .close();
+            });
+        }
+        catch (err) {
+            console.log("Error impresora: ", err);
         }
     }
     async _venta(info) {
@@ -195,13 +222,13 @@ class Impresora {
             var detalleIva21 = '';
             var detalleIva = '';
             if (tiposIva.importe1 > 0) {
-                detalleIva4 = `${tiposIva.base1.toFixed(2)}        4%: ${tiposIva.valorIva1.toFixed(2)}      ${tiposIva.importe1.toFixed(2)}\n`;
+                detalleIva4 = `${tiposIva.base1.toFixed(2)}€      4%: ${tiposIva.valorIva1.toFixed(2)}€     ${tiposIva.importe1.toFixed(2)}€\n`;
             }
             if (tiposIva.importe2 > 0) {
-                detalleIva10 = `${tiposIva.base2.toFixed(2)}        10%: ${tiposIva.valorIva2.toFixed(2)}      ${tiposIva.importe2.toFixed(2)}\n`;
+                detalleIva10 = `${tiposIva.base2.toFixed(2)}€      10%: ${tiposIva.valorIva2.toFixed(2)}€     ${tiposIva.importe2.toFixed(2)}€\n`;
             }
             if (tiposIva.importe3 > 0) {
-                detalleIva21 = `${tiposIva.base3.toFixed(2)}       21%: ${tiposIva.valorIva3.toFixed(2)}      ${tiposIva.importe3.toFixed(2)}\n`;
+                detalleIva21 = `${tiposIva.base3.toFixed(2)}€     21%: ${tiposIva.valorIva3.toFixed(2)}€     ${tiposIva.importe3.toFixed(2)}€\n`;
             }
             detalleIva = detalleIva4 + detalleIva10 + detalleIva21;
             var infoConsumoPersonal = '';
@@ -211,7 +238,8 @@ class Impresora {
             }
             device.open(function () {
                 printer
-                    .encode('latin1')
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
                     .font('a')
                     .style('b')
                     .size(0, 0)
@@ -222,7 +250,6 @@ class Impresora {
                     .text(detalleClienteVip)
                     .text(detalleNombreCliente)
                     .text(detallePuntosCliente)
-                    .control('LF')
                     .control('LF')
                     .control('LF')
                     .control('LF')
@@ -237,7 +264,8 @@ class Impresora {
                     .text(infoConsumoPersonal)
                     .size(1, 1)
                     .text(pagoDevolucion)
-                    .text('TOTAL: ' + total.toFixed(2) + ' EUR \n')
+                    .text('TOTAL: ' + total.toFixed(2) + ' €')
+                    .control('LF')
                     .size(0, 0)
                     .align('CT')
                     .text('Base IVA         IVA         IMPORT')
@@ -264,6 +292,8 @@ class Impresora {
             const printer = new escpos.Printer(device, options);
             device.open(function () {
                 printer
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
                     .font('a')
                     .style('b')
                     .align('CT')
@@ -301,6 +331,8 @@ class Impresora {
             var printer = new escpos.Printer(device, options);
             device.open(function () {
                 printer
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
                     .font('a')
                     .style('b')
                     .align('CT')
@@ -334,6 +366,8 @@ class Impresora {
             var printer = new escpos.Printer(device, options);
             device.open(function () {
                 printer
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
                     .font('a')
                     .style('b')
                     .align('CT')
@@ -376,6 +410,8 @@ class Impresora {
             let mesFinal = fechaFinal.getMonth() + 1;
             device.open(function () {
                 printer
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
                     .font('a')
                     .style('b')
                     .align('CT')
@@ -443,6 +479,8 @@ class Impresora {
                     var printer = new escpos.Printer(device, options);
                     device.open(function () {
                         printer
+                            .setCharacterCodeTable(19)
+                            .encode('CP858')
                             .font('a')
                             .style('b')
                             .align('CT')

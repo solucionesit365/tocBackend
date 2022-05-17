@@ -42,5 +42,3 @@ export async function setPagada(idTransaccion: string) {
     
     return resultado;
 }
-
-

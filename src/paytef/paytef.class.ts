@@ -25,6 +25,7 @@ function limpiarNombreTienda(cadena: string) {
 
 class PaytefClass {
   async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number): Promise<void> {
+
     try {
       /* Obtengo el trabajador actual */
       const idTrabajadorActivo = await trabajadoresInstance.getCurrentIdTrabajador();
@@ -35,7 +36,7 @@ class PaytefClass {
         /* ¿Existe la cesta del trabajador activo? */
         if (cesta != null) {
           /* Consigo el total de la cesta para enviarlo a PayTef */
-          const total = cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
+          const total = this.getTotal(cesta); //cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
           // La lista no puede estar vacía ni el total puede ser cero.
           if (cesta.lista.length > 0 && total > 0) {
             /* Creo la transacción con los datos de la cesta, total e idCliente => MongoDB */
@@ -106,13 +107,14 @@ class PaytefClass {
       /* ¿Ya existe el resultado de PayTef? */
       if (UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
         if (UtilesModule.checkVariable(resEstadoPaytef.data.result.transactionReference) && resEstadoPaytef.data.result.transactionReference != '') {
+          // console.log(resEstadoPaytef.data.result.receipts.clientReceipt);
           /* ¿La transacción de PayTef es exactamente la misma que la última obtenida desde MongoDB? */
           if (resEstadoPaytef.data.result.transactionReference === ultimaTransaccion._id.toString()) {
             /* ¿Venta aprobada sin fallos? */
-            if (resEstadoPaytef.data.result.approved && !resEstadoPaytef.data.result.failed) {
+            if (resEstadoPaytef.data.result.approved) {
               // Añadir que la transacción ya ha sido cobrada => pagada: true (antes de que pueda fallar la inserción de ticket) !!!!!!
               /* Cierro ticket */
-              const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference);
+              const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference, resEstadoPaytef.data.result.receipts.clientReceipt);
               if (resCierreTicket.error === false) {
                 /* Operación aprobada y finalizada */
                 client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
@@ -157,7 +159,7 @@ class PaytefClass {
     }
   }
   
-  async cerrarTicket(idTransaccion: string) {
+  async cerrarTicket(idTransaccion: string, recibo: string) {
     return transaccionesInstance.getTransaccionById(idTransaccion).then(async (infoTransaccion) => {
       if (infoTransaccion != null) {
         try {
@@ -191,7 +193,8 @@ class PaytefClass {
           enTransito: false,
           intentos: 0,
           comentario: '',
-          regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true): (false)
+          regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true): (false),
+          recibo: recibo
         }
         if (await ticketsInstance.insertarTicket(nuevoTicket)) {
           if (await cestas.borrarCestaActiva()) {
