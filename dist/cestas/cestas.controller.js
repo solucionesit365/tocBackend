@@ -319,8 +319,8 @@ let CestasController = class CestasController {
         }
     }
     async getCestaByTrabajadorId(params) {
-        if (utiles_module_1.UtilesModule.checkVariable(params.idTrabajador)) {
-            return { error: false, info: await cestas_clase_1.cestas.getCestaByTrabajadorID(params.idTrabajador) };
+        if (utiles_module_1.UtilesModule.checkVariable(params.idCesta)) {
+            return { error: false, info: await cestas_clase_1.cestas.getCestaByID(params.idCesta) };
         }
         else {
             return { error: true, mensaje: 'Backend error, faltan datos en cestas/getCestaByTrabajadorId' };

@@ -21,10 +21,10 @@ export async function getCestaByTrabajadorID(idTrabajador: number) {
     let resultado = await cesta.findOne({idTrabajador: idTrabajador});
     return resultado;
 }
-export async function getCestaByID(idTrabajador: number) {
+export async function getCestaByID(idCesta: number) {
     const database = (await conexion).db('tocgame');
     const cesta = database.collection('cestas');
-    let resultado = await cesta.findOne({_id: idTrabajador});
+    let resultado = await cesta.findOne({_id: idCesta});
     return resultado;
 }
 

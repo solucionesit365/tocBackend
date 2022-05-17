@@ -25,10 +25,10 @@ async function getCestaByTrabajadorID(idTrabajador) {
     return resultado;
 }
 exports.getCestaByTrabajadorID = getCestaByTrabajadorID;
-async function getCestaByID(idTrabajador) {
+async function getCestaByID(idCesta) {
     const database = (await mongodb_1.conexion).db('tocgame');
     const cesta = database.collection('cestas');
-    let resultado = await cesta.findOne({ _id: idTrabajador });
+    let resultado = await cesta.findOne({ _id: idCesta });
     return resultado;
 }
 exports.getCestaByID = getCestaByID;

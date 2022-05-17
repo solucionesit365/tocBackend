@@ -24,11 +24,11 @@ function limpiarNombreTienda(cadena) {
     }
 }
 class PaytefClass {
-    async iniciarTransaccion(client, idCliente) {
+    async iniciarTransaccion(client, idCliente, idCesta) {
         try {
             const idTrabajadorActivo = await trabajadores_clase_1.trabajadoresInstance.getCurrentIdTrabajador();
             if (idTrabajadorActivo != null) {
-                const cesta = await cestas_clase_1.cestas.getCestaByTrabajadorID(idTrabajadorActivo);
+                const cesta = await cestas_clase_1.cestas.getCestaByID(idCesta);
                 if (cesta != null) {
                     const total = cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
                     if (cesta.lista.length > 0 && total > 0) {

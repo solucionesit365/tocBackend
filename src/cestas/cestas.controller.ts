@@ -345,10 +345,16 @@ export class CestasController {
         }
     }
 
+    /**
+     * Metodod que llaman desde tocgame.js en el frontend en iniciartoc()
+     * es el metodo que carga en raiz la cesta selecionada 
+     * @param params 
+     * @returns 
+     */ 
     @Post('getCestaByTrabajadorId')
     async getCestaByTrabajadorId(@Body() params) {
-        if (UtilesModule.checkVariable(params.idTrabajador)) {
-            return { error: false, info: await cestas.getCestaByTrabajadorID(params.idTrabajador) };
+        if (UtilesModule.checkVariable(params.idCesta)) {
+            return { error: false, info: await cestas.getCestaByID(params.idCesta) };
         } else {
             return { error: true, mensaje: 'Backend error, faltan datos en cestas/getCestaByTrabajadorId' };
         }

@@ -220,9 +220,9 @@ export class SocketGateway{
       /* Comprobando que params tenga sentido */
       if (UtilesModule.checkVariable(params)) {
         /* Comprobando que idClienteFinal sea string */
-        if (UtilesModule.checkVariable(params.idClienteFinal)) {
+        if (UtilesModule.checkVariable(params.idClienteFinal, params.idCesta)) {
           /* Creo la transacción e inicio la petición de cobro a PayTef */
-          paytefInstance.iniciarTransaccion(client, params.idClienteFinal);
+          paytefInstance.iniciarTransaccion(client, params.idClienteFinal, params.idCesta);
         } else {
           client.emit('consultaPaytef', { error: true, mensaje: 'Backend: paytef/iniciarTransaccion faltan datos idClienteFinal' });
         } 
