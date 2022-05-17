@@ -195,8 +195,8 @@ let SocketGateway = class SocketGateway {
     iniciarPaytef(params, client) {
         if (utiles_module_1.UtilesModule.checkVariable(params)) {
             if (utiles_module_1.UtilesModule.checkVariable(params)) {
-                if (utiles_module_1.UtilesModule.checkVariable(params.idClienteFinal)) {
-                    paytef_class_1.paytefInstance.iniciarTransaccion(client, params.idClienteFinal);
+                if (utiles_module_1.UtilesModule.checkVariable(params.idClienteFinal, params.idCesta)) {
+                    paytef_class_1.paytefInstance.iniciarTransaccion(client, params.idClienteFinal, params.idCesta);
                 }
                 else {
                     client.emit('consultaPaytef', { error: true, mensaje: 'Backend: paytef/iniciarTransaccion faltan datos idClienteFinal' });

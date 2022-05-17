@@ -24,22 +24,15 @@ function limpiarNombreTienda(cadena: string) {
 }
 
 class PaytefClass {
-  getTotal(cesta: CestasInterface): number {
-    let total = 0;
-    cesta.lista.forEach(itemLista => {
-      total += itemLista.subtotal;
-    });
-    return total;
-  }
+  async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number): Promise<void> {
 
-  async iniciarTransaccion(client: Socket, idCliente: string): Promise<void> {
     try {
       /* Obtengo el trabajador actual */
       const idTrabajadorActivo = await trabajadoresInstance.getCurrentIdTrabajador();
       /* ¿Trabajador activo existe? */
       if (idTrabajadorActivo != null) {
         /* Obtengo la cesta del trabajador activo */
-        const cesta = await cestas.getCestaByTrabajadorID(idTrabajadorActivo);
+        const cesta = await cestas.getCestaByID(idCesta);
         /* ¿Existe la cesta del trabajador activo? */
         if (cesta != null) {
           /* Consigo el total de la cesta para enviarlo a PayTef */

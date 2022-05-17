@@ -144,7 +144,7 @@ class TrabajadoresClase {
                         return this.nuevoFichajesSincro("ENTRADA", idTrabajador, idPlan).then((res2) => {
                             if (res2.acknowledged) {
                                 cestas_clase_1.cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
-                                    cestas_clase_1.cestas.updateIdCestaTrabajador(idTrabajador.toString());
+                                    cestas_clase_1.cestas.updateIdCestaTrabajador(idTrabajador);
                                 });
                                 return true;
                             }
