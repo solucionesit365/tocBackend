@@ -24,6 +24,13 @@ function limpiarNombreTienda(cadena: string) {
 }
 
 class PaytefClass {
+  getTotal(cesta: CestasInterface): number {
+    let total = 0;
+    cesta.lista.forEach(itemLista => {
+      total += itemLista.subtotal;
+    });
+    return total;
+  }
   async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number): Promise<void> {
 
     try {
