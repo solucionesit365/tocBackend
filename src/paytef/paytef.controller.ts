@@ -135,7 +135,7 @@ export class PaytefController {
                         break;
                     }
                 }
-                console.log(ipTefpay);
+                // console.log(ipTefpay);
             }
         });
         // find().then(devices => {

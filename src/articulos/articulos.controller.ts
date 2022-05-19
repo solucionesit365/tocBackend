@@ -33,7 +33,7 @@ export class ArticulosController {
     @Post('editarArticulo')
     editarArticulo(@Body() params) {
         if (params.idArticulo && params.nombre && params.precioBase && params.precioConIva) {
-            console.log('Hola', params.idArticulo, params.nombre, params.precioBase, params.precioConIva)
+            // console.log('Hola', params.idArticulo, params.nombre, params.precioBase, params.precioConIva)
             return articulosInstance.editarArticulo(params.idArticulo, params.nombre, params.precioBase, params.precioConIva).then((res) => {
                 if(res) {
                     return { error: false, info: res }

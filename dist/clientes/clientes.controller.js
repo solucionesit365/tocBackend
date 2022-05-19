@@ -24,7 +24,6 @@ let ClientesController = class ClientesController {
         return clientes_clase_1.clienteInstance.buscar(params.busqueda);
     }
     getClienteByID(params) {
-        console.log(params);
         if (params.idCliente != undefined) {
             return clientes_clase_1.clienteInstance.getClienteByID(params.idCliente).then((res) => {
                 if (res != null) {

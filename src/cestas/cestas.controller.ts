@@ -115,8 +115,8 @@ export class CestasController {
     }
     @Post('getCestaCurrent')
     PostCestaCurrent(@Body() params) {
-    console.log('get cesta ')
-    console.log(params)
+    // console.log('get cesta ')
+    // console.log(params)
                 return cestas.getCestaByID(params.idCesta).then((res) => {
                     console.log(res)
                     if (res) {
@@ -133,20 +133,20 @@ export class CestasController {
 
     @Post('getCestaByID')
     getCestaByID(@Body() params) {
-        console.log('Get cesta by id')
-        console.log(params)
+        // console.log('Get cesta by id')
+        // console.log(params)
 
         if (params.idCesta != undefined && params.idCesta != null) {
-            console.log('primer if')
+            // console.log('primer if')
             if (params.idCesta == -1) {
-                console.log('segundo  if')
+                // console.log('segundo  if')
                 return trabajadoresInstance.getCurrentTrabajador().then((res) => {
-                    console.log('Hola', res)
+                    // console.log('Hola', res)
                     return cestas.getCesta(res._id).then((res) => {
                         if (res) {
                             return { error: false, info: res };
                         }
-                        console.log('Holaa',res);
+                        // console.log('Holaa',res);
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                     }).catch((err) => {
                         console.log(err);
@@ -160,15 +160,15 @@ export class CestasController {
                 //     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID > getCestaRandom CATCH' };
                 // });
             } else {
-                console.log('es el else')
+                // console.log('es el else')
                 return cestas.getCesta(params.idCesta).then((res) => {
                     if (res) {
-                        console.log('este es el result ')
-                        console.log(res)
+                        // console.log('este es el result ')
+                        // console.log(res)
                         return { error: false, info: res };
                     }
                     
-                    console.log(res);
+                    // console.log(res);
                     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                 }).catch((err) => {
                     console.log(err);
@@ -216,7 +216,7 @@ export class CestasController {
 
     @Post('cambiarCestaTrabajador')
     cambiarCestaTrabajador(@Body() params) {
-        console.log(params)
+        // console.log(params)
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
@@ -231,7 +231,7 @@ export class CestasController {
     }
     @Post('cerarCestaMesas')
     cerarCestaMesas(@Body() params) {
-        console.log(params)
+        // console.log(params)
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa)
         } else {
