@@ -41,7 +41,7 @@ export declare class CestasController {
         okey: boolean;
         error: string;
     }>;
-    getCestaByID(params: any): Promise<{
+    PostCestaCurrent(params: any): Promise<{
         error: boolean;
         info: import("./cestas.interface").CestasInterface;
         mensaje?: undefined;
@@ -53,6 +53,21 @@ export declare class CestasController {
         error: boolean;
         mensaje: string;
     }>;
+    getCestaByID(params: any): Promise<{
+        error: boolean;
+        info: import("./cestas.interface").CestasInterface;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+        info?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+    }> | {
+        error: boolean;
+        mensaje: string;
+    };
     getCestaCurrentTrabajador(): Promise<{
         error: boolean;
         info: import("./cestas.interface").CestasInterface;
@@ -74,6 +89,22 @@ export declare class CestasController {
         mensaje: string;
         info?: undefined;
     }> | {
+        error: boolean;
+        mensaje: string;
+    };
+    cambiarCestaTrabajador(params: any): Promise<{
+        error: boolean;
+        info: true;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+        info?: undefined;
+    }> | {
+        error: boolean;
+        mensaje: string;
+    };
+    cerarCestaMesas(params: any): void | {
         error: boolean;
         mensaje: string;
     };

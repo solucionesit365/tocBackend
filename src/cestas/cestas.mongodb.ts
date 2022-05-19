@@ -21,6 +21,12 @@ export async function getCestaByTrabajadorID(idTrabajador: number) {
     let resultado = await cesta.findOne({idTrabajador: idTrabajador});
     return resultado;
 }
+export async function getCestaByID(idCesta: number) {
+    const database = (await conexion).db('tocgame');
+    const cesta = database.collection('cestas');
+    let resultado = await cesta.findOne({_id: idCesta});
+    return resultado;
+}
 
 export async function eliminarCesta(nombre: string) {
     const database = (await conexion).db('tocgame');
@@ -36,17 +42,36 @@ export async function eliminarCestaByIdTrabajador(idTrabajador: number) {
     return resultado;
 }
 
-export async function updateIdCestaTrabajador(id: string) {
+export async function updateIdCestaTrabajador(id: number) {
     const database = (await conexion).db('tocgame');
     const cesta = database.collection('cestas');
-    const resTemp = await cesta.findOne({ nombreCesta: id });
+    const resTemp = await cesta.findOne({ nombreCesta: id.toString() });
     resTemp._id = id;
     resTemp.nombreCesta = `Trabajador ${id}`
     const resultado = await cesta.insertOne(resTemp);
-    await cesta.deleteMany({ nombreCesta: id });
+    await cesta.deleteMany({ nombreCesta: id.toString() });
     return resultado;
 }
 
+// export async function updateIdCestaTrabajadorMesas(id: string, idCesta: number) {
+//     console.log('updateIdCestaTrabajador')
+//     console.log(id)
+//     console.log(idCesta)
+//     const database = (await conexion).db('tocgame');
+//     const cesta = database.collection('cestas');
+//      const mesa = await cesta.findOne({ _id: idCesta });
+//      console.log('La lista de las mesas ------------------------------------------')
+//      console.log(mesa.lista)
+//     // resTemp._id = id;
+//     const resultado = await cesta.updateOne({ _id: `${id}` }, { $set: { lista: mesa.lista  } });
+//     const cestaTrabajadors = await cesta.findOne({ _id: `${id}` });
+//     console.log('--------------------------')
+//     console.log(cestaTrabajadors)
+//     console.log('El resultado del update ------------------------------------------')
+
+//   console.log(resultado)
+//     return resultado;
+// }
 export async function getAllCestas(): Promise<any> {
     const database = (await conexion).db('tocgame');
     const cesta = database.collection('cestas');

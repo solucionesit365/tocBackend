@@ -3,17 +3,19 @@ export declare class CestaClase {
     private cesta;
     private udsAplicar;
     constructor();
-    updateIdCestaTrabajador(id: string): Promise<boolean>;
+    updateIdCestaTrabajador(id: number): Promise<boolean>;
     getCesta(idCesta: number): Promise<CestasInterface>;
     getCestaRandom(): Promise<CestasInterface>;
     reiniciarCesta(idCestaBorrar: any): Promise<CestasInterface>;
     borrarCestaActiva(): Promise<boolean>;
     nuevaCestaVacia(): CestasInterface;
+    insertarCestas(cestas: any): Promise<any>;
     getTodasCestas(): Promise<CestasInterface[]>;
+    cerarCestaMesas(idTrabajador: number, nombreMesa: string): void;
     borrarCesta(idCestaBorrar: any): Promise<boolean>;
     eliminarCesta(nombreCesta: any): Promise<boolean>;
     setCesta(cesta: CestasInterface): Promise<boolean>;
-    crearNuevaCesta(nombreCesta: string): Promise<boolean | CestasInterface>;
+    crearNuevaCesta(nombreCesta: string, idCestaSincro?: any): Promise<boolean | CestasInterface>;
     crearCestaParaTrabajador(idTrabajador: number): Promise<boolean | CestasInterface>;
     borrarItemCesta(idCesta: number, idArticulo: number): Promise<boolean | CestasInterface>;
     limpiarCesta(unaCesta: CestasInterface, posicionPrincipal: number, posicionSecundario: number, sobraCantidadPrincipal: number, sobraCantidadSecundario: number, pideDelA: number, pideDelB: number): Promise<CestasInterface>;
@@ -34,6 +36,7 @@ export declare class CestaClase {
     enviarACocina(idCesta: any): Promise<boolean>;
     getCestaDiferente(id_cesta: any): Promise<false | import("bson").Document>;
     getCestaByTrabajadorID(idTrabajador: number): Promise<CestasInterface>;
+    getCestaByID(idCesta: number): Promise<CestasInterface>;
 }
 declare const cestas: CestaClase;
 export { cestas };
