@@ -473,7 +473,7 @@ export class CestaClase {
       cestaActual.lista = cestaActual.lista.reverse();
       let indexArticulo = posArticulo;
       if(posArticulo === -100) indexArticulo = cestaActual.lista.findIndex(i => i._id === idArticulo);
-      console.log(indexArticulo);
+      // console.log(indexArticulo);
       cestaActual.lista[indexArticulo].suplementosId = suplementos;
       for(let i in suplementos) {
         const idSuplemento = suplementos[i];

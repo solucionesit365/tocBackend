@@ -73,7 +73,7 @@ class PaytefClass {
                   if (respuestaPaytef.data.info.started) {
                     this.consultarEstadoOperacion(client);
                   } else {
-                    console.log(respuestaPaytef.data);
+                    // console.log(respuestaPaytef.data);
                     client.emit('consultaPaytef', { error: true, mensaje: 'La operación no ha podido iniciar' });
                   }
                 } else {
@@ -81,7 +81,7 @@ class PaytefClass {
                 }
               }
             } else {
-              console.log(resTransaccion.mensaje);
+              // console.log(resTransaccion.mensaje);
               client.emit('consultaPaytef', { error: true, mensaje: 'Error al crear la transacción' });
             }
           } else {
@@ -142,7 +142,7 @@ class PaytefClass {
             // Cobrado y sin transacción definida => PEOR ERROR POSIBLE
             LogsClass.newLog('PEOR ERROR POSIBLE', `no tengo referencia de la transacción: tiemstamp: ${Date.now()}`);
           }
-          console.log(resEstadoPaytef.data);
+          // console.log(resEstadoPaytef.data);
           client.emit('consultaPaytef', { error: true, mensaje: 'Sin información de la última transacción => REINICIAR DATÁFONO' })
         }  
         /* ¿Existe info de PayTef? NO es igual a RESULT. Siempre debería existir, salvo que PayTef esté roto */

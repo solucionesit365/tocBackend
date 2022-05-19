@@ -14,7 +14,7 @@ export class ClientesController {
 
     @Post('getClienteByID')
     getClienteByID(@Body() params) {
-        console.log(params);
+        // console.log(params);
         if (params.idCliente != undefined) {
             return clienteInstance.getClienteByID(params.idCliente).then((res) => {
                 if (res != null) {

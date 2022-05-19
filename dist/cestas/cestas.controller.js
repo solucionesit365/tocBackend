@@ -114,8 +114,6 @@ let CestasController = class CestasController {
         }
     }
     PostCestaCurrent(params) {
-        console.log('get cesta ');
-        console.log(params);
         return cestas_clase_1.cestas.getCestaByID(params.idCesta).then((res) => {
             console.log(res);
             if (res) {
@@ -128,19 +126,13 @@ let CestasController = class CestasController {
         });
     }
     getCestaByID(params) {
-        console.log('Get cesta by id');
-        console.log(params);
         if (params.idCesta != undefined && params.idCesta != null) {
-            console.log('primer if');
             if (params.idCesta == -1) {
-                console.log('segundo  if');
                 return trabajadores_clase_1.trabajadoresInstance.getCurrentTrabajador().then((res) => {
-                    console.log('Hola', res);
                     return cestas_clase_1.cestas.getCesta(res._id).then((res) => {
                         if (res) {
                             return { error: false, info: res };
                         }
-                        console.log('Holaa', res);
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                     }).catch((err) => {
                         console.log(err);
@@ -149,14 +141,10 @@ let CestasController = class CestasController {
                 });
             }
             else {
-                console.log('es el else');
                 return cestas_clase_1.cestas.getCesta(params.idCesta).then((res) => {
                     if (res) {
-                        console.log('este es el result ');
-                        console.log(res);
                         return { error: false, info: res };
                     }
-                    console.log(res);
                     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                 }).catch((err) => {
                     console.log(err);
@@ -202,7 +190,6 @@ let CestasController = class CestasController {
         }
     }
     cambiarCestaTrabajador(params) {
-        console.log(params);
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas_clase_1.cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
@@ -218,7 +205,6 @@ let CestasController = class CestasController {
         }
     }
     cerarCestaMesas(params) {
-        console.log(params);
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas_clase_1.cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa);
         }
