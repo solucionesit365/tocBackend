@@ -24,9 +24,14 @@ function limpiarNombreTienda(cadena) {
     }
 }
 class PaytefClass {
-
+    getTotal(cesta) {
+        let total = 0;
+        cesta.lista.forEach(itemLista => {
+            total += itemLista.subtotal;
+        });
+        return total;
+    }
     async iniciarTransaccion(client, idCliente, idCesta) {
-
         try {
             const idTrabajadorActivo = await trabajadores_clase_1.trabajadoresInstance.getCurrentIdTrabajador();
             if (idTrabajadorActivo != null) {

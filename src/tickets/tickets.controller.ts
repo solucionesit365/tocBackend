@@ -24,9 +24,11 @@ export class TicketsController {
         if (params.total != undefined && params.idCesta != undefined && params.idCliente != undefined) {
             return ticketsInstance.crearTicketEfectivo(params.total, params.idCesta, params.idCliente).then((res) => {
                 if (res) {
+                    
                     return {
                         error: false
                     }
+                    
                 } else {
                     return {
                         error: true,

@@ -120,7 +120,7 @@ export class TicketsClase {
             comentario: '',
             regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false)
         }
-
+console.log(objTicket)
         if (await this.insertarTicket(objTicket)) {
             if (await cestas.borrarCesta(idCesta)) {
                 if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
