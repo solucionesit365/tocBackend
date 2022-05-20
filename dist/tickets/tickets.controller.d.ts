@@ -1,5 +1,12 @@
 export declare class TicketsController {
     getTicketsIntervalo(params: any): Promise<any[]>;
+    getTickets(params: any): Promise<{
+        error: boolean;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+    }>;
     crearTicketEfectivo(params: any): Promise<{
         error: boolean;
         mensaje?: undefined;

@@ -30,6 +30,23 @@ let TicketsController = class TicketsController {
             return [];
         });
     }
+    getTickets(params) {
+        console.log('get ticket');
+        console.log(params);
+        return tickets_clase_1.ticketsInstance.getTicketByID(params.ticketID).then((res) => {
+            if (res) {
+                return {
+                    error: false
+                };
+            }
+            else {
+                return {
+                    error: true,
+                    mensaje: 'Error en crearTicketEfectivo'
+                };
+            }
+        });
+    }
     crearTicketEfectivo(params) {
         if (params.total != undefined && params.idCesta != undefined && params.idCliente != undefined) {
             return tickets_clase_1.ticketsInstance.crearTicketEfectivo(params.total, params.idCesta, params.idCliente).then((res) => {
@@ -145,6 +162,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "getTicketsIntervalo", null);
+__decorate([
+    (0, common_1.Post)('getTickets'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TicketsController.prototype, "getTickets", null);
 __decorate([
     (0, common_1.Post)('crearTicketEfectivo'),
     __param(0, (0, common_1.Body)()),

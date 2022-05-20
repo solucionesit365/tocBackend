@@ -115,7 +115,6 @@ class TicketsClase {
             comentario: '',
             regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false)
         };
-        console.log(objTicket);
         if (await this.insertarTicket(objTicket)) {
             if (await cestas_clase_1.cestas.borrarCesta(idCesta)) {
                 if (await parametros_clase_1.parametrosInstance.setUltimoTicket(objTicket._id)) {

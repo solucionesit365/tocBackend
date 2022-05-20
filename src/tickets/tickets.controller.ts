@@ -19,6 +19,27 @@ export class TicketsController {
         });
     }
 
+    @Post('getTickets')
+    getTickets(@Body() params) {
+      console.log('get ticket')
+      console.log(params)
+                return ticketsInstance.getTicketByID(params.ticketID).then((res)=>{
+                    if (res) {
+                    
+                        return {
+                            error: false
+                        }
+                        
+                    } else {
+                        return {
+                            error: true,
+                            mensaje: 'Error en crearTicketEfectivo'
+                        }
+                    }
+                });
+    }
+
+
     @Post('crearTicketEfectivo')
     crearTicketEfectivo(@Body() params) {
         if (params.total != undefined && params.idCesta != undefined && params.idCliente != undefined) {
