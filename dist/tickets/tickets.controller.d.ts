@@ -2,10 +2,12 @@ export declare class TicketsController {
     getTicketsIntervalo(params: any): Promise<any[]>;
     getTickets(params: any): Promise<{
         error: boolean;
+        res: import("./tickets.interface").TicketsInterface;
         mensaje?: undefined;
     } | {
         error: boolean;
         mensaje: string;
+        res?: undefined;
     }>;
     crearTicketEfectivo(params: any): Promise<{
         error: boolean;
@@ -73,4 +75,8 @@ export declare class TicketsController {
         mensaje: string;
     };
     getListadoVentas(params: any): Promise<import("./tickets.interface").TicketsInterface[]>;
+    rectificativa(params: any): Promise<{
+        error: boolean;
+        mensaje: string;
+    }>;
 }

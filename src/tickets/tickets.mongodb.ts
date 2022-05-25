@@ -127,6 +127,8 @@ export async function getTicketMasAntiguo() {
 }
 
 export async function nuevoTicket(ticket: any) {
+    console.log("Nuevo ticket ")
+    console.log(ticket)
     const database = (await conexion).db('tocgame');
     const tickets = database.collection('tickets');
     const resultado = tickets.insertOne(ticket);
@@ -153,6 +155,28 @@ export async function actualizarComentario(ticket: TicketsInterface) {
     } });
     return resultado;
 }
+
+export async function duplicarTicket(ticket: TicketsInterface) {
+    const duplicar = await this.getTicketByID(ticket)
+    if(duplicar.total > 0){
+        const id =await this.getUltimoTicket() + 1
+        duplicar._id = id
+        duplicar.total = ( duplicar.total *-1)
+        duplicar.lista.forEach(element => {
+          
+           element.subtotal =  (element.subtotal * -1) 
+        
+        });
+       const database = (await conexion).db('tocgame');
+       const tickets = database.collection('tickets');
+       const resultado = tickets.insertOne(duplicar);
+        return resultado;
+    }
+    return false
+     
+ }
+
+
 
 // export async function getDedudaDeliveroo(inicioTime: number, finalTime: number) {
 //     await 

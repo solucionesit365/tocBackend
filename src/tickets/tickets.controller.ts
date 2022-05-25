@@ -27,7 +27,8 @@ export class TicketsController {
                     if (res) {
                     
                         return {
-                            error: false
+                            error: false,
+                            res
                         }
                         
                     } else {
@@ -171,4 +172,17 @@ export class TicketsController {
             return ticketsInstance.getTicketsIntervalo(params.start, params.end);
         }
     }}
+
+    @Post('rectificativa')
+    rectificativa(@Body() params){
+        
+        return ticketsInstance.rectificativa(params.ticketID).then((res)=>{
+            if (res){
+              return   { error: false, mensaje: "Rectificativa creada"}
+            }else{
+                return { error: true, mensaje: 'Ya esta rectificado' }
+            }
+            
+        })
+    }
 }

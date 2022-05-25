@@ -258,8 +258,9 @@ export class CestasController {
     }
 
     @Post('clickTeclaArticulo')
-    clickTeclaArticulo(@Body() params) {
-        return cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoAPeso, params.idCesta, params.unidades).then((res) => {
+    async clickTeclaArticulo(@Body() params) {
+        
+        return await cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoAPeso, params.idCesta, params.unidades).then((res) => {
             return {
                 error: false,
                 bloqueado: false,
@@ -272,6 +273,9 @@ export class CestasController {
             };
         });
     }
+
+
+
 
     @Post('regalarProducto')
     regalarProducto(@Body() params) {
@@ -344,6 +348,11 @@ export class CestasController {
             })
         }
     }
+
+
+
+
+
 
     /**
      * Metodod que llaman desde tocgame.js en el frontend en iniciartoc()

@@ -36,7 +36,8 @@ let TicketsController = class TicketsController {
         return tickets_clase_1.ticketsInstance.getTicketByID(params.ticketID).then((res) => {
             if (res) {
                 return {
-                    error: false
+                    error: false,
+                    res
                 };
             }
             else {
@@ -154,6 +155,16 @@ let TicketsController = class TicketsController {
             }
         }
     }
+    rectificativa(params) {
+        return tickets_clase_1.ticketsInstance.rectificativa(params.ticketID).then((res) => {
+            if (res) {
+                return { error: false, mensaje: "Rectificativa creada" };
+            }
+            else {
+                return { error: true, mensaje: 'Ya esta rectificado' };
+            }
+        });
+    }
 };
 __decorate([
     (0, common_1.Post)('getTicketsIntervalo'),
@@ -211,6 +222,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "getListadoVentas", null);
+__decorate([
+    (0, common_1.Post)('rectificativa'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TicketsController.prototype, "rectificativa", null);
 TicketsController = __decorate([
     (0, common_1.Controller)('tickets')
 ], TicketsController);
