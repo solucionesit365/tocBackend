@@ -367,7 +367,9 @@ class CestaClase {
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].promocion.esPromo === false) {
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
-                cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                if (!cesta.lista[i].regalo) {
+                    cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                }
             }
             else if (cesta.lista[i].promocion.esPromo === true) {
                 if (cesta.lista[i].nombre == 'Oferta combo') {

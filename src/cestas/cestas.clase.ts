@@ -425,7 +425,9 @@ export class CestaClase {
         for(let i = 0; i < cesta.lista.length; i++) {
             if(cesta.lista[i].promocion.esPromo === false) {
                 let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[i]._id);
-                cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                if (!cesta.lista[i].regalo) { // Sino es regalo, aplicar.
+                  cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                }                
             }
             else if(cesta.lista[i].promocion.esPromo === true) {
                     if(cesta.lista[i].nombre == 'Oferta combo') {
@@ -575,8 +577,7 @@ export class CestaClase {
         console.log(err);
         return null;
       });
-    }
-    
+    }    
   }
 
 
