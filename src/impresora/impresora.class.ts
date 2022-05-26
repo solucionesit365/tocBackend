@@ -111,10 +111,7 @@ export class Impresora {
                         puntos: puntosCliente
                     }
                 };
-                this._venta(sendObject);
-                if (infoTicket.recibo != null && infoTicket.recibo != undefined) {
-                    this.imprimirRecibo(infoTicket.recibo);
-                }
+                this._venta(sendObject, infoTicket.recibo);
             }
             else {
                 sendObject = {
@@ -164,7 +161,7 @@ export class Impresora {
         }
     }
 
-    private async _venta(info) {
+    private async _venta(info, recibo = null) {
         const numFactura = info.numFactura;
         const arrayCompra = info.arrayCompra;
         const total = info.total;
@@ -177,7 +174,10 @@ export class Impresora {
         const tipoImpresora = info.impresora;
         const infoClienteVip = info.infoClienteVip;
         const infoCliente = info.infoCliente;
-
+        let strRecibo = '';
+        if (recibo != null && recibo != undefined) {
+            strRecibo = recibo;
+        }
         try {
             permisosImpresora();
 
@@ -307,45 +307,47 @@ export class Impresora {
             device.open(function () 
             {
                 printer
-                    .setCharacterCodeTable(19)
-                    .encode('CP858')
-                    .font('a')
-                    .style('b')
-                    .size(0, 0)
-                    .text(cabecera)
-                    .text(`Data: ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
-                    .text('Factura simplificada N: ' + numFactura)
-                    .text('Ates per: ' + nombreDependienta)
-                    .text(detalleClienteVip)
-                    .text(detalleNombreCliente)
-                    .text(detallePuntosCliente)
-                    .control('LF')
-                    .control('LF')
-                    .control('LF')
-                    .text('Quantitat      Article        Import (EUR)')
-                    .text('-----------------------------------------')
-                    .align('LT')
-                    .text(detalles)
-                    .align('CT')
-                    .text(pagoTarjeta)
-                    .text(pagoTkrs)
-                    .align('LT')
-                    .text(infoConsumoPersonal)
-                    .size(1, 1)
-                    .text(pagoDevolucion)
-                    .text('TOTAL: ' + total.toFixed(2) + ' €')
-                    .control('LF')
-                    .size(0, 0)
-                    .align('CT')
-                    .text('Base IVA         IVA         IMPORT')
-                    .text(detalleIva)
-                    .text('-- ES COPIA --')
-                    .text(pie)
-                    .control('LF')
-                    .control('LF')
-                    .control('LF')
-                    .cut('PAPER_FULL_CUT')
-                    .close()
+                .setCharacterCodeTable(19)
+                .encode('CP858')
+                .font('a')
+                .style('b')
+                .size(0, 0)
+                .text(cabecera)
+                .text(`Data: ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
+                .text('Factura simplificada N: ' + numFactura)
+                .text('Ates per: ' + nombreDependienta)
+                .text(detalleClienteVip)
+                .text(detalleNombreCliente)
+                .text(detallePuntosCliente)
+                .control('LF')
+                .control('LF')
+                .control('LF')
+                .text('Quantitat      Article        Import (EUR)')
+                .text('-----------------------------------------')
+                .align('LT')
+                .text(detalles)
+                .align('CT')
+                .text(pagoTarjeta)
+                .text(pagoTkrs)
+                .align('LT')
+                .text(infoConsumoPersonal)
+                .size(1, 1)
+                .text(pagoDevolucion)
+                .text('TOTAL: ' + total.toFixed(2) + ' €')
+                .control('LF')
+                .size(0, 0)
+                .align('CT')
+                .text('Base IVA         IVA         IMPORT')
+                .text(detalleIva)
+                .text('-- ES COPIA --')
+                .text(pie)
+                .control('LF')
+                .control('LF')
+                .control('LF')
+                .cut('PAPER_FULL_CUT')
+                .text(strRecibo)
+                .cut('PAPER_FULL_CUT')
+                .close()                        
             });
         }
         catch (err) {
