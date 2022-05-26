@@ -31,7 +31,8 @@ export interface CestasInterface {
                 unidadesOferta: number,
                 tipoPromo: string
             }
-        }
+        },
+        regalo?: boolean
     }[],
     nombreCesta?: string;
     idCestaSincro?: string,

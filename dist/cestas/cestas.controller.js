@@ -243,15 +243,20 @@ let CestasController = class CestasController {
             return cestas_clase_1.cestas.getCesta(params.idCesta).then((cesta) => {
                 if (cesta != null) {
                     cesta.lista[params.index].subtotal = 0;
+                    cesta.lista[params.index]["regalo"] = true;
                     cesta['regalo'] = true;
-                    return cestas_clase_1.cestas.setCesta(cesta).then((res) => {
-                        if (res) {
-                            return { error: false, cesta: cesta };
-                        }
-                        return { error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta' };
+                    return cestas_clase_1.cestas.recalcularIvas(cesta).then((cestaBuena) => {
+                        return cestas_clase_1.cestas.setCesta(cestaBuena).then((res) => {
+                            if (res) {
+                                return { error: false, cesta: cestaBuena };
+                            }
+                            return { error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta' };
+                        }).catch((err) => {
+                            console.log(err);
+                            return { error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta CATCH' };
+                        });
                     }).catch((err) => {
-                        console.log(err);
-                        return { error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta CATCH' };
+                        return { error: true, mensaje: err.message };
                     });
                 }
                 else {
