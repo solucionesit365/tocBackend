@@ -115,10 +115,8 @@ export class CestasController {
     }
     @Post('getCestaCurrent')
     PostCestaCurrent(@Body() params) {
-    console.log('get cesta ')
-    console.log(params)
+    
                 return cestas.getCestaByID(params.idCesta).then((res) => {
-                    console.log(res)
                     if (res) {
                         return { error: false, info: res };
                     }
@@ -133,9 +131,6 @@ export class CestasController {
 
     @Post('getCestaByID')
     getCestaByID(@Body() params) {
-        console.log('Get cesta by id')
-        console.log(params)
-
         if (params.idCesta != undefined && params.idCesta != null) {
             console.log('primer if')
             if (params.idCesta == -1) {

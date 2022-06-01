@@ -366,6 +366,12 @@ class CestaClase {
         };
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].promocion.esPromo === false) {
+                cesta.lista.forEach(element => {
+                    element.suplementosId.forEach(async (suplemento) => {
+                        let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(suplemento);
+                        cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
+                    });
+                });
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
                 cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
             }
@@ -412,7 +418,6 @@ class CestaClase {
         let indexArticulo = posArticulo;
         if (posArticulo === -100)
             indexArticulo = cestaActual.lista.findIndex(i => i._id === idArticulo);
-        console.log(indexArticulo);
         cestaActual.lista[indexArticulo].suplementosId = suplementos;
         for (let i in suplementos) {
             const idSuplemento = suplementos[i];
@@ -421,7 +426,8 @@ class CestaClase {
             cestaActual.lista[indexArticulo].nombre += ` + ${infoSuplemento.nombre}`;
         }
         cestaActual.lista = cestaActual.lista.reverse();
-        return this.setCesta(cestaActual).then((res) => {
+        const cestaDef = await this.recalcularIvas(cestaActual);
+        return this.setCesta(cestaDef).then((res) => {
             if (res)
                 return cestaActual;
             return false;
