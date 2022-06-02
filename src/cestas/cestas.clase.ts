@@ -410,6 +410,8 @@ export class CestaClase {
         this.udsAplicar = unidades;
     }
     async recalcularIvas(cesta: CestasInterface) {
+      console.log("recalcular ivas")
+
         cesta.tiposIva = {
             base1: 0,
             base2: 0,
@@ -423,14 +425,19 @@ export class CestaClase {
         }
         for(let i = 0; i < cesta.lista.length; i++) {
             if(cesta.lista[i].promocion.esPromo === false) {
-              cesta.lista.forEach(element => {
-                element.suplementosId.forEach(async suplemento => {
+               cesta.lista.forEach( element => {
+                element.suplementosId.forEach( async suplemento => {
+                  console.log(suplemento)
                   let infoArticulo = await articulosInstance.getInfoArticulo(suplemento);
-                cesta.tiposIva = construirObjetoIvas(infoArticulo, 1, cesta.tiposIva);
+                cesta.tiposIva =  construirObjetoIvas( infoArticulo, 1, cesta.tiposIva);
+                console.log('cesta en el foreach')
+                console.log(cesta)
                 });
               });
                 let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[i]._id);
                 cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                console.log('cesta fuera del  foreach')
+                console.log(cesta)
             }
             else if(cesta.lista[i].promocion.esPromo === true) {
                     if(cesta.lista[i].nombre == 'Oferta combo') {
@@ -452,8 +459,10 @@ export class CestaClase {
                   }
             
         }
+        console.log("cesta recalcular el iva ")
+        console.log(cesta)
   
-        return cesta;
+        return await cesta;
     }
 
     async borrarArticulosCesta(idCesta: number) {
@@ -488,9 +497,10 @@ export class CestaClase {
       }
       
       cestaActual.lista = cestaActual.lista.reverse();
-      const cestaDef = await this.recalcularIvas(cestaActual)
-      return this.setCesta(cestaDef).then((res) => {
-        if(res) return cestaActual;
+      const cestaDef =  await this.recalcularIvas(cestaActual)
+
+      return this.setCesta(await cestaDef).then((res) => {
+        if(res) return cestaDef;
         return false;
       }).catch((err) => {
         console.log(err);
