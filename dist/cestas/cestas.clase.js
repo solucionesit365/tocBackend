@@ -367,19 +367,16 @@ class CestaClase {
         };
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].promocion.esPromo === false) {
-                cesta.lista.forEach(element => {
-                    element.suplementosId.forEach(async (suplemento) => {
-                        console.log(suplemento);
-                        let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(suplemento);
-                        cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
-                        console.log('cesta en el foreach');
-                        console.log(cesta);
-                    });
+                cesta.lista.forEach(async (element) => {
+                    if (element.suplementosId) {
+                        await element.suplementosId.forEach(async (suplemento) => {
+                            let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(suplemento);
+                            cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
+                        });
+                    }
                 });
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
                 cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
-                console.log('cesta fuera del  foreach');
-                console.log(cesta);
             }
             else if (cesta.lista[i].promocion.esPromo === true) {
                 if (cesta.lista[i].nombre == 'Oferta combo') {
@@ -399,8 +396,6 @@ class CestaClase {
                 }
             }
         }
-        console.log("cesta recalcular el iva ");
-        console.log(cesta);
         return await cesta;
     }
     async borrarArticulosCesta(idCesta) {
