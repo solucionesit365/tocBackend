@@ -142,9 +142,6 @@ export declare class CestasController {
         mensaje: string;
     } | {
         error: boolean;
-        mensaje: any;
-    } | {
-        error: boolean;
         mensaje: string;
     }> | {
         error: boolean;
