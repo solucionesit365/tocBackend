@@ -16,7 +16,9 @@ async function bootstrap() {
     credentials: true
   }});
   // app.enableCors();
-  await app.listen(3000);
+ await app.listen(3000);
+ //await app.listen(3000,"10.137.0.201"); //para iterum
+
 }
 bootstrap();
 // Toco código jojojo

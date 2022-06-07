@@ -115,7 +115,6 @@ let CestasController = class CestasController {
     }
     PostCestaCurrent(params) {
         return cestas_clase_1.cestas.getCestaByID(params.idCesta).then((res) => {
-            console.log(res);
             if (res) {
                 return { error: false, info: res };
             }
@@ -224,8 +223,8 @@ let CestasController = class CestasController {
         cestas_clase_1.cestas.setUnidadesAplicar(params.unidades);
         return { okey: true };
     }
-    clickTeclaArticulo(params) {
-        return cestas_clase_1.cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoAPeso, params.idCesta, params.unidades).then((res) => {
+    async clickTeclaArticulo(params) {
+        return await cestas_clase_1.cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoAPeso, params.idCesta, params.unidades).then((res) => {
             return {
                 error: false,
                 bloqueado: false,
@@ -411,7 +410,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], CestasController.prototype, "clickTeclaArticulo", null);
 __decorate([
     (0, common_1.Post)('regalarProducto'),

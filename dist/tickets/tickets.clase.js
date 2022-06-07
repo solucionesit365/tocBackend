@@ -18,6 +18,16 @@ class TicketsClase {
             return null;
         });
     }
+    rectificativa(idTicket) {
+        return schTickets.duplicarTicket(idTicket).then((res) => {
+            if (res) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+    }
     getTicketsIntervalo(fechaInicio, fechaFinal) {
         return schTickets.getTicketsIntervalo(fechaInicio, fechaFinal).then((resultado) => {
             return resultado;

@@ -19,14 +19,38 @@ export class TicketsController {
         });
     }
 
+    @Post('getTickets')
+    getTickets(@Body() params) {
+      console.log('get ticket')
+      console.log(params)
+                return ticketsInstance.getTicketByID(params.ticketID).then((res)=>{
+                    if (res) {
+                    
+                        return {
+                            error: false,
+                            res
+                        }
+                        
+                    } else {
+                        return {
+                            error: true,
+                            mensaje: 'Error en crearTicketEfectivo'
+                        }
+                    }
+                });
+    }
+
+
     @Post('crearTicketEfectivo')
     crearTicketEfectivo(@Body() params) {
         if (params.total != undefined && params.idCesta != undefined && params.idCliente != undefined) {
             return ticketsInstance.crearTicketEfectivo(params.total, params.idCesta, params.idCliente).then((res) => {
                 if (res) {
+                    
                     return {
                         error: false
                     }
+                    
                 } else {
                     return {
                         error: true,
@@ -148,4 +172,17 @@ export class TicketsController {
             return ticketsInstance.getTicketsIntervalo(params.start, params.end);
         }
     }}
+
+    @Post('rectificativa')
+    rectificativa(@Body() params){
+        
+        return ticketsInstance.rectificativa(params.ticketID).then((res)=>{
+            if (res){
+              return   { error: false, mensaje: "Rectificativa creada"}
+            }else{
+                return { error: true, mensaje: 'Ya esta rectificado' }
+            }
+            
+        })
+    }
 }

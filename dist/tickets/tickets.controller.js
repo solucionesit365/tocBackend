@@ -30,6 +30,24 @@ let TicketsController = class TicketsController {
             return [];
         });
     }
+    getTickets(params) {
+        console.log('get ticket');
+        console.log(params);
+        return tickets_clase_1.ticketsInstance.getTicketByID(params.ticketID).then((res) => {
+            if (res) {
+                return {
+                    error: false,
+                    res
+                };
+            }
+            else {
+                return {
+                    error: true,
+                    mensaje: 'Error en crearTicketEfectivo'
+                };
+            }
+        });
+    }
     crearTicketEfectivo(params) {
         if (params.total != undefined && params.idCesta != undefined && params.idCliente != undefined) {
             return tickets_clase_1.ticketsInstance.crearTicketEfectivo(params.total, params.idCesta, params.idCliente).then((res) => {
@@ -137,6 +155,16 @@ let TicketsController = class TicketsController {
             }
         }
     }
+    rectificativa(params) {
+        return tickets_clase_1.ticketsInstance.rectificativa(params.ticketID).then((res) => {
+            if (res) {
+                return { error: false, mensaje: "Rectificativa creada" };
+            }
+            else {
+                return { error: true, mensaje: 'Ya esta rectificado' };
+            }
+        });
+    }
 };
 __decorate([
     (0, common_1.Post)('getTicketsIntervalo'),
@@ -145,6 +173,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "getTicketsIntervalo", null);
+__decorate([
+    (0, common_1.Post)('getTickets'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TicketsController.prototype, "getTickets", null);
 __decorate([
     (0, common_1.Post)('crearTicketEfectivo'),
     __param(0, (0, common_1.Body)()),
@@ -187,6 +222,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "getListadoVentas", null);
+__decorate([
+    (0, common_1.Post)('rectificativa'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TicketsController.prototype, "rectificativa", null);
 TicketsController = __decorate([
     (0, common_1.Controller)('tickets')
 ], TicketsController);
