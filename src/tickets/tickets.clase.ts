@@ -7,6 +7,7 @@ import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { articulosInstance } from "../articulos/articulos.clase";
 import axios from "axios";
 import { clienteInstance } from "../clientes/clientes.clase";
+import { Console } from "console";
 
 export class TicketsClase {
 
@@ -18,7 +19,15 @@ export class TicketsClase {
             return null;
         });
     }
-
+    rectificativa(idTicket){
+            return schTickets.duplicarTicket(idTicket).then((res)=>{
+                if (res){
+                    return  true
+                }else {
+                   return false
+                }
+            });
+        }
     getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]> {
         return schTickets.getTicketsIntervalo(fechaInicio, fechaFinal).then((resultado: TicketsInterface[]) => {
             return resultado;
@@ -47,6 +56,7 @@ export class TicketsClase {
     }
 
     insertarTicket(ticket: TicketsInterface) {
+       
         if (ticket.lista.length == 0) {
             const itemVacio = {
                 _id: 5724,

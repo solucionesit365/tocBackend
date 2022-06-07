@@ -1,6 +1,7 @@
 import { TicketsInterface } from "./tickets.interface";
 export declare class TicketsClase {
     getTicketByID(idTicket: number): Promise<TicketsInterface>;
+    rectificativa(idTicket: any): Promise<boolean>;
     getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]>;
     getUltimoTicket(): Promise<number>;
     insertarTicket(ticket: TicketsInterface): Promise<boolean>;

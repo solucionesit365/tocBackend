@@ -11,3 +11,4 @@ export declare function getTicketMasAntiguo(): Promise<import("bson").Document[]
 export declare function nuevoTicket(ticket: any): Promise<import("mongodb").InsertOneResult<import("bson").Document>>;
 export declare function actualizarEstadoTicket(ticket: TicketsInterface): Promise<import("mongodb").UpdateResult>;
 export declare function actualizarComentario(ticket: TicketsInterface): Promise<import("mongodb").UpdateResult>;
+export declare function duplicarTicket(ticket: TicketsInterface): Promise<false | import("mongodb").InsertOneResult<import("bson").Document>>;

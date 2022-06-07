@@ -122,6 +122,7 @@ class Impresora {
         }
     }
     async imprimirRecibo(recibo) {
+        console.log(recibo);
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
