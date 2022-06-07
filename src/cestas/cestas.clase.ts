@@ -204,7 +204,7 @@ export class CestaClase {
       console.log(idTrabajador);
       return this.setCesta(nuevaCesta).then((res) => {
         if (res) {
-          console.log(nuevaCesta )
+
           return nuevaCesta;
         } else {
           return false;
@@ -425,18 +425,18 @@ export class CestaClase {
         }
         for(let i = 0; i < cesta.lista.length; i++) {
             if(cesta.lista[i].promocion.esPromo === false) {
-               cesta.lista.forEach( async element => {
-                if(element.suplementosId){
-                  await element.suplementosId.forEach( async suplemento => {
-                    let infoArticulo = await articulosInstance.getInfoArticulo(suplemento);
-                  cesta.tiposIva =  construirObjetoIvas( infoArticulo, 1, cesta.tiposIva);
-                  });
+                  if(cesta.lista[i].suplementosId){
+                    for (let index = 0; index < cesta.lista[i].suplementosId.length; index++) {
+                    
+                      let infoArticulo =   await articulosInstance.getInfoArticulo(cesta.lista[i].suplementosId[index]);
+                      cesta.tiposIva =  construirObjetoIvas(  infoArticulo, 1, cesta.tiposIva);
+                   
+                    }
+                
                 }
-               
-              });
                 let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[i]._id);
                 cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
-         
+               
             }
             else if(cesta.lista[i].promocion.esPromo === true) {
                     if(cesta.lista[i].nombre == 'Oferta combo') {
@@ -458,7 +458,6 @@ export class CestaClase {
                   }
             
         }
-      
   
         return await cesta;
     }

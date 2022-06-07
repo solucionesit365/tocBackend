@@ -176,7 +176,6 @@ class CestaClase {
             console.log(idTrabajador);
             return this.setCesta(nuevaCesta).then((res) => {
                 if (res) {
-                    console.log(nuevaCesta);
                     return nuevaCesta;
                 }
                 else {
@@ -367,14 +366,12 @@ class CestaClase {
         };
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].promocion.esPromo === false) {
-                cesta.lista.forEach(async (element) => {
-                    if (element.suplementosId) {
-                        await element.suplementosId.forEach(async (suplemento) => {
-                            let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(suplemento);
-                            cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
-                        });
+                if (cesta.lista[i].suplementosId) {
+                    for (let index = 0; index < cesta.lista[i].suplementosId.length; index++) {
+                        let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i].suplementosId[index]);
+                        cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
                     }
-                });
+                }
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
                 cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
             }
