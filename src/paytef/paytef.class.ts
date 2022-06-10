@@ -46,8 +46,9 @@ class PaytefClass {
           const total = this.getTotal(cesta); //cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
           // La lista no puede estar vacía ni el total puede ser cero.
           if (cesta.lista.length > 0 && total > 0) {
+            const nuevoTicket = ticketsInstance.generarObjetoTicket((await ticketsInstance.getUltimoTicket())+1, total, cesta, "TARJETA", idTrabajadorActivo, idCliente);
             /* Cerrar ticket */
-            const resCierreTicket = await paytefInstance.cerrarTicket(); //resEstadoPaytef.data.result.receipts.clientReceipt);
+            const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket); //resEstadoPaytef.data.result.receipts.clientReceipt);
             if (resCierreTicket.error === false) {
               /* Operación aprobada y finalizada */
               client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
@@ -168,37 +169,10 @@ class PaytefClass {
     }
   }
   
-  async cerrarTicket() {  
-    const parametros = parametrosInstance.getParametros();
-    /* Creo datos del ticket */
-    const nuevoTicket: TicketsInterface = {
-      _id: (await ticketsInstance.getUltimoTicket())+1,
-      timestamp: Date.now(),
-      total: infoTransaccion.total,
-      lista: infoTransaccion.cesta.lista,
-      tipoPago: "TARJETA",
-      idTrabajador: parametros.idCurrentTrabajador,
-      tiposIva: infoTransaccion.cesta.tiposIva,
-      cliente: infoTransaccion.idCliente,
-      infoClienteVip: {
-          esVip : false,
-          nif: '',
-          nombre: '',
-          cp: '',
-          direccion: '',
-          ciudad: ''
-      },
-      enviado: false,
-      enTransito: false,
-      intentos: 0,
-      comentario: '',
-      regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true): (false),
-      recibo: '',
-      anulado: false
-    }
+  async cerrarTicket(nuevoTicket: TicketsInterface) {  
     if (await ticketsInstance.insertarTicket(nuevoTicket)) {
-      if (await cestas.borrarCestaActiva()) {
-        movimientosInstance.nuevaSalida(infoTransaccion.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
+      if (await cestas.borrarCestaActiva()) { // Repasar esto porque no es la activa, sino una en concreto por id
+        movimientosInstance.nuevaSalida(nuevoTicket.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
         if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
           return { error: false };
         } else {

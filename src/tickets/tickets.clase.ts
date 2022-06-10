@@ -11,16 +11,17 @@ import { CestasInterface } from "src/cestas/cestas.interface";
 
 export class TicketsClase {
 
-    generarObjetoTicket(idTicket: number, total: number, lista: CestasInterface["lista"], tipoPago: string, ) {
+    /* No válido para clientes especiales que pagan en tienda (infoClienteVip) */
+    generarObjetoTicket(idTicket: number, total: number, cesta: CestasInterface, tipoPago: string, idCurrentTrabajador: number, idCliente: string) {
         const nuevoTicket: TicketsInterface = {
             _id: idTicket,
             timestamp: Date.now(),
             total: total,
-            lista: lista,
+            lista: cesta.lista,
             tipoPago: tipoPago,
-            idTrabajador: parametros.idCurrentTrabajador,
-            tiposIva: infoTransaccion.cesta.tiposIva,
-            cliente: infoTransaccion.idCliente,
+            idTrabajador: idCurrentTrabajador,
+            tiposIva: cesta.tiposIva,
+            cliente: idCliente,
             infoClienteVip: {
                 esVip : false,
                 nif: '',
@@ -33,10 +34,11 @@ export class TicketsClase {
             enTransito: false,
             intentos: 0,
             comentario: '',
-            regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true): (false),
+            regalo: cesta.regalo, // (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
             recibo: '',
             anulado: false
-          }
+        }
+        return nuevoTicket;
     }
 
     getTicketByID(idTicket: number): Promise <TicketsInterface> {
