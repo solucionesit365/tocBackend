@@ -1,10 +1,11 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { impresoraInstance } from 'src/impresora/impresora.class';
+import { ticketsInstance } from 'src/tickets/tickets.clase';
+
 
 @Controller('test')
 export class TestController {
     @Post('test')
     imprimirAlgo(@Body() parms) {
-        return 69;
+        return ticketsInstance.anularTicket(2);
     }
 }

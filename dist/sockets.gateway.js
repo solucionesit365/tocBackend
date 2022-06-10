@@ -81,7 +81,8 @@ let SocketGateway = class SocketGateway {
                     enTransito: false,
                     intentos: 0,
                     comentario: '',
-                    regalo: (cesta.regalo == true && idClienteFinal != '' && idClienteFinal != null) ? (true) : (false)
+                    regalo: (cesta.regalo == true && idClienteFinal != '' && idClienteFinal != null) ? (true) : (false),
+                    anulado: false
                 };
                 const client = new net.Socket();
                 const aux = this;

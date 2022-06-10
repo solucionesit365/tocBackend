@@ -39,6 +39,13 @@ class PaytefClass {
                 if (cesta != null) {
                     const total = this.getTotal(cesta);
                     if (cesta.lista.length > 0 && total > 0) {
+                        const resCierreTicket = await paytefInstance.cerrarTicket();
+                        if (resCierreTicket.error === false) {
+                            client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
+                        }
+                        else {
+                            client.emit('consultaPaytef', { error: true, mensaje: resCierreTicket.mensaje });
+                        }
                         const resTransaccion = await transacciones_class_1.transaccionesInstance.crearTransaccion(cesta, total, idCliente);
                         if (resTransaccion.error === false) {
                             if (utiles_module_1.UtilesModule.checkVariable(resTransaccion.insertedId) && resTransaccion.insertedId !== '') {
@@ -102,13 +109,6 @@ class PaytefClass {
                 if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.result.transactionReference) && resEstadoPaytef.data.result.transactionReference != '') {
                     if (resEstadoPaytef.data.result.transactionReference === ultimaTransaccion._id.toString()) {
                         if (resEstadoPaytef.data.result.approved) {
-                            const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference, resEstadoPaytef.data.result.receipts.clientReceipt);
-                            if (resCierreTicket.error === false) {
-                                client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
-                            }
-                            else {
-                                client.emit('consultaPaytef', { error: true, mensaje: resCierreTicket.mensaje });
-                            }
                         }
                         else {
                             client.emit('consultaPaytef', { error: true, mensaje: 'Operación denegada' });
@@ -147,61 +147,47 @@ class PaytefClass {
             client.emit('consultaPaytef', { error: true, mensaje: 'Error ' + err.message });
         }
     }
-    async cerrarTicket(idTransaccion, recibo) {
-        return transacciones_class_1.transaccionesInstance.getTransaccionById(idTransaccion).then(async (infoTransaccion) => {
-            if (infoTransaccion != null) {
-                try {
-                    await transacciones_class_1.transaccionesInstance.setPagada(idTransaccion);
+    async cerrarTicket() {
+        const parametros = parametros_clase_1.parametrosInstance.getParametros();
+        const nuevoTicket = {
+            _id: (await tickets_clase_1.ticketsInstance.getUltimoTicket()) + 1,
+            timestamp: Date.now(),
+            total: infoTransaccion.total,
+            lista: infoTransaccion.cesta.lista,
+            tipoPago: "TARJETA",
+            idTrabajador: parametros.idCurrentTrabajador,
+            tiposIva: infoTransaccion.cesta.tiposIva,
+            cliente: infoTransaccion.idCliente,
+            infoClienteVip: {
+                esVip: false,
+                nif: '',
+                nombre: '',
+                cp: '',
+                direccion: '',
+                ciudad: ''
+            },
+            enviado: false,
+            enTransito: false,
+            intentos: 0,
+            comentario: '',
+            regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false),
+            recibo: '',
+            anulado: false
+        };
+        if (await tickets_clase_1.ticketsInstance.insertarTicket(nuevoTicket)) {
+            if (await cestas_clase_1.cestas.borrarCestaActiva()) {
+                movimientos_clase_1.movimientosInstance.nuevaSalida(infoTransaccion.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
+                if (await parametros_clase_1.parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
+                    return { error: false };
                 }
-                catch (err) {
-                    console.log(err);
-                    logs_class_1.LogsClass.newLog('No se ha podido establecer como pagada', 'idTransaccion: ' + idTransaccion);
-                    return { error: true, mensaje: 'Error, no se ha podido marcar como pagada la transacción ' + idTransaccion };
-                }
-                const parametros = parametros_clase_1.parametrosInstance.getParametros();
-                const nuevoTicket = {
-                    _id: (await tickets_clase_1.ticketsInstance.getUltimoTicket()) + 1,
-                    timestamp: Date.now(),
-                    total: infoTransaccion.total,
-                    lista: infoTransaccion.cesta.lista,
-                    tipoPago: "TARJETA",
-                    idTrabajador: parametros.idCurrentTrabajador,
-                    tiposIva: infoTransaccion.cesta.tiposIva,
-                    cliente: infoTransaccion.idCliente,
-                    infoClienteVip: {
-                        esVip: false,
-                        nif: '',
-                        nombre: '',
-                        cp: '',
-                        direccion: '',
-                        ciudad: ''
-                    },
-                    enviado: false,
-                    enTransito: false,
-                    intentos: 0,
-                    comentario: '',
-                    regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false),
-                    recibo: recibo
-                };
-                if (await tickets_clase_1.ticketsInstance.insertarTicket(nuevoTicket)) {
-                    if (await cestas_clase_1.cestas.borrarCestaActiva()) {
-                        movimientos_clase_1.movimientosInstance.nuevaSalida(infoTransaccion.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
-                        if (await parametros_clase_1.parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
-                            return { error: false };
-                        }
-                        else {
-                            return { error: true, mensaje: 'Error no se ha podido cambiar el último id ticket' };
-                        }
-                    }
-                    else {
-                        return { error: true, mensaje: 'Error, no se ha podido borrar la cesta' };
-                    }
+                else {
+                    return { error: true, mensaje: 'Error no se ha podido cambiar el último id ticket' };
                 }
             }
             else {
-                return { error: true, mensaje: 'Error,  no se ha podido recuperar la transacción' };
+                return { error: true, mensaje: 'Error, no se ha podido borrar la cesta' };
             }
-        });
+        }
     }
 }
 const paytefInstance = new PaytefClass();
