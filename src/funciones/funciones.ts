@@ -43,7 +43,6 @@ export function construirObjetoIvas(infoArticulo: ArticulosInterface, unidades, 
             default: break;
         }
     }
-
     const aux = {
         base1: redondearPrecio(base1 + tipoIvaAnterior.base1),
         base2: redondearPrecio(base2 + tipoIvaAnterior.base2),

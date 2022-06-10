@@ -352,7 +352,6 @@ class CestaClase {
         this.udsAplicar = unidades;
     }
     async recalcularIvas(cesta) {
-        console.log("recalcular ivas");
         cesta.tiposIva = {
             base1: 0,
             base2: 0,
@@ -369,7 +368,7 @@ class CestaClase {
                 if (cesta.lista[i].suplementosId) {
                     for (let index = 0; index < cesta.lista[i].suplementosId.length; index++) {
                         let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i].suplementosId[index]);
-                        cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
+                        cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                     }
                 }
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
@@ -422,7 +421,7 @@ class CestaClase {
         for (let i in suplementos) {
             const idSuplemento = suplementos[i];
             const infoSuplemento = await articulos_clase_1.articulosInstance.getInfoArticulo(idSuplemento);
-            cestaActual.lista[indexArticulo].subtotal += infoSuplemento.precioConIva;
+            cestaActual.lista[indexArticulo].subtotal += infoSuplemento.precioConIva * cestaActual.lista[indexArticulo].unidades;
             cestaActual.lista[indexArticulo].nombre += ` + ${infoSuplemento.nombre}`;
         }
         cestaActual.lista = cestaActual.lista.reverse();
