@@ -21,7 +21,21 @@ export class InstaladorController {
             password: params.password,
             numLlicencia: params.numLlicencia
         }).then((res: any) => {
+            //console.log(res.data.info)
             if (!res.data.error) {
+                let parametrosfinales ={};
+              let paramstpv=  JSON.stringify(res.data.info).split(',')            
+             for (let index = 0; index < paramstpv.length; index++) {
+        
+                 paramstpv[index] = paramstpv[index].replace('\"', "").replace('{',"").replace('}',"");
+                
+                 if(paramstpv[index].includes('Si')){
+                    paramstpv[index]= paramstpv[index].replace('\"',"")
+                    let final = paramstpv[index].split(':')
+                    parametrosfinales[final[0]] ='Si'
+                 }
+                
+                }
                 const objParams: ParametrosInterface = {
                     _id: 'PARAMETROS',
                     licencia: params.numLlicencia,
@@ -32,10 +46,9 @@ export class InstaladorController {
                     codigoTienda: res.data.info.codigoTienda,
                     nombreEmpresa: res.data.info.nombreEmpresa,
                     nombreTienda: res.data.info.nombreTienda,
-                    prohibirBuscarArticulos: res.data.info.prohibirBuscarArticulos,
                     token: res.data.info.token,
+                    ...parametrosfinales,
                     database: res.data.info.database,
-                    botonesConPrecios: res.data.info.botonesConPrecios,
                     impresoraUsbInfo: { pid: '', vid: '' },
                     idCurrentTrabajador: null
                 };

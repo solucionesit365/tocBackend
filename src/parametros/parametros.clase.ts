@@ -71,6 +71,7 @@ const parametrosVacios: ParametrosInterface = {
         // this.parametros.tipoDatafono = params.tipoDatafono;
         // this.parametros.impresoraCafeteria = params.impresoraCafeteria;
         // this.parametros.ultimoTicket = params.ultimoTicket;
+       // console.log(params)
         this.parametros = params;
         return schParametros.setParametros(this.parametros).then((res) => {
             return res.acknowledged;
