@@ -248,6 +248,7 @@ class CestaClase {
         return unaCesta;
     }
     async insertarArticuloCesta(infoArticulo, unidades, idCesta, infoAPeso = null) {
+        console.log('insertarArticuloCesta');
         var miCesta = await this.getCesta(idCesta);
         if (miCesta.lista.length > 0) {
             let encontrado = false;
@@ -261,6 +262,7 @@ class CestaClase {
                             miCesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, unidades, viejoIva);
                         }
                         else {
+                            console.log('insertarArticuloCesta info a perro');
                             miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
                             miCesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, unidades, viejoIva, infoAPeso);
                         }
@@ -294,6 +296,7 @@ class CestaClase {
         return temporal;
     }
     async addItem(idArticulo, idBoton, aPeso, infoAPeso, idCesta, unidades = 1) {
+        console.log('add item');
         var cestaRetornar = null;
         let infoArticulo;
         if (caja_clase_1.cajaInstance.cajaAbierta()) {
@@ -352,6 +355,7 @@ class CestaClase {
         this.udsAplicar = unidades;
     }
     async recalcularIvas(cesta) {
+        let cestainicial = cesta;
         cesta.tiposIva = {
             base1: 0,
             base2: 0,
@@ -372,7 +376,14 @@ class CestaClase {
                     }
                 }
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
-                cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                let gramos = cestainicial.lista[i].subtotal / (infoArticulo.precioConIva);
+                if (cestainicial.lista[i].subtotal / infoArticulo.precioConIva != 1 && !cesta.lista[i].suplementosId) {
+                    let precioAplicado = infoArticulo.precioConIva * gramos;
+                    cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva, { precioAplicado: precioAplicado });
+                }
+                else {
+                    cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                }
             }
             else if (cesta.lista[i].promocion.esPromo === true) {
                 if (cesta.lista[i].nombre == 'Oferta combo') {
