@@ -176,7 +176,6 @@ class CestaClase {
             console.log(idTrabajador);
             return this.setCesta(nuevaCesta).then((res) => {
                 if (res) {
-                    console.log(nuevaCesta);
                     return nuevaCesta;
                 }
                 else {
@@ -249,6 +248,7 @@ class CestaClase {
         return unaCesta;
     }
     async insertarArticuloCesta(infoArticulo, unidades, idCesta, infoAPeso = null) {
+        console.log('insertarArticuloCesta');
         var miCesta = await this.getCesta(idCesta);
         if (miCesta.lista.length > 0) {
             let encontrado = false;
@@ -262,6 +262,7 @@ class CestaClase {
                             miCesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, unidades, viejoIva);
                         }
                         else {
+                            console.log('insertarArticuloCesta info a perro');
                             miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
                             miCesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, unidades, viejoIva, infoAPeso);
                         }
@@ -295,6 +296,7 @@ class CestaClase {
         return temporal;
     }
     async addItem(idArticulo, idBoton, aPeso, infoAPeso, idCesta, unidades = 1) {
+        console.log('add item');
         var cestaRetornar = null;
         let infoArticulo;
         if (caja_clase_1.cajaInstance.cajaAbierta()) {
@@ -353,7 +355,7 @@ class CestaClase {
         this.udsAplicar = unidades;
     }
     async recalcularIvas(cesta) {
-        console.log("recalcular ivas");
+        let cestainicial = cesta;
         cesta.tiposIva = {
             base1: 0,
             base2: 0,
@@ -367,16 +369,21 @@ class CestaClase {
         };
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].promocion.esPromo === false) {
-                cesta.lista.forEach(async (element) => {
-                    if (element.suplementosId) {
-                        await element.suplementosId.forEach(async (suplemento) => {
-                            let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(suplemento);
-                            cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, 1, cesta.tiposIva);
-                        });
+                if (cesta.lista[i].suplementosId) {
+                    for (let index = 0; index < cesta.lista[i].suplementosId.length; index++) {
+                        let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i].suplementosId[index]);
+                        cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                     }
-                });
+                }
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
-                cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                let gramos = cestainicial.lista[i].subtotal / (infoArticulo.precioConIva);
+                if (cestainicial.lista[i].subtotal / infoArticulo.precioConIva != 1 && !cesta.lista[i].suplementosId) {
+                    let precioAplicado = infoArticulo.precioConIva * gramos;
+                    cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva, { precioAplicado: precioAplicado });
+                }
+                else {
+                    cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
+                }
             }
             else if (cesta.lista[i].promocion.esPromo === true) {
                 if (cesta.lista[i].nombre == 'Oferta combo') {
@@ -425,7 +432,7 @@ class CestaClase {
         for (let i in suplementos) {
             const idSuplemento = suplementos[i];
             const infoSuplemento = await articulos_clase_1.articulosInstance.getInfoArticulo(idSuplemento);
-            cestaActual.lista[indexArticulo].subtotal += infoSuplemento.precioConIva;
+            cestaActual.lista[indexArticulo].subtotal += infoSuplemento.precioConIva * cestaActual.lista[indexArticulo].unidades;
             cestaActual.lista[indexArticulo].nombre += ` + ${infoSuplemento.nombre}`;
         }
         cestaActual.lista = cestaActual.lista.reverse();

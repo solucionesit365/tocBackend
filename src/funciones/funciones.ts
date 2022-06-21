@@ -20,6 +20,7 @@ function redondearPrecio(precio) /* REDONDEA AL SEGUNDO DECIMAL */
 export function construirObjetoIvas(infoArticulo: ArticulosInterface, unidades, tipoIvaAnterior: TiposIva, infoAPeso = null) : TiposIva
 {
     let base1 = 0, base2 = 0, base3 = 0;
+    
     let valor1 = 0, valor2 = 0, valor3 = 0;
     let importe1 = 0, importe2 = 0, importe3 = 0;
 
@@ -43,7 +44,6 @@ export function construirObjetoIvas(infoArticulo: ArticulosInterface, unidades, 
             default: break;
         }
     }
-
     const aux = {
         base1: redondearPrecio(base1 + tipoIvaAnterior.base1),
         base2: redondearPrecio(base2 + tipoIvaAnterior.base2),
