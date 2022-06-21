@@ -1,7 +1,7 @@
 import { TicketsInterface } from "./tickets.interface";
 import { CestasInterface } from "src/cestas/cestas.interface";
 export declare class TicketsClase {
-    generarObjetoTicket(idTicket: number, total: number, lista: CestasInterface["lista"], tipoPago: string): void;
+    generarObjetoTicket(idTicket: number, total: number, cesta: CestasInterface, tipoPago: string, idCurrentTrabajador: number, idCliente: string): TicketsInterface;
     getTicketByID(idTicket: number): Promise<TicketsInterface>;
     rectificativa(idTicket: any): Promise<boolean>;
     getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]>;

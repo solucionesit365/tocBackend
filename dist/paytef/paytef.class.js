@@ -39,7 +39,8 @@ class PaytefClass {
                 if (cesta != null) {
                     const total = this.getTotal(cesta);
                     if (cesta.lista.length > 0 && total > 0) {
-                        const resCierreTicket = await paytefInstance.cerrarTicket();
+                        const nuevoTicket = tickets_clase_1.ticketsInstance.generarObjetoTicket((await tickets_clase_1.ticketsInstance.getUltimoTicket()) + 1, total, cesta, "TARJETA", idTrabajadorActivo, idCliente);
+                        const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket);
                         if (resCierreTicket.error === false) {
                             client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
                         }
@@ -147,36 +148,10 @@ class PaytefClass {
             client.emit('consultaPaytef', { error: true, mensaje: 'Error ' + err.message });
         }
     }
-    async cerrarTicket() {
-        const parametros = parametros_clase_1.parametrosInstance.getParametros();
-        const nuevoTicket = {
-            _id: (await tickets_clase_1.ticketsInstance.getUltimoTicket()) + 1,
-            timestamp: Date.now(),
-            total: infoTransaccion.total,
-            lista: infoTransaccion.cesta.lista,
-            tipoPago: "TARJETA",
-            idTrabajador: parametros.idCurrentTrabajador,
-            tiposIva: infoTransaccion.cesta.tiposIva,
-            cliente: infoTransaccion.idCliente,
-            infoClienteVip: {
-                esVip: false,
-                nif: '',
-                nombre: '',
-                cp: '',
-                direccion: '',
-                ciudad: ''
-            },
-            enviado: false,
-            enTransito: false,
-            intentos: 0,
-            comentario: '',
-            regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false),
-            recibo: '',
-            anulado: false
-        };
+    async cerrarTicket(nuevoTicket) {
         if (await tickets_clase_1.ticketsInstance.insertarTicket(nuevoTicket)) {
             if (await cestas_clase_1.cestas.borrarCestaActiva()) {
-                movimientos_clase_1.movimientosInstance.nuevaSalida(infoTransaccion.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
+                movimientos_clase_1.movimientosInstance.nuevaSalida(nuevoTicket.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
                 if (await parametros_clase_1.parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
                     return { error: false };
                 }
