@@ -11,16 +11,16 @@ const axios_1 = require("axios");
 const clientes_clase_1 = require("../clientes/clientes.clase");
 const cestas_interface_1 = require("../cestas/cestas.interface");
 class TicketsClase {
-    generarObjetoTicket(idTicket, total, lista, tipoPago) {
+    generarObjetoTicket(idTicket, total, cesta, tipoPago, idCurrentTrabajador, idCliente) {
         const nuevoTicket = {
             _id: idTicket,
             timestamp: Date.now(),
             total: total,
-            lista: lista,
+            lista: cesta.lista,
             tipoPago: tipoPago,
-            idTrabajador: parametros.idCurrentTrabajador,
-            tiposIva: infoTransaccion.cesta.tiposIva,
-            cliente: infoTransaccion.idCliente,
+            idTrabajador: idCurrentTrabajador,
+            tiposIva: cesta.tiposIva,
+            cliente: idCliente,
             infoClienteVip: {
                 esVip: false,
                 nif: '',
@@ -33,10 +33,11 @@ class TicketsClase {
             enTransito: false,
             intentos: 0,
             comentario: '',
-            regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false),
+            regalo: cesta.regalo,
             recibo: '',
             anulado: false
         };
+        return nuevoTicket;
     }
     getTicketByID(idTicket) {
         return schTickets.getTicketByID(idTicket).then((res) => {
