@@ -21,8 +21,7 @@ export class TicketsController {
 
     @Post('getTickets')
     getTickets(@Body() params) {
-      console.log('get ticket')
-      console.log(params)
+
                 return ticketsInstance.getTicketByID(params.ticketID).then((res)=>{
                     if (res) {
                     

@@ -5,12 +5,12 @@ declare class PaytefClass {
     getTotal(cesta: CestasInterface): number;
     iniciarTransaccion(client: Socket, idCliente: string, idCesta: number): Promise<void>;
     consultarEstadoOperacion(client: Socket): Promise<void>;
-    cerrarTicket(idTransaccion: string, recibo: string): Promise<{
-        error: boolean;
-        mensaje: string;
-    } | {
+    cerrarTicket(): Promise<{
         error: boolean;
         mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
     }>;
 }
 declare const paytefInstance: PaytefClass;

@@ -2,6 +2,7 @@ import { TicketsInterface } from "./tickets.interface";
 export declare function limpiezaTickets(): Promise<void>;
 export declare function getTicketByID(idTicket: number): Promise<any>;
 export declare function getTicketsIntervalo(inicioTime: number, finalTime: number): Promise<any>;
+export declare function anularTicket(idTicket: number): Promise<import("mongodb").UpdateResult>;
 export declare function getTickets(): Promise<any>;
 export declare function getDedudaDeliveroo(inicioTime: number, finalTime: number): Promise<number>;
 export declare function getDedudaGlovo(inicioTime: number, finalTime: number): Promise<number>;

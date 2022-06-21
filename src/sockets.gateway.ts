@@ -93,7 +93,8 @@ export class SocketGateway{
             enTransito: false,
             intentos: 0,
             comentario: '',
-            regalo: (cesta.regalo == true && idClienteFinal != '' && idClienteFinal != null) ? (true): (false)
+            regalo: (cesta.regalo == true && idClienteFinal != '' && idClienteFinal != null) ? (true): (false),
+            anulado: false
         }
         
         /* Abro socket para ClearONE */
@@ -225,7 +226,7 @@ export class SocketGateway{
           paytefInstance.iniciarTransaccion(client, params.idClienteFinal, params.idCesta);
         } else {
           client.emit('consultaPaytef', { error: true, mensaje: 'Backend: paytef/iniciarTransaccion faltan datos idClienteFinal' });
-        } 
+        }
       } else {
         client.emit('consultaPaytef', { error: true, mensaje: 'Backend: paytef/iniciarTransaccion faltan todos los datos' });
       }

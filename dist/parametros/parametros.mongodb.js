@@ -10,24 +10,10 @@ async function getParametros() {
 }
 exports.getParametros = getParametros;
 async function setParametros(params) {
+    console.log(params);
     const database = (await mongodb_1.conexion).db('tocgame');
     const parametros = database.collection('parametros');
-    const resultado = await parametros.updateOne({ _id: "PARAMETROS" }, { $set: {
-            "codigoTienda": params.codigoTienda,
-            "database": params.database,
-            "licencia": params.licencia,
-            "nombreEmpresa": params.nombreEmpresa,
-            "nombreTienda": params.nombreTienda,
-            "tipoDatafono": params.tipoDatafono,
-            "tipoImpresora": params.tipoImpresora,
-            "impresoraCafeteria": params.impresoraCafeteria,
-            "botonesConPrecios": params.botonesConPrecios,
-            "prohibirBuscarArticulos": params.prohibirBuscarArticulos,
-            "ultimoTicket": params.ultimoTicket,
-            "idCurrentTrabajador": params.idCurrentTrabajador,
-            "impresoraUsbInfo": params.impresoraUsbInfo,
-            "token": params.token
-        } }, { upsert: true });
+    const resultado = await parametros.updateOne({ _id: "PARAMETROS" }, { $set: params }, { upsert: true });
     return resultado;
 }
 exports.setParametros = setParametros;

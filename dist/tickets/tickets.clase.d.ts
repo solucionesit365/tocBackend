@@ -1,5 +1,7 @@
 import { TicketsInterface } from "./tickets.interface";
+import { CestasInterface } from "src/cestas/cestas.interface";
 export declare class TicketsClase {
+    generarObjetoTicket(idTicket: number, total: number, lista: CestasInterface["lista"], tipoPago: string): void;
     getTicketByID(idTicket: number): Promise<TicketsInterface>;
     rectificativa(idTicket: any): Promise<boolean>;
     getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]>;
@@ -13,5 +15,6 @@ export declare class TicketsClase {
     getTicketMasAntiguo(): Promise<import("bson").Document[]>;
     actualizarEstadoTicket(ticket: TicketsInterface): Promise<boolean>;
     actualizarComentario(ticket: TicketsInterface): Promise<boolean>;
+    anularTicket(idTicket: number): Promise<boolean>;
 }
 export declare const ticketsInstance: TicketsClase;

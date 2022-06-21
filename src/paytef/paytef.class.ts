@@ -46,6 +46,15 @@ class PaytefClass {
           const total = this.getTotal(cesta); //cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3;
           // La lista no puede estar vacía ni el total puede ser cero.
           if (cesta.lista.length > 0 && total > 0) {
+            const nuevoTicket = ticketsInstance.generarObjetoTicket((await ticketsInstance.getUltimoTicket())+1, total, cesta, "TARJETA", idTrabajadorActivo, idCliente);
+            /* Cerrar ticket */
+            const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket); //resEstadoPaytef.data.result.receipts.clientReceipt);
+            if (resCierreTicket.error === false) {
+              /* Operación aprobada y finalizada */
+              client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
+            } else {
+              client.emit('consultaPaytef', { error: true, mensaje: resCierreTicket.mensaje });
+            }
             /* Creo la transacción con los datos de la cesta, total e idCliente => MongoDB */
             const resTransaccion = await transaccionesInstance.crearTransaccion(cesta, total, idCliente);
             /* ¿La transacción se ha generado correctamente en MongoDB? */
@@ -121,13 +130,7 @@ class PaytefClass {
             if (resEstadoPaytef.data.result.approved) {
               // Añadir que la transacción ya ha sido cobrada => pagada: true (antes de que pueda fallar la inserción de ticket) !!!!!!
               /* Cierro ticket */
-              const resCierreTicket = await paytefInstance.cerrarTicket(resEstadoPaytef.data.result.transactionReference, resEstadoPaytef.data.result.receipts.clientReceipt);
-              if (resCierreTicket.error === false) {
-                /* Operación aprobada y finalizada */
-                client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
-              } else {
-                client.emit('consultaPaytef', { error: true, mensaje: resCierreTicket.mensaje });
-              }
+
             } else {
               /* La operación ha sido denegada */
               client.emit('consultaPaytef', { error: true, mensaje: 'Operación denegada' });
@@ -166,59 +169,19 @@ class PaytefClass {
     }
   }
   
-  async cerrarTicket(idTransaccion: string, recibo: string) {
-    return transaccionesInstance.getTransaccionById(idTransaccion).then(async (infoTransaccion) => {
-      if (infoTransaccion != null) {
-        try {
-          await transaccionesInstance.setPagada(idTransaccion);
-        } catch(err) {
-          console.log(err);
-          LogsClass.newLog('No se ha podido establecer como pagada', 'idTransaccion: ' + idTransaccion);
-          return { error: true, mensaje: 'Error, no se ha podido marcar como pagada la transacción ' + idTransaccion };
-        }
-        
-        const parametros = parametrosInstance.getParametros();
-        /* Creo datos del ticket */
-        const nuevoTicket: TicketsInterface = {
-          _id: (await ticketsInstance.getUltimoTicket())+1,
-          timestamp: Date.now(),
-          total: infoTransaccion.total,
-          lista: infoTransaccion.cesta.lista,
-          tipoPago: "TARJETA",
-          idTrabajador: parametros.idCurrentTrabajador,
-          tiposIva: infoTransaccion.cesta.tiposIva,
-          cliente: infoTransaccion.idCliente,
-          infoClienteVip: {
-              esVip : false,
-              nif: '',
-              nombre: '',
-              cp: '',
-              direccion: '',
-              ciudad: ''
-          },
-          enviado: false,
-          enTransito: false,
-          intentos: 0,
-          comentario: '',
-          regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true): (false),
-          recibo: recibo
-        }
-        if (await ticketsInstance.insertarTicket(nuevoTicket)) {
-          if (await cestas.borrarCestaActiva()) {
-            movimientosInstance.nuevaSalida(infoTransaccion.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
-            if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
-              return { error: false };
-            } else {
-              return { error: true, mensaje: 'Error no se ha podido cambiar el último id ticket' };
-            }
-          } else {
-            return { error: true, mensaje: 'Error, no se ha podido borrar la cesta' };
-          }
+  async cerrarTicket(nuevoTicket: TicketsInterface) {  
+    if (await ticketsInstance.insertarTicket(nuevoTicket)) {
+      if (await cestas.borrarCestaActiva()) { // Repasar esto porque no es la activa, sino una en concreto por id
+        movimientosInstance.nuevaSalida(nuevoTicket.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
+        if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
+          return { error: false };
+        } else {
+          return { error: true, mensaje: 'Error no se ha podido cambiar el último id ticket' };
         }
       } else {
-        return { error: true, mensaje: 'Error,  no se ha podido recuperar la transacción' };
+        return { error: true, mensaje: 'Error, no se ha podido borrar la cesta' };
       }
-    });      
+    }
   }
 }
 

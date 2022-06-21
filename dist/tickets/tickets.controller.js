@@ -31,8 +31,6 @@ let TicketsController = class TicketsController {
         });
     }
     getTickets(params) {
-        console.log('get ticket');
-        console.log(params);
         return tickets_clase_1.ticketsInstance.getTicketByID(params.ticketID).then((res) => {
             if (res) {
                 return {

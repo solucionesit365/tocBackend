@@ -14,10 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestController = void 0;
 const common_1 = require("@nestjs/common");
-const impresora_class_1 = require("../impresora/impresora.class");
+const tickets_clase_1 = require("../tickets/tickets.clase");
 let TestController = class TestController {
     imprimirAlgo(parms) {
-        return 69;
+        return tickets_clase_1.ticketsInstance.anularTicket(2);
     }
 };
 __decorate([

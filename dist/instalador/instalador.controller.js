@@ -33,23 +33,17 @@ let InstaladorController = class InstaladorController {
             numLlicencia: params.numLlicencia
         }).then((res) => {
             if (!res.data.error) {
-                const objParams = {
-                    _id: 'PARAMETROS',
-                    licencia: params.numLlicencia,
-                    tipoImpresora: params.tipoImpresora,
-                    tipoDatafono: params.tipoDatafono,
-                    impresoraCafeteria: params.impresoraCafeteria,
-                    ultimoTicket: res.data.info.ultimoTicket,
-                    codigoTienda: res.data.info.codigoTienda,
-                    nombreEmpresa: res.data.info.nombreEmpresa,
-                    nombreTienda: res.data.info.nombreTienda,
-                    prohibirBuscarArticulos: res.data.info.prohibirBuscarArticulos,
-                    token: res.data.info.token,
-                    database: res.data.info.database,
-                    botonesConPrecios: res.data.info.botonesConPrecios,
-                    impresoraUsbInfo: { pid: '', vid: '' },
-                    idCurrentTrabajador: null
-                };
+                let parametrosfinales = {};
+                let paramstpv = JSON.stringify(res.data.info).split(',');
+                for (let index = 0; index < paramstpv.length; index++) {
+                    paramstpv[index] = paramstpv[index].replace('\"', "").replace('{', "").replace('}', "");
+                    if (paramstpv[index].includes('Si')) {
+                        paramstpv[index] = paramstpv[index].replace('\"', "");
+                        let final = paramstpv[index].split(':');
+                        parametrosfinales[final[0]] = 'Si';
+                    }
+                }
+                const objParams = Object.assign(Object.assign({ _id: 'PARAMETROS', licencia: params.numLlicencia, tipoImpresora: params.tipoImpresora, tipoDatafono: params.tipoDatafono, impresoraCafeteria: params.impresoraCafeteria, ultimoTicket: res.data.info.ultimoTicket, codigoTienda: res.data.info.codigoTienda, nombreEmpresa: res.data.info.nombreEmpresa, nombreTienda: res.data.info.nombreTienda, token: res.data.info.token }, parametrosfinales), { database: res.data.info.database, impresoraUsbInfo: { pid: '', vid: '' }, idCurrentTrabajador: null });
                 return parametros_clase_1.parametrosInstance.setParametros(objParams).then((res2) => {
                     if (res2) {
                         return { error: false };

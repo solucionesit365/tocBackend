@@ -9,7 +9,35 @@ const movimientos_clase_1 = require("../movimientos/movimientos.clase");
 const articulos_clase_1 = require("../articulos/articulos.clase");
 const axios_1 = require("axios");
 const clientes_clase_1 = require("../clientes/clientes.clase");
+const cestas_interface_1 = require("../cestas/cestas.interface");
 class TicketsClase {
+    generarObjetoTicket(idTicket, total, lista, tipoPago) {
+        const nuevoTicket = {
+            _id: idTicket,
+            timestamp: Date.now(),
+            total: total,
+            lista: lista,
+            tipoPago: tipoPago,
+            idTrabajador: parametros.idCurrentTrabajador,
+            tiposIva: infoTransaccion.cesta.tiposIva,
+            cliente: infoTransaccion.idCliente,
+            infoClienteVip: {
+                esVip: false,
+                nif: '',
+                nombre: '',
+                cp: '',
+                direccion: '',
+                ciudad: ''
+            },
+            enviado: false,
+            enTransito: false,
+            intentos: 0,
+            comentario: '',
+            regalo: (infoTransaccion.cesta.regalo == true && infoTransaccion.idCliente != '' && infoTransaccion.idCliente != null) ? (true) : (false),
+            recibo: '',
+            anulado: false
+        };
+    }
     getTicketByID(idTicket) {
         return schTickets.getTicketByID(idTicket).then((res) => {
             return res;
@@ -123,7 +151,8 @@ class TicketsClase {
             enTransito: false,
             intentos: 0,
             comentario: '',
-            regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false)
+            regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false),
+            anulado: false
         };
         if (await this.insertarTicket(objTicket)) {
             if (await cestas_clase_1.cestas.borrarCesta(idCesta)) {
@@ -172,7 +201,8 @@ class TicketsClase {
             enTransito: false,
             intentos: 0,
             comentario: '',
-            regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false)
+            regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false),
+            anulado: false
         };
         if (await this.insertarTicket(objTicket)) {
             if (await cestas_clase_1.cestas.borrarCesta(idCesta)) {
@@ -223,7 +253,8 @@ class TicketsClase {
             enTransito: false,
             intentos: 0,
             comentario: '',
-            regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false)
+            regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true) : (false),
+            anulado: false
         };
         if (await this.insertarTicket(objTicket)) {
             if (await cestas_clase_1.cestas.borrarCesta(idCesta)) {
@@ -298,7 +329,8 @@ class TicketsClase {
             enTransito: false,
             enviado: false,
             intentos: 0,
-            comentario: ''
+            comentario: '',
+            anulado: false
         };
         if (await this.insertarTicket(objTicket)) {
             if (await cestas_clase_1.cestas.borrarCesta(idCesta)) {
@@ -347,7 +379,8 @@ class TicketsClase {
             enTransito: false,
             enviado: false,
             intentos: 0,
-            comentario: ''
+            comentario: '',
+            anulado: false
         };
         if (await this.insertarTicket(objTicket)) {
             if (await cestas_clase_1.cestas.borrarCesta(idCesta)) {
@@ -383,6 +416,13 @@ class TicketsClase {
             return res.acknowledged;
         }).catch((err) => {
             console.log(err);
+            return false;
+        });
+    }
+    anularTicket(idTicket) {
+        return schTickets.anularTicket(idTicket).then((res) => {
+            return res.acknowledged;
+        }).catch(() => {
             return false;
         });
     }

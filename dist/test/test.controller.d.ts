@@ -1,3 +1,3 @@
 export declare class TestController {
-    imprimirAlgo(parms: any): number;
+    imprimirAlgo(parms: any): Promise<boolean>;
 }

@@ -50,5 +50,6 @@ export interface TicketsInterface {
     },
     cantidadTkrs?: number,
     regalo?: boolean,
-    recibo?: string
+    recibo?: string,
+    anulado: boolean
 }
