@@ -31,6 +31,40 @@ class PaytefClass {
         });
         return total;
     }
+    cancelarOperacion() {
+        const params = parametros_clase_1.parametrosInstance.getParametros();
+        axios_1.default.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { "pinpad": "*" });
+    }
+    iniciarDatafono(idTicket, total, client) {
+        const params = parametros_clase_1.parametrosInstance.getParametros();
+        if (utiles_module_1.UtilesModule.checkVariable(params.ipTefpay)) {
+            axios_1.default.post(`http://${params.ipTefpay}:8887/transaction/start`, {
+                pinpad: "*",
+                opType: "sale",
+                createReceipt: true,
+                executeOptions: {
+                    method: "polling"
+                },
+                language: "es",
+                requestedAmount: Math.round(total * 100),
+                requireConfirmation: false,
+                transactionReference: idTicket,
+                showResultSeconds: 5
+            }).then((respuestaPaytef) => {
+                if (respuestaPaytef.data.info.started) {
+                    this.consultarEstadoOperacion(client, idTicket);
+                }
+                else {
+                    client.emit('consultaPaytef', { error: true, mensaje: 'La operación no ha podido iniciar' });
+                }
+            }).catch((err) => {
+                client.emit('consultaPaytef', { error: true, mensaje: 'Backend: ' + err.message });
+            });
+        }
+        else {
+            client.emit('consultaPaytef', { error: true, mensaje: 'IP TefPay no definida, contacta con informática' });
+        }
+    }
     async iniciarTransaccion(client, idCliente, idCesta) {
         try {
             const idTrabajadorActivo = await trabajadores_clase_1.trabajadoresInstance.getCurrentIdTrabajador();
@@ -42,43 +76,10 @@ class PaytefClass {
                         const nuevoTicket = tickets_clase_1.ticketsInstance.generarObjetoTicket((await tickets_clase_1.ticketsInstance.getUltimoTicket()) + 1, total, cesta, "TARJETA", idTrabajadorActivo, idCliente);
                         const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket);
                         if (resCierreTicket.error === false) {
-                            client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
+                            this.iniciarDatafono(resCierreTicket.info, total, client);
                         }
                         else {
                             client.emit('consultaPaytef', { error: true, mensaje: resCierreTicket.mensaje });
-                        }
-                        const resTransaccion = await transacciones_class_1.transaccionesInstance.crearTransaccion(cesta, total, idCliente);
-                        if (resTransaccion.error === false) {
-                            if (utiles_module_1.UtilesModule.checkVariable(resTransaccion.insertedId) && resTransaccion.insertedId !== '') {
-                                const params = parametros_clase_1.parametrosInstance.getParametros();
-                                if (utiles_module_1.UtilesModule.checkVariable(params.ipTefpay)) {
-                                    const respuestaPaytef = await axios_1.default.post(`http://${params.ipTefpay}:8887/transaction/start`, {
-                                        pinpad: "*",
-                                        opType: "sale",
-                                        createReceipt: true,
-                                        executeOptions: {
-                                            method: "polling"
-                                        },
-                                        language: "es",
-                                        requestedAmount: Math.round(total * 100),
-                                        requireConfirmation: false,
-                                        transactionReference: resTransaccion.insertedId,
-                                        showResultSeconds: 5
-                                    });
-                                    if (respuestaPaytef.data.info.started) {
-                                        this.consultarEstadoOperacion(client);
-                                    }
-                                    else {
-                                        client.emit('consultaPaytef', { error: true, mensaje: 'La operación no ha podido iniciar' });
-                                    }
-                                }
-                                else {
-                                    client.emit('consultaPaytef', { error: true, mensaje: 'IP TefPay no definida, contacta con informática' });
-                                }
-                            }
-                        }
-                        else {
-                            client.emit('consultaPaytef', { error: true, mensaje: 'Error al crear la transacción' });
                         }
                     }
                     else {
@@ -94,37 +95,41 @@ class PaytefClass {
             }
         }
         catch (err) {
-            const params = parametros_clase_1.parametrosInstance.getParametros();
-            axios_1.default.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { "pinpad": "*" });
+            this.cancelarOperacion();
             console.log(err.message);
             client.emit('consultaPaytef', { error: true, mensaje: err.message });
-            logs_class_1.LogsClass.newLog('iniciarTransaccion PayTefClass', err.message);
         }
     }
-    async consultarEstadoOperacion(client) {
+    anularOperacion(idTicket, client) {
+        tickets_clase_1.ticketsInstance.anularTicket(idTicket).then((resAnulacion) => {
+            if (resAnulacion) {
+                client.emit('consultaPaytef', { error: true, mensaje: 'Operación denegada. Ticket anulado' });
+            }
+            else {
+                logs_class_1.LogsClass.newLog('Error nuevo grave', `Ticket denegado por PayTef pero no anulado por el toc: idTicket: ${idTicket} tiemstamp: ${Date.now()}`);
+                client.emit('consultaPaytef', { error: true, mensaje: 'CONTACTA A INFORMÁTICA. Ticket denegado por PayTef pero no anulado por el toc' });
+            }
+        });
+    }
+    async consultarEstadoOperacion(client, idTicket) {
         try {
             const ipDatafono = parametros_clase_1.parametrosInstance.getParametros().ipTefpay;
-            const ultimaTransaccion = await transacciones_class_1.transaccionesInstance.getUltimaTransaccion();
             const resEstadoPaytef = await axios_1.default.post(`http://${ipDatafono}:8887/transaction/poll`, { pinpad: "*" });
             if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
-                if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.result.transactionReference) && resEstadoPaytef.data.result.transactionReference != '') {
-                    if (resEstadoPaytef.data.result.transactionReference === ultimaTransaccion._id.toString()) {
-                        if (resEstadoPaytef.data.result.approved) {
-                        }
-                        else {
-                            client.emit('consultaPaytef', { error: true, mensaje: 'Operación denegada' });
-                        }
+                if (Number(resEstadoPaytef.data.result.transactionReference) === idTicket) {
+                    if (resEstadoPaytef.data.result.approved) {
+                        client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
                     }
                     else {
-                        await axios_1.default.post(`http://${ipDatafono}:8887/pinpad/cancel`, { "pinpad": "*" });
-                        client.emit('consultaPaytef', { error: true, mensaje: 'La transacción no coincide con la actual de MongoDB' });
+                        this.anularOperacion(idTicket, client);
                     }
                 }
+                else if (resEstadoPaytef.data.result.approved) {
+                    logs_class_1.LogsClass.newLog('Error nuevo (sin referencia)', `Ticket aprobado por PayTef y creado en el toc, pero sin referencia: ${idTicket} timestamp: ${Date.now()}`);
+                    client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
+                }
                 else {
-                    if (resEstadoPaytef.data.result.approved && !resEstadoPaytef.data.result.failed) {
-                        logs_class_1.LogsClass.newLog('PEOR ERROR POSIBLE', `no tengo referencia de la transacción: tiemstamp: ${Date.now()}`);
-                    }
-                    client.emit('consultaPaytef', { error: true, mensaje: 'Sin información de la última transacción => REINICIAR DATÁFONO' });
+                    this.anularOperacion(idTicket, client);
                 }
             }
             else if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.info)) {
@@ -133,15 +138,15 @@ class PaytefClass {
                 }
                 else {
                     await new Promise(r => setTimeout(r, 1000));
-                    this.consultarEstadoOperacion(client);
+                    this.consultarEstadoOperacion(client, idTicket);
                 }
             }
             else {
-                client.emit('consultaPaytef', { error: true, mensaje: 'Error, el datáfono no da respuesta' });
+                await new Promise(r => setTimeout(r, 1000));
+                this.consultarEstadoOperacion(client, idTicket);
             }
         }
         catch (err) {
-            console.log(err);
             const ipDatafono = parametros_clase_1.parametrosInstance.getParametros().ipTefpay;
             axios_1.default.post(`http://${ipDatafono}:8887/pinpad/cancel`, { "pinpad": "*" });
             logs_class_1.LogsClass.newLog('Error backend paytefClass consultarEstadoOperacion', err.message);
@@ -153,7 +158,7 @@ class PaytefClass {
             if (await cestas_clase_1.cestas.borrarCestaActiva()) {
                 movimientos_clase_1.movimientosInstance.nuevaSalida(nuevoTicket.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
                 if (await parametros_clase_1.parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
-                    return { error: false };
+                    return { error: false, info: nuevoTicket._id };
                 }
                 else {
                     return { error: true, mensaje: 'Error no se ha podido cambiar el último id ticket' };
