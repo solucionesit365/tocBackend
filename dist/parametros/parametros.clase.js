@@ -59,6 +59,23 @@ class ParametrosClase {
             return null;
         });
     }
+    async actParametros(params) {
+        this.parametros = params;
+        return await schParametros.setParametros(this.parametros).then((res) => {
+            return res.acknowledged;
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
+    async getlicencia() {
+        return await schParametros.getLicencia().then((res) => {
+            return res.licencia;
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
     setParametros(params) {
         this.parametros = params;
         return schParametros.setParametros(this.parametros).then((res) => {

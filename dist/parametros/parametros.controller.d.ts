@@ -1,18 +1,32 @@
+import { ParametrosInterface } from './parametros.interface';
 export declare class ParametrosController {
     todoInstalado(): {
         todoInstalado: true;
-        config: import("./parametros.interface").ParametrosInterface;
+        config: ParametrosInterface;
     } | {
         todoInstalado: boolean;
         config?: undefined;
     };
     getParametros(): {
         error: boolean;
-        parametros: import("./parametros.interface").ParametrosInterface;
+        parametros: ParametrosInterface;
     };
+    actualizarParametros(): Promise<{
+        error: boolean;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+    } | {
+        error: boolean;
+        mensaje: string;
+    } | {
+        error: boolean;
+        mensaje: string;
+    }>;
     getParametrosBonito(): {
         error: boolean;
-        parametros: import("./parametros.interface").ParametrosInterface;
+        parametros: ParametrosInterface;
     };
     vidAndPid(params: any): Promise<{
         error: boolean;
@@ -29,7 +43,7 @@ export declare class ParametrosController {
     };
     getVidAndPid(): Promise<{
         error: boolean;
-        info: import("./parametros.interface").ParametrosInterface;
+        info: ParametrosInterface;
     } | {
         error: boolean;
         info: {

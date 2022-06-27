@@ -25,7 +25,6 @@ export async function getParametros() {
 // idCurrentTrabajador: number,
 // token: string
 export async function setParametros(params: ParametrosInterface) {
-    console.log(params)
     const database = (await conexion).db('tocgame');
     const parametros = database.collection('parametros');
 
@@ -46,9 +45,18 @@ export async function setParametros(params: ParametrosInterface) {
     //     "impresoraUsbInfo": params.impresoraUsbInfo,
     //     "token": params.token
     // }}, {upsert: true});
-    
+    console.log(resultado)
     return resultado;
 }
+
+export async function getLicencia() {
+    const database = (await conexion).db('tocgame');
+    const parametros = database.collection('parametros');
+    const resultado = await parametros.findOne({_id: "PARAMETROS"});
+
+    return resultado
+}
+   
 
 export async function setUltimoTicket(idTicket: number) {
     const database = (await conexion).db('tocgame');

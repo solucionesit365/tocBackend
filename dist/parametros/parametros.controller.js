@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParametrosController = void 0;
 const common_1 = require("@nestjs/common");
 const parametros_clase_1 = require("./parametros.clase");
+const axios_1 = require("axios");
 let ParametrosController = class ParametrosController {
     todoInstalado() {
         const res = parametros_clase_1.parametrosInstance.todoInstalado();
@@ -32,6 +33,33 @@ let ParametrosController = class ParametrosController {
     getParametros() {
         const parametros = parametros_clase_1.parametrosInstance.getParametros();
         return { error: false, parametros };
+    }
+    async actualizarParametros() {
+        let licencia = await parametros_clase_1.parametrosInstance.getlicencia();
+        return axios_1.default.post('parametros/getParametros', {
+            numLlicencia: licencia
+        }).then((res) => {
+            if (!res.data.error) {
+                let paramstpv = res.data.info;
+                return parametros_clase_1.parametrosInstance.setParametros(paramstpv).then((res2) => {
+                    if (res2) {
+                        return { error: false };
+                    }
+                    else {
+                        return { error: true, mensaje: 'Backend: Error en instalador/pedirDatos > setParametros' };
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                    return { error: true, mensaje: 'Backend: No se ha podido setear parametros' };
+                });
+            }
+            else {
+                return { error: true, mensaje: res.data.mensaje };
+            }
+        }).catch((err) => {
+            console.log(err);
+            return { error: true, mensaje: 'Error en pedir parametros/instaladorLicencia de sanPedro' };
+        });
     }
     getParametrosBonito() {
         const parametros = parametros_clase_1.parametrosInstance.getParametros();
@@ -127,6 +155,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ParametrosController.prototype, "getParametros", null);
+__decorate([
+    (0, common_1.Post)('actualizarParametros'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ParametrosController.prototype, "actualizarParametros", null);
 __decorate([
     (0, common_1.Get)('getParametrosBonito'),
     __metadata("design:type", Function),

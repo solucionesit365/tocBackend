@@ -1,5 +1,7 @@
 import { Body, Controller, Post, Get, ConsoleLogger } from '@nestjs/common';
 import { parametrosInstance } from "./parametros.clase";
+import { ParametrosInterface } from './parametros.interface';
+import axios from 'axios';
 @Controller('parametros')
 export class ParametrosController {
     @Post('todoInstalado')
@@ -20,6 +22,36 @@ export class ParametrosController {
     getParametros() {
         const parametros = parametrosInstance.getParametros();
         return { error: false, parametros };      
+    }
+    
+    @Post('actualizarParametros')
+        async actualizarParametros() {
+            let licencia = await parametrosInstance.getlicencia()
+//const licencia =  await parametrosInstance.getParametros().licencia;
+        return axios.post('parametros/getParametros', {
+            numLlicencia:licencia
+        }).then((res: any) => {
+            if (!res.data.error) {
+                
+              let paramstpv=  res.data.info
+              return parametrosInstance.setParametros(paramstpv).then((res2) => {
+                 if (res2) {
+                 return { error: false };
+                    } else {
+                        return { error: true, mensaje: 'Backend: Error en instalador/pedirDatos > setParametros'};
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                    return  { error: true, mensaje: 'Backend: No se ha podido setear parametros' };
+                });
+            } else {
+                return { error: true, mensaje: res.data.mensaje };
+            }
+        }).catch((err) => {
+            console.log(err);
+            return { error: true, mensaje: 'Error en pedir parametros/instaladorLicencia de sanPedro' };
+        });
+ 
     }
 
     @Get('getParametrosBonito')

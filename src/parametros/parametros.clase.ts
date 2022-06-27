@@ -64,7 +64,23 @@ const parametrosVacios: ParametrosInterface = {
             return null;
         });
     }
-
+    async actParametros(params: ParametrosInterface){
+        this.parametros = params;
+        return await schParametros.setParametros(this.parametros).then((res) => {
+            return res.acknowledged;
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
+    async getlicencia(){
+        return await schParametros.getLicencia().then((res) => {
+            return res.licencia;
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
     setParametros(params: ParametrosInterface): Promise<boolean> {
         // this.parametros.licencia = params.licencia;
         // this.parametros.tipoImpresora = params.tipoImpresora;
