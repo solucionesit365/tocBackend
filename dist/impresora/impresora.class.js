@@ -32,10 +32,8 @@ function permisosImpresora() {
     }
 }
 function random() {
-    let min = 0;
-    let max = 99999999;
-    let numero = Math.random() * (max - min + 1) + min;
-    return numero;
+    let numero = Math.floor(10000000 + Math.random() * 999999999);
+    return numero.toString(16).slice(0, 8);
 }
 function dateToString2(fecha) {
     var fechaFinal = null;
@@ -280,7 +278,7 @@ class Impresora {
                     .text(detalleIva)
                     .text('-- ES COPIA --')
                     .control('LF')
-                    .text('ID: ' + random())
+                    .text('ID: ' + random() + ' - ' + random())
                     .text(pie)
                     .control('LF')
                     .control('LF')
