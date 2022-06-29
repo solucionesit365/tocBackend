@@ -32,6 +32,12 @@ function permisosImpresora() {
         console.log(err);
     }
 }
+function random () {
+    let min= 0
+    let max = 99999999
+    let numero = Math.random() * (max - min + 1) + min
+    return  numero
+  }
 
 /* Función auxiliar */
 function dateToString2(fecha) {
@@ -69,6 +75,7 @@ function dateToString2(fecha) {
 
 export class Impresora {
     async imprimirTicket(idTicket: number, esDevolucion = false) {
+        console.log('imprimir ticket ')
         const paramsTicket = await paramsTicketInstance.getParamsTicket();
         //const infoTicket: TicketsInterface = await ticketsInstance.getTicketByID(idTicket);
         let infoTicket;
@@ -138,7 +145,7 @@ export class Impresora {
     }
 
     private async imprimirRecibo(recibo: string) {
-        console.log(recibo)
+        console.log('imprimir recibo')
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -341,6 +348,7 @@ export class Impresora {
                     .text('Base IVA         IVA         IMPORT')
                     .text(detalleIva)
                     .text('-- ES COPIA --')
+                    .text(random())
                     .text(pie)
                     .control('LF')
                     .control('LF')

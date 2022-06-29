@@ -31,6 +31,12 @@ function permisosImpresora() {
         console.log(err);
     }
 }
+function random() {
+    let min = 0;
+    let max = 99999999;
+    let numero = Math.random() * (max - min + 1) + min;
+    return numero;
+}
 function dateToString2(fecha) {
     var fechaFinal = null;
     if (typeof fecha === 'string' || typeof fecha === 'number') {
@@ -61,6 +67,7 @@ function dateToString2(fecha) {
 }
 class Impresora {
     async imprimirTicket(idTicket, esDevolucion = false) {
+        console.log('imprimir ticket ');
         const paramsTicket = await params_ticket_class_1.paramsTicketInstance.getParamsTicket();
         let infoTicket;
         if (!esDevolucion) {
@@ -125,7 +132,7 @@ class Impresora {
         }
     }
     async imprimirRecibo(recibo) {
-        console.log(recibo);
+        console.log('imprimir recibo');
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -272,6 +279,7 @@ class Impresora {
                     .text('Base IVA         IVA         IMPORT')
                     .text(detalleIva)
                     .text('-- ES COPIA --')
+                    .text(random())
                     .text(pie)
                     .control('LF')
                     .control('LF')
