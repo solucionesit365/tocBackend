@@ -37,7 +37,9 @@ class Dispositivos {
         else if (os.platform() === 'win32') {
             try {
                 if (parametros.tipoImpresora == 'USB') {
+                    console.log("OBSERVÁ: ", parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
                     const device = new escpos.USB(parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
+                    console.log(device);
                     return device;
                 }
                 else if (parametros.tipoImpresora == 'SERIE') {

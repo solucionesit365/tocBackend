@@ -33,7 +33,9 @@ export class Dispositivos {
             try {
                 if (parametros.tipoImpresora == 'USB') {
                     // const device: number = new escpos.USB();
+                    console.log("OBSERVÁ: ", parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
                     const device: number = new escpos.USB(parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
+                    console.log(device);
                     return device;
                 } else if (parametros.tipoImpresora == 'SERIE') {
                     // const device = new escpos.Serial('COM1', {
