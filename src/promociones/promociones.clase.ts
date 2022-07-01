@@ -167,10 +167,8 @@ export class OfertasClase {
             let precioRealPromo = (dtoAplicado.precioRealPrincipal*cantidadPrincipal + dtoAplicado.precioRealSecundario*cantidadSecundario);
             if (precioPromoGdt != precioRealPromo) {
                 let diferencia = precioPromoGdt - precioRealPromo;
-                if (diferencia < 0) { // Negativo
-                    precioRealPromo += diferencia;
-                    dtoAplicado.precioRealSecundario += diferencia;
-                }
+                precioRealPromo += diferencia;
+                dtoAplicado.precioRealSecundario += diferencia;
             }
 
             cesta.lista.push({
