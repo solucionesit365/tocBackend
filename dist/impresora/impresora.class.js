@@ -474,7 +474,56 @@ class Impresora {
         }
     }
     mostrarVisor(data) {
-        console.log('El visor da muchos problemas');
+        console.log(data);
+        var eur = String.fromCharCode(128);
+        var limitNombre = 0;
+        var lengthTotal = '';
+        var datosExtra = '';
+        if (data.total !== undefined) {
+            lengthTotal = (data.total).toString();
+            if (lengthTotal.length == 1)
+                limitNombre = 17;
+            else if (lengthTotal.length == 2)
+                limitNombre = 16;
+            else if (lengthTotal.length == 3)
+                limitNombre = 15;
+            else if (lengthTotal.length == 4)
+                limitNombre = 14;
+            else if (lengthTotal.length == 5)
+                limitNombre = 13;
+            else if (lengthTotal.length == 6)
+                limitNombre = 12;
+            else if (lengthTotal.length == 7)
+                limitNombre = 11;
+            datosExtra = data.dependienta.substring(0, limitNombre) + " " + data.total + eur;
+        }
+        if (datosExtra.length <= 2) {
+            datosExtra = "";
+            eur = "";
+        }
+        data.texto = datosExtra + "" + data.texto.substring(0, 14);
+        data.texto += " " + data.precio + eur;
+        try {
+            permisosImpresora();
+            const device = dispositivos.getDeviceVisor();
+            console.log(dispositivos.getDeviceVisor());
+            if (device != null) {
+                var options = { encoding: "ISO-8859-1" };
+                var printer = new escpos.Screen(device, options);
+                device.open(function () {
+                    printer
+                        .clear()
+                        .text(data.texto)
+                        .close();
+                });
+            }
+            else {
+                console.log("Controlado: dispositivo es null");
+            }
+        }
+        catch (err) {
+            console.log("Error: ", err);
+        }
     }
     async imprimirEntregas() {
         const params = parametros_clase_1.parametrosInstance.getParametros();
