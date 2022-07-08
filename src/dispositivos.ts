@@ -54,16 +54,18 @@ export class Dispositivos {
     }
 
     getDeviceVisor() {
-        
         if (os.platform() === 'win32') {
-            const device = new escpos.USB(0x01, 0xff, {
-                baudRate: 9600,
-                stopBit: 2
-            });
-            return null;
+           const device = new escpos.Serial('COM4', {
+                        baudRate: 115200,
+                        stopBit: 2
+                    });
+                    return device;
+        
+        
         } else if (os.platform() === 'linux') {
             return new escpos.Serial('/dev/ttyUSB0', {
-                baudRate: 9600,
+                // baudRate: 9600,
+                 baudRate: 115200,
                 stopBit: 2
             }); 
         }
