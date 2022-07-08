@@ -251,7 +251,11 @@ class Impresora {
                     .style('b')
                     .size(0, 0)
                     .text(cabecera)
+<<<<<<< HEAD
                     .text(`Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours() < 10 ? '0' : '') + fecha.getHours()}:${(fecha.getMinutes() < 10 ? '0' : '') + fecha.getMinutes()}`)
+=======
+                    .text(`Data: ${(fecha.getDay)} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours() < 10 ? '0' : '') + fecha.getHours()}:${(fecha.getMinutes() < 10 ? '0' : '') + fecha.getMinutes()}`)
+>>>>>>> 3c0021080b4e9d056f011194f3a7cf0bb6deeb1a
                     .text('Factura simplificada N: ' + numFactura)
                     .text('Ates per: ' + nombreDependienta)
                     .text(detalleClienteVip)
