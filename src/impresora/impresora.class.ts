@@ -310,6 +310,8 @@ export class Impresora {
                 detalleIva = '';
             }
             
+            let diasSemana = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+
             device.open(function () 
             {
                 printer
@@ -319,7 +321,7 @@ export class Impresora {
                     .style('b')
                     .size(0, 0)
                     .text(cabecera)
-                    .text(`Data: a ${fecha.getDay()} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
+                    .text(`Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
                     .text('Factura simplificada N: ' + numFactura)
                     .text('Ates per: ' + nombreDependienta)
                     .text(detalleClienteVip)
