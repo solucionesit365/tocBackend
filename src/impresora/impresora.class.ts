@@ -310,7 +310,7 @@ export class Impresora {
                 detalleIva = '';
             }
             
-            let diasSemana = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+            let diasSemana = ["Diumenge", "Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres", "Dissabte"]
 
             
             device.open(function () 
