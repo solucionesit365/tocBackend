@@ -312,6 +312,7 @@ export class Impresora {
             
             let diasSemana = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 
+            
             device.open(function () 
             {
                 printer
