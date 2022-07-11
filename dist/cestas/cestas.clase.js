@@ -384,6 +384,19 @@ class CestaClase {
                 else {
                     cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                 }
+                trabajadores_clase_1.trabajadoresInstance.getCurrentTrabajador().then((data) => {
+                    try {
+                        impresora_class_1.impresoraInstance.mostrarVisor({
+                            dependienta: data.nombre,
+                            total: (cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3).toFixed(2),
+                            precio: infoArticulo.precioConIva.toString(),
+                            texto: infoArticulo.nombre,
+                        });
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                });
             }
             else if (cesta.lista[i].promocion.esPromo === true) {
                 if (cesta.lista[i].nombre == 'Oferta combo') {

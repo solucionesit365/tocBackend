@@ -342,6 +342,7 @@ export class CestaClase {
                 miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, miCesta.tiposIva, infoAPeso);
             }            
         }
+  
 
         const temporal = await ofertas.buscarOfertas(miCesta, viejoIva);
         return temporal; //await ofertas.buscarOfertas(miCesta, viejoIva);
@@ -444,6 +445,19 @@ export class CestaClase {
                  
                   cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                  }
+                 trabajadoresInstance.getCurrentTrabajador().then((data) => {
+                  // console.log(data.nombre);
+                  try {
+                    impresoraInstance.mostrarVisor({
+                      dependienta: data.nombre,
+                      total: (cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3).toFixed(2),
+                      precio: infoArticulo.precioConIva.toString(),
+                      texto: infoArticulo.nombre,
+                    });
+                  } catch(err) {
+                    console.log(err);
+                  }
+                })
             }
             else if(cesta.lista[i].promocion.esPromo === true) {
                     if(cesta.lista[i].nombre == 'Oferta combo') {
@@ -464,6 +478,7 @@ export class CestaClase {
                     }
                   }
             
+                
         }
         return await cesta;
     }

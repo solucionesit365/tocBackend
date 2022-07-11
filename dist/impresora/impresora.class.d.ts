@@ -1,4 +1,6 @@
 export declare class Impresora {
+    binvenidacliente(): void;
+    despedircliente(): void;
     imprimirTicket(idTicket: number, esDevolucion?: boolean): Promise<void>;
     private imprimirRecibo;
     private _venta;
