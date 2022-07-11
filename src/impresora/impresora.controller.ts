@@ -21,10 +21,10 @@ export class ImpresoraController {
     
     @Post('despedida')
     despedircliente() {
-        return impresoraInstance.despedircliente();
+         impresoraInstance.despedircliente();
     }
     @Post('bienvenida')
     binvenidacliente() {
-        return impresoraInstance.binvenidacliente();
+         impresoraInstance.binvenidacliente();
     }
 }

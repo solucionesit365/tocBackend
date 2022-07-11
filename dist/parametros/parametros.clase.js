@@ -125,8 +125,8 @@ class ParametrosClase {
             return false;
         });
     }
-    setVidAndPid(vid, pid) {
-        return schParametros.setVidAndPid(vid, pid).then((res) => {
+    setVidAndPid(vid, pid, com) {
+        return schParametros.setVidAndPid(vid, pid, com).then((res) => {
             if (res.acknowledged) {
                 return true;
             }

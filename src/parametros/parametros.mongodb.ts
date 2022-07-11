@@ -66,10 +66,10 @@ export async function setUltimoTicket(idTicket: number) {
     return resultado;
 }
 
-export async function setVidAndPid(vid: string, pid: string) {
+export async function setVidAndPid(vid: string, pid: string, com: string) {
     const database = (await conexion).db('tocgame');
     const parametros = database.collection('parametros');
-    const resultado = await parametros.updateOne({_id: "PARAMETROS"}, {$set: {"impresoraUsbInfo": { vid: vid, pid: pid }}}, {upsert: true});
+    const resultado = await parametros.updateOne({_id: "PARAMETROS"}, {$set: {"impresoraUsbInfo": { vid: vid, pid: pid }, visor: com}}, {upsert: true});
     
     return resultado;
 }

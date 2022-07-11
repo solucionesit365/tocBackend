@@ -55,9 +55,10 @@ export class Dispositivos {
         }
     }
 
-    getDeviceVisor() {
+    async getDeviceVisor() {
+        const parametros = await parametrosInstance.getEspecialParametros();
         if (os.platform() === 'win32') {
-           const device = new escpos.Serial('COM2', {
+           const device = new escpos.Serial(parametros.visor, {
                         baudRate: 9600,
                         stopBit: 2
                     });

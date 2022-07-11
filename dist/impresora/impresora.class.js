@@ -64,10 +64,10 @@ function dateToString2(fecha) {
     return `${finalYear}-${finalMonth}-${finalDay} ${finalHours}:${finalMinutes}:${finalSeconds}`;
 }
 class Impresora {
-    binvenidacliente() {
+    async binvenidacliente() {
         try {
             permisosImpresora();
-            const device = dispositivos.getDeviceVisor();
+            const device = await dispositivos.getDeviceVisor();
             if (device != null) {
                 var options = { encoding: "iso88591" };
                 var printer = new escpos.Screen(device, options);
@@ -90,10 +90,10 @@ class Impresora {
             console.log("Error: ", err);
         }
     }
-    despedircliente() {
+    async despedircliente() {
         try {
             permisosImpresora();
-            const device = dispositivos.getDeviceVisor();
+            const device = await dispositivos.getDeviceVisor();
             if (device != null) {
                 var options = { encoding: "iso88591" };
                 var printer = new escpos.Screen(device, options);
@@ -527,7 +527,7 @@ class Impresora {
             console.log(err);
         }
     }
-    mostrarVisor(data) {
+    async mostrarVisor(data) {
         console.log(data);
         var eur = "E";
         console.log(eur);
@@ -566,7 +566,7 @@ class Impresora {
         data.texto += " " + data.precio + eur;
         try {
             permisosImpresora();
-            const device = dispositivos.getDeviceVisor();
+            const device = await dispositivos.getDeviceVisor();
             if (device != null) {
                 var options = { encoding: "iso88591" };
                 var printer = new escpos.Screen(device, options);

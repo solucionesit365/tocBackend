@@ -27,10 +27,10 @@ let ImpresoraController = class ImpresoraController {
         return impresora_class_1.impresoraInstance.imprimirEntregas();
     }
     despedircliente() {
-        return impresora_class_1.impresoraInstance.despedircliente();
+        impresora_class_1.impresoraInstance.despedircliente();
     }
     binvenidacliente() {
-        return impresora_class_1.impresoraInstance.binvenidacliente();
+        impresora_class_1.impresoraInstance.binvenidacliente();
     }
 };
 __decorate([
