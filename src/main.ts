@@ -21,4 +21,3 @@ async function bootstrap() {
 
 }
 bootstrap();
-// Notificación con webhook y slack cambio 4fdsafsad
