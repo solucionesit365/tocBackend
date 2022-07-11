@@ -49,6 +49,7 @@ export class InstaladorController {
                     token: res.data.info.token,
                     ...parametrosfinales,
                     database: res.data.info.database,
+                    visor: '',
                     impresoraUsbInfo: { pid: '', vid: '' },
                     idCurrentTrabajador: null
                 };
