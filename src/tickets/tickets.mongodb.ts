@@ -170,6 +170,7 @@ export async function duplicarTicket(ticket: TicketsInterface) {
     const duplicar = await this.getTicketByID(ticket)
     if(duplicar.total > 0){
         const id =await this.getUltimoTicket() + 1
+        duplicar.enviado = false;
         duplicar._id = id
         duplicar.total = ( duplicar.total *-1)
         duplicar.lista.forEach(element => {

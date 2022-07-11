@@ -31,6 +31,10 @@ function permisosImpresora() {
         console.log(err);
     }
 }
+function random() {
+    let numero = Math.floor(10000000 + Math.random() * 999999999);
+    return numero.toString(16).slice(0, 8);
+}
 function dateToString2(fecha) {
     var fechaFinal = null;
     if (typeof fecha === 'string' || typeof fecha === 'number') {
@@ -61,6 +65,7 @@ function dateToString2(fecha) {
 }
 class Impresora {
     async imprimirTicket(idTicket, esDevolucion = false) {
+        console.log('imprimir ticket ');
         const paramsTicket = await params_ticket_class_1.paramsTicketInstance.getParamsTicket();
         let infoTicket;
         if (!esDevolucion) {
@@ -122,7 +127,7 @@ class Impresora {
         }
     }
     async imprimirRecibo(recibo) {
-        console.log(recibo);
+        console.log('imprimir recibo');
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -238,6 +243,7 @@ class Impresora {
                 infoConsumoPersonal = '---------------- Dte. 100% --------------';
                 detalleIva = '';
             }
+            let diasSemana = ["Diumenge", "Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres", "Dissabte"];
             device.open(function () {
                 printer
                     .setCharacterCodeTable(19)
@@ -246,7 +252,7 @@ class Impresora {
                     .style('b')
                     .size(0, 0)
                     .text(cabecera)
-                    .text(`Data: ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours() < 10 ? '0' : '') + fecha.getHours()}:${(fecha.getMinutes() < 10 ? '0' : '') + fecha.getMinutes()}`)
+                    .text(`Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours() < 10 ? '0' : '') + fecha.getHours()}:${(fecha.getMinutes() < 10 ? '0' : '') + fecha.getMinutes()}`)
                     .text('Factura simplificada N: ' + numFactura)
                     .text('Ates per: ' + nombreDependienta)
                     .text(detalleClienteVip)
@@ -273,6 +279,8 @@ class Impresora {
                     .text('Base IVA         IVA         IMPORT')
                     .text(detalleIva)
                     .text('-- ES COPIA --')
+                    .control('LF')
+                    .text('ID: ' + random() + ' - ' + random())
                     .text(pie)
                     .control('LF')
                     .control('LF')
@@ -470,7 +478,56 @@ class Impresora {
         }
     }
     mostrarVisor(data) {
-        console.log('El visor da muchos problemas');
+        console.log(data);
+        var eur = String.fromCharCode(128);
+        var limitNombre = 0;
+        var lengthTotal = '';
+        var datosExtra = '';
+        if (data.total !== undefined) {
+            lengthTotal = (data.total).toString();
+            if (lengthTotal.length == 1)
+                limitNombre = 17;
+            else if (lengthTotal.length == 2)
+                limitNombre = 16;
+            else if (lengthTotal.length == 3)
+                limitNombre = 15;
+            else if (lengthTotal.length == 4)
+                limitNombre = 14;
+            else if (lengthTotal.length == 5)
+                limitNombre = 13;
+            else if (lengthTotal.length == 6)
+                limitNombre = 12;
+            else if (lengthTotal.length == 7)
+                limitNombre = 11;
+            datosExtra = data.dependienta.substring(0, limitNombre) + " " + data.total + eur;
+        }
+        if (datosExtra.length <= 2) {
+            datosExtra = "";
+            eur = "";
+        }
+        data.texto = datosExtra + "" + data.texto.substring(0, 14);
+        data.texto += " " + data.precio + eur;
+        try {
+            permisosImpresora();
+            const device = dispositivos.getDeviceVisor();
+            console.log(dispositivos.getDeviceVisor());
+            if (device != null) {
+                var options = { encoding: "ISO-8859-1" };
+                var printer = new escpos.Screen(device, options);
+                device.open(function () {
+                    printer
+                        .clear()
+                        .text(data.texto)
+                        .close();
+                });
+            }
+            else {
+                console.log("Controlado: dispositivo es null");
+            }
+        }
+        catch (err) {
+            console.log("Error: ", err);
+        }
     }
     async imprimirEntregas() {
         const params = parametros_clase_1.parametrosInstance.getParametros();

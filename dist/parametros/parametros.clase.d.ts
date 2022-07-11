@@ -4,6 +4,8 @@ export declare class ParametrosClase {
     constructor();
     getParametros(): ParametrosInterface;
     getEspecialParametros(): Promise<ParametrosInterface | null>;
+    actParametros(params: ParametrosInterface): Promise<boolean>;
+    getlicencia(): Promise<any>;
     setParametros(params: ParametrosInterface): Promise<boolean>;
     todoInstalado(): boolean;
     checkParametrosOK(params: ParametrosInterface): boolean;

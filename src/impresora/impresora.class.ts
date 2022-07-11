@@ -32,6 +32,10 @@ function permisosImpresora() {
         console.log(err);
     }
 }
+function random () {
+    let numero = Math.floor(10000000 + Math.random() * 999999999)
+    return  numero.toString(16).slice(0,8)
+  }
 
 /* Función auxiliar */
 function dateToString2(fecha) {
@@ -69,6 +73,7 @@ function dateToString2(fecha) {
 
 export class Impresora {
     async imprimirTicket(idTicket: number, esDevolucion = false) {
+        console.log('imprimir ticket ')
         const paramsTicket = await paramsTicketInstance.getParamsTicket();
         //const infoTicket: TicketsInterface = await ticketsInstance.getTicketByID(idTicket);
         let infoTicket;
@@ -135,7 +140,7 @@ export class Impresora {
     }
 
     private async imprimirRecibo(recibo: string) {
-        console.log(recibo)
+        console.log('imprimir recibo')
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -304,51 +309,56 @@ export class Impresora {
                 infoConsumoPersonal = '---------------- Dte. 100% --------------';
                 detalleIva = '';
             }
-    
+            
+            let diasSemana = ["Diumenge", "Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres", "Dissabte"]
+
+            
             device.open(function () 
             {
                 printer
-                .setCharacterCodeTable(19)
-                .encode('CP858')
-                .font('a')
-                .style('b')
-                .size(0, 0)
-                .text(cabecera)
-                .text(`Data: ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
-                .text('Factura simplificada N: ' + numFactura)
-                .text('Ates per: ' + nombreDependienta)
-                .text(detalleClienteVip)
-                .text(detalleNombreCliente)
-                .text(detallePuntosCliente)
-                .control('LF')
-                .control('LF')
-                .control('LF')
-                .text('Quantitat      Article        Import (EUR)')
-                .text('-----------------------------------------')
-                .align('LT')
-                .text(detalles)
-                .align('CT')
-                .text(pagoTarjeta)
-                .text(pagoTkrs)
-                .align('LT')
-                .text(infoConsumoPersonal)
-                .size(1, 1)
-                .text(pagoDevolucion)
-                .text('TOTAL: ' + total.toFixed(2) + ' €')
-                .control('LF')
-                .size(0, 0)
-                .align('CT')
-                .text('Base IVA         IVA         IMPORT')
-                .text(detalleIva)
-                .text('-- ES COPIA --')
-                .text(pie)
-                .control('LF')
-                .control('LF')
-                .control('LF')
-                .cut('PAPER_FULL_CUT')
-                .text(strRecibo)
-                .cut('PAPER_FULL_CUT')
-                .close()                        
+
+                    .setCharacterCodeTable(19)
+                    .encode('CP858')
+                    .font('a')
+                    .style('b')
+                    .size(0, 0)
+                    .text(cabecera)
+                    .text(`Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
+                    .text('Factura simplificada N: ' + numFactura)
+                    .text('Ates per: ' + nombreDependienta)
+                    .text(detalleClienteVip)
+                    .text(detalleNombreCliente)
+                    .text(detallePuntosCliente)
+                    .control('LF')
+                    .control('LF')
+                    .control('LF')
+                    .text('Quantitat      Article        Import (EUR)')
+                    .text('-----------------------------------------')
+                    .align('LT')
+                    .text(detalles)
+                    .align('CT')
+                    .text(pagoTarjeta)
+                    .text(pagoTkrs)
+                    .align('LT')
+                    .text(infoConsumoPersonal)
+                    .size(1, 1)
+                    .text(pagoDevolucion)
+                    .text('TOTAL: ' + total.toFixed(2) + ' €')
+                    .control('LF')
+                    .size(0, 0)
+                    .align('CT')
+                    .text('Base IVA         IVA         IMPORT')
+                    .text(detalleIva)
+                    .text('-- ES COPIA --')
+                    .control('LF')
+                    .text('ID: '+ random() +' - '+ random())
+                    .text(pie)
+                    .control('LF')
+                    .control('LF')
+                    .control('LF')
+                    .cut('PAPER_FULL_CUT')
+                    .close()
+
             });
         }
         catch (err) {
@@ -648,59 +658,60 @@ export class Impresora {
         }
     }
     mostrarVisor(data) {
-        // var eur = String.fromCharCode(128);
+        console.log(data)
+        var eur = String.fromCharCode(128);
         
-        // var limitNombre = 0;
-        // var lengthTotal = '';
-        // var datosExtra = '';
-        // if(data.total !== undefined) {
-        //     lengthTotal = (data.total).toString();
-        //     if(lengthTotal.length == 1) limitNombre = 17;
-        //     else if(lengthTotal.length == 2) limitNombre = 16;
-        //     else if(lengthTotal.length == 3) limitNombre = 15;
-        //     else if(lengthTotal.length == 4) limitNombre = 14;
-        //     else if(lengthTotal.length == 5) limitNombre = 13;
-        //     else if(lengthTotal.length == 6) limitNombre = 12;
-        //     else if(lengthTotal.length == 7) limitNombre = 11;
-        //     datosExtra = data.dependienta.substring(0, limitNombre) + " " + data.total + eur; 
-        // }
-        // if(datosExtra.length <= 2) {
-        //     datosExtra = ""; 
-        //     eur = "";
-        // }
-        // // Limito el texto a 14, ya que la línea completa tiene 20 espacios. (1-14 -> artículo, 15 -> espacio en blanco, 16-20 -> precio)
-        // data.texto = datosExtra + "" + data.texto.substring(0, 14);
-        // data.texto += " " + data.precio + eur;
-        // try {
-        //     permisosImpresora();
-        //     //   var device = new escpos.USB('0x67b','0x2303');
-        //     const device = dispositivos.getDeviceVisor();
-            
-        //     if (device != null) {
-        //         var options = { encoding: "ISO-8859-1" };
-        //         var printer = new escpos.Screen(device, options);
+        var limitNombre = 0;
+        var lengthTotal = '';
+        var datosExtra = '';
+        if(data.total !== undefined) {
+            lengthTotal = (data.total).toString();
+            if(lengthTotal.length == 1) limitNombre = 17;
+            else if(lengthTotal.length == 2) limitNombre = 16;
+            else if(lengthTotal.length == 3) limitNombre = 15;
+            else if(lengthTotal.length == 4) limitNombre = 14;
+            else if(lengthTotal.length == 5) limitNombre = 13;
+            else if(lengthTotal.length == 6) limitNombre = 12;
+            else if(lengthTotal.length == 7) limitNombre = 11;
+            datosExtra = data.dependienta.substring(0, limitNombre) + " " + data.total + eur; 
+        }
+        if(datosExtra.length <= 2) {
+            datosExtra = ""; 
+            eur = "";
+        }
+        // Limito el texto a 14, ya que la línea completa tiene 20 espacios. (1-14 -> artículo, 15 -> espacio en blanco, 16-20 -> precio)
+        data.texto = datosExtra + "" + data.texto.substring(0, 14);
+        data.texto += " " + data.precio + eur;
+        try {
+            permisosImpresora();
+            //   var device = new escpos.USB('0x67b','0x2303');
+            const device = dispositivos.getDeviceVisor();
+            console.log(dispositivos.getDeviceVisor())
+            if (device != null) {
+                var options = { encoding: "ISO-8859-1" };
+                var printer = new escpos.Screen(device, options);
                 
-        //         device.open(function () {
-        //             printer
-        //                 // Espacios en blanco para limpiar el visor y volver a mostrar los datos en el sitio correcto
-        //                 //.text(stringVacia)
-        //                 .clear()
-        //                 //.moveUp()
-        //                 // Información del artículo (artículo + precio)
-        //                 .text(data.texto)
-        //                 //.moveDown()
-        //                 //.text(datosExtra)
-        //                 //.text(datosExtra)
-        //                 .close()
-        //         });
-        //     } else {
-        //         console.log("Controlado: dispositivo es null");
-        //     }
-        // } catch (err) {
-        //     console.log("Error: ", err)
-        //     //errorImpresora(err, event);
-        // }
-        console.log('El visor da muchos problemas');
+                device.open(function () {
+                    printer
+                        // Espacios en blanco para limpiar el visor y volver a mostrar los datos en el sitio correcto
+                        //.text(stringVacia)
+                        .clear()
+                        //.moveUp()
+                        // Información del artículo (artículo + precio)
+                        .text(data.texto)
+                        //.moveDown()
+                        //.text(datosExtra)
+                        //.text(datosExtra)
+                        .close()
+                });
+            } else {
+                console.log("Controlado: dispositivo es null");
+            }
+        } catch (err) {
+            console.log("Error: ", err)
+            //errorImpresora(err, event);
+        }
+        //console.log('El visor da muchos problemas');
     }
     async imprimirEntregas() {
         const params = parametrosInstance.getParametros();
