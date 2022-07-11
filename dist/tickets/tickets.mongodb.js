@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicarTicket = exports.actualizarComentario = exports.actualizarEstadoTicket = exports.nuevoTicket = exports.getTicketMasAntiguo = exports.getUltimoTicket = exports.getTotalTkrs = exports.getDedudaGlovo = exports.getDedudaDeliveroo = exports.getTickets = exports.getTicketsIntervalo = exports.getTicketByID = exports.limpiezaTickets = void 0;
+exports.duplicarTicket = exports.actualizarComentario = exports.actualizarEstadoTicket = exports.nuevoTicket = exports.getTicketMasAntiguo = exports.getUltimoTicket = exports.getTotalTkrs = exports.getDedudaGlovo = exports.getDedudaDeliveroo = exports.getTickets = exports.anularTicket = exports.getTicketsIntervalo = exports.getTicketByID = exports.limpiezaTickets = void 0;
 const mongodb_1 = require("../conexion/mongodb");
 const utiles_module_1 = require("../utiles/utiles.module");
 async function limpiezaTickets() {
@@ -23,6 +23,15 @@ async function getTicketsIntervalo(inicioTime, finalTime) {
     return resultado;
 }
 exports.getTicketsIntervalo = getTicketsIntervalo;
+async function anularTicket(idTicket) {
+    const database = (await mongodb_1.conexion).db('tocgame');
+    const tickets = database.collection('tickets');
+    const resultado = tickets.updateOne({ _id: idTicket }, { $set: {
+            "anulado": true
+        } });
+    return resultado;
+}
+exports.anularTicket = anularTicket;
 async function getTickets() {
     const database = (await mongodb_1.conexion).db('tocgame');
     const tickets = database.collection('tickets');

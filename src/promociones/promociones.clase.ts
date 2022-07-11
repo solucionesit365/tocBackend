@@ -87,7 +87,7 @@ export class OfertasClase {
                 sobranSecundario         = cesta.lista[posicionSecundario].unidades-nVeces*necesariasSecundario;
     
                 cesta = await cestas.limpiarCesta(cesta, posicionPrincipal, posicionSecundario, sobranPrincipal, sobranSecundario, pideDelA, pideDelB);
-                cesta = await this.insertarLineaPromoCestaCombo(cesta, 1, nVeces, precioPromo*nVeces, idPromo, idPrincipal, idSecundario, necesariasPrincipal, necesariasSecundario);
+                cesta = await this.insertarLineaPromoCestaCombo(cesta, 1, nVeces, precioPromo*nVeces, idPromo, idPrincipal, idSecundario, necesariasPrincipal, necesariasSecundario, precioPromo);
             }
             else
             {
@@ -159,11 +159,18 @@ export class OfertasClase {
     }
 
     /* Inserta la línea de la oferta combinada en la cesta */
-    async insertarLineaPromoCestaCombo(cesta: CestasInterface, tipoPromo: number, unidades: number, total: number, idPromo: string, idPrincipal: number, idSecundario: number, cantidadPrincipal: number, cantidadSecundario: number) {
+    async insertarLineaPromoCestaCombo(cesta: CestasInterface, tipoPromo: number, unidades: number, total: number, idPromo: string, idPrincipal: number, idSecundario: number, cantidadPrincipal: number, cantidadSecundario: number, precioPromoGdt: number) {
         var dtoAplicado = await this.calcularPrecioRealCombo(tipoPromo, idPrincipal, idSecundario, cantidadPrincipal, cantidadSecundario, unidades, total);
 
         if(tipoPromo === 1) //COMBO
         {
+            let precioRealPromo = (dtoAplicado.precioRealPrincipal*cantidadPrincipal + dtoAplicado.precioRealSecundario*cantidadSecundario);
+            if (precioPromoGdt != precioRealPromo) {
+                let diferencia = precioPromoGdt - precioRealPromo;
+                precioRealPromo += diferencia;
+                dtoAplicado.precioRealSecundario += diferencia;
+            }
+
             cesta.lista.push({
                 _id: -2,
                 nombre: 'Oferta combo',

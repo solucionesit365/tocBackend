@@ -19,6 +19,7 @@ function redondearPrecio(precio) /* REDONDEA AL SEGUNDO DECIMAL */
 }
 export function construirObjetoIvas(infoArticulo: ArticulosInterface, unidades, tipoIvaAnterior: TiposIva, infoAPeso = null) : TiposIva
 {
+
     let base1 = 0, base2 = 0, base3 = 0;
     
     let valor1 = 0, valor2 = 0, valor3 = 0;

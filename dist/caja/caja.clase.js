@@ -240,23 +240,25 @@ class CajaClase {
             }
         }
         for (let i = 0; i < arrayTicketsCaja.length; i++) {
-            nClientes++;
-            totalTickets += arrayTicketsCaja[i].total;
-            switch (arrayTicketsCaja[i].tipoPago) {
-                case "TARJETA":
-                    totalTarjeta += arrayTicketsCaja[i].total;
-                    break;
-                case "EFECTIVO":
-                    recaudado += arrayTicketsCaja[i].total;
-                    totalEnEfectivo += arrayTicketsCaja[i].total;
-                    break;
-                case "DEUDA":
-                    totalDeuda += arrayTicketsCaja[i].total;
-                    break;
-                case "TICKET_RESTAURANT":
-                    recaudado += arrayTicketsCaja[i].total;
-                    totalEnEfectivo += arrayTicketsCaja[i].total;
-                    break;
+            if (arrayTicketsCaja[i].anulado != true) {
+                nClientes++;
+                totalTickets += arrayTicketsCaja[i].total;
+                switch (arrayTicketsCaja[i].tipoPago) {
+                    case "TARJETA":
+                        totalTarjeta += arrayTicketsCaja[i].total;
+                        break;
+                    case "EFECTIVO":
+                        recaudado += arrayTicketsCaja[i].total;
+                        totalEnEfectivo += arrayTicketsCaja[i].total;
+                        break;
+                    case "DEUDA":
+                        totalDeuda += arrayTicketsCaja[i].total;
+                        break;
+                    case "TICKET_RESTAURANT":
+                        recaudado += arrayTicketsCaja[i].total;
+                        totalEnEfectivo += arrayTicketsCaja[i].total;
+                        break;
+                }
             }
         }
         currentCaja['calaixFetZ'] = totalTickets;

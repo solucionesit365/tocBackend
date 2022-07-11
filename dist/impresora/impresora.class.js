@@ -106,10 +106,7 @@ class Impresora {
                         puntos: puntosCliente
                     }
                 };
-                this._venta(sendObject);
-                if (infoTicket.recibo != null && infoTicket.recibo != undefined) {
-                    this.imprimirRecibo(infoTicket.recibo);
-                }
+                this._venta(sendObject, infoTicket.recibo);
             }
             else {
                 sendObject = {
@@ -154,7 +151,7 @@ class Impresora {
             console.log("Error impresora: ", err);
         }
     }
-    async _venta(info) {
+    async _venta(info, recibo = null) {
         const numFactura = info.numFactura;
         const arrayCompra = info.arrayCompra;
         const total = info.total;
@@ -166,6 +163,10 @@ class Impresora {
         const tipoImpresora = info.impresora;
         const infoClienteVip = info.infoClienteVip;
         const infoCliente = info.infoCliente;
+        let strRecibo = '';
+        if (recibo != null && recibo != undefined) {
+            strRecibo = recibo;
+        }
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -284,6 +285,8 @@ class Impresora {
                     .control('LF')
                     .control('LF')
                     .control('LF')
+                    .cut('PAPER_FULL_CUT')
+                    .text(strRecibo)
                     .cut('PAPER_FULL_CUT')
                     .close();
             });

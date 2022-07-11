@@ -66,7 +66,7 @@ class OfertasClase {
                 sobranPrincipal = cesta.lista[posicionPrincipal].unidades - nVeces * necesariasPrincipal;
                 sobranSecundario = cesta.lista[posicionSecundario].unidades - nVeces * necesariasSecundario;
                 cesta = await cestas_clase_1.cestas.limpiarCesta(cesta, posicionPrincipal, posicionSecundario, sobranPrincipal, sobranSecundario, pideDelA, pideDelB);
-                cesta = await this.insertarLineaPromoCestaCombo(cesta, 1, nVeces, precioPromo * nVeces, idPromo, idPrincipal, idSecundario, necesariasPrincipal, necesariasSecundario);
+                cesta = await this.insertarLineaPromoCestaCombo(cesta, 1, nVeces, precioPromo * nVeces, idPromo, idPrincipal, idSecundario, necesariasPrincipal, necesariasSecundario, precioPromo);
             }
             else {
                 if (pideDelA !== -1 && pideDelB === -1) {
@@ -115,9 +115,15 @@ class OfertasClase {
         cestas_clase_1.cestas.setCesta(unaCesta);
         return unaCesta;
     }
-    async insertarLineaPromoCestaCombo(cesta, tipoPromo, unidades, total, idPromo, idPrincipal, idSecundario, cantidadPrincipal, cantidadSecundario) {
+    async insertarLineaPromoCestaCombo(cesta, tipoPromo, unidades, total, idPromo, idPrincipal, idSecundario, cantidadPrincipal, cantidadSecundario, precioPromoGdt) {
         var dtoAplicado = await this.calcularPrecioRealCombo(tipoPromo, idPrincipal, idSecundario, cantidadPrincipal, cantidadSecundario, unidades, total);
         if (tipoPromo === 1) {
+            let precioRealPromo = (dtoAplicado.precioRealPrincipal * cantidadPrincipal + dtoAplicado.precioRealSecundario * cantidadSecundario);
+            if (precioPromoGdt != precioRealPromo) {
+                let diferencia = precioPromoGdt - precioRealPromo;
+                precioRealPromo += diferencia;
+                dtoAplicado.precioRealSecundario += diferencia;
+            }
             cesta.lista.push({
                 _id: -2,
                 nombre: 'Oferta combo',

@@ -22,6 +22,16 @@ export async function getTicketsIntervalo(inicioTime: number, finalTime: number)
     return resultado;
 }
 
+export async function anularTicket(idTicket: number) {
+    const database = (await conexion).db('tocgame');
+    const tickets = database.collection('tickets');
+    const resultado = tickets.updateOne({ _id: idTicket }, { $set: {
+        "anulado": true
+    }});
+    
+    return resultado;
+}
+
 export async function getTickets(): Promise<any> {
     const database = (await conexion).db('tocgame');
     const tickets = database.collection('tickets');

@@ -42,7 +42,6 @@ let ArticulosController = class ArticulosController {
     }
     editarArticulo(params) {
         if (params.idArticulo && params.nombre && params.precioBase && params.precioConIva) {
-            console.log('Hola', params.idArticulo, params.nombre, params.precioBase, params.precioConIva);
             return articulos_clase_1.articulosInstance.editarArticulo(params.idArticulo, params.nombre, params.precioBase, params.precioConIva).then((res) => {
                 if (res) {
                     return { error: false, info: res };

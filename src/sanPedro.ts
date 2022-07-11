@@ -6,9 +6,7 @@ import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 import { devolucionesInstance } from "./devoluciones/devoluciones.clase";
 
 const io = require("socket.io-client");
-const socket = io('http://34.78.247.153:3001'); // NORMAL
-//const socket = io('http://35.254.58.252:3001'); // San pedro hit 
-
+const socket = io('https://sanpedro.cloud'); // NORMAL //io('http://34.78.247.153:3001'); // NORMAL
 //const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
 
 

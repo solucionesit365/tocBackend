@@ -32,6 +32,7 @@ export interface CestasInterface {
                 tipoPromo: string;
             };
         };
+        regalo?: boolean;
     }[];
     nombreCesta?: string;
     idCestaSincro?: string;

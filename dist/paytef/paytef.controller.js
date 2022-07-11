@@ -48,7 +48,6 @@ let PaytefController = class PaytefController {
                         break;
                     }
                 }
-                console.log(ipTefpay);
             }
         });
     }

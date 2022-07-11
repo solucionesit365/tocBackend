@@ -183,7 +183,7 @@ export class TrabajadoresClase {
                         });
                         return true;
                     } else {
-                        console.log(123);
+                        // console.log(123);
                         return false;
                     }
                 }).catch((err) => {
@@ -191,7 +191,7 @@ export class TrabajadoresClase {
                     return false;
                 });
             } else {
-                console.log(432);
+                // console.log(432);
                 return false;
             }
         }).catch((err) => {
@@ -290,7 +290,7 @@ export class TrabajadoresClase {
                 arrayTrabajadores.push({ infoTrabajador: await this.getTrabajador(idsAyer[i].infoFichaje.idTrabajador), timestamp: idsAyer[i]._id});
             }
             
-            console.log("lool:", arrayTrabajadores);
+            // console.log("lool:", arrayTrabajadores);
 
             const parametros = parametrosInstance.getParametros();
             return axios.post('turnos/getHorasExtraCoordinacion', {
