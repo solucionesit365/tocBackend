@@ -21,4 +21,4 @@ async function bootstrap() {
 
 }
 bootstrap();
-// Toco código jojojo
+// Notificación con webhook y slack
