@@ -114,7 +114,6 @@ export class Impresora {
             if (device != null) {
                 var options = { encoding: "iso88591" };
                 var printer = new escpos.Screen(device,options);
-                
                 try {
                     device.open(function () {
                         printer
@@ -125,7 +124,6 @@ export class Impresora {
                             // Información del artículo (artículo + precio)
                             .text(' Moltes Gracies !!')
                             //.text(datosExtra)
-                           
                             .close()
                     });
                 } catch (error) {
