@@ -64,7 +64,6 @@ export class Dispositivos {
                     });
                     return device;
         
-        
         } else if (os.platform() === 'linux') {
             return new escpos.Serial('/dev/ttyUSB0', {
                 baudRate: 9600,

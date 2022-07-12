@@ -102,7 +102,7 @@ export class Impresora {
                 console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
-            console.log("Error: ", err)
+            console.log("Error1: ", err)
             //errorImpresora(err, event);
         }
     }
@@ -123,7 +123,7 @@ export class Impresora {
                             .clear()
                            // .moveUp()
                             // Información del artículo (artículo + precio)
-                            .text('Moltes gracies!')
+                            .text(' Moltes Gracies !!')
                             //.text(datosExtra)
                            
                             .close()
@@ -136,9 +136,9 @@ export class Impresora {
                 console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
-            console.log("Error: ", err)
+            console.log("Error1: ", err)
             //errorImpresora(err, event);
-        }    }
+        }   }
     async imprimirTicket(idTicket: number, esDevolucion = false) {
         console.log('imprimir ticket ')
         const paramsTicket = await paramsTicketInstance.getParamsTicket();
@@ -789,7 +789,7 @@ export class Impresora {
                 console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
-            console.log("Error: ", err)
+            console.log("Error2: ", err)
             //errorImpresora(err, event);
         }
         //console.log('El visor da muchos problemas');

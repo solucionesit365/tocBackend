@@ -87,7 +87,7 @@ class Impresora {
             }
         }
         catch (err) {
-            console.log("Error: ", err);
+            console.log("Error1: ", err);
         }
     }
     async despedircliente() {
@@ -101,7 +101,7 @@ class Impresora {
                     device.open(function () {
                         printer
                             .clear()
-                            .text('Moltes gracies!')
+                            .text(' Moltes Gracies !!')
                             .close();
                     });
                 }
@@ -113,7 +113,7 @@ class Impresora {
             }
         }
         catch (err) {
-            console.log("Error: ", err);
+            console.log("Error1: ", err);
         }
     }
     async imprimirTicket(idTicket, esDevolucion = false) {
@@ -587,7 +587,7 @@ class Impresora {
             }
         }
         catch (err) {
-            console.log("Error: ", err);
+            console.log("Error2: ", err);
         }
     }
     async imprimirEntregas() {
