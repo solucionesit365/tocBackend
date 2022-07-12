@@ -66,9 +66,10 @@ let ParametrosController = class ParametrosController {
         return { error: false, parametros };
     }
     vidAndPid(params) {
+        console.log(params);
         if (params != undefined || params != null) {
-            if (params.vid != undefined || params.vid != null || params.pid != undefined || params.pid != null) {
-                return parametros_clase_1.parametrosInstance.setVidAndPid(params.vid, params.pid).then((res) => {
+            if (params.vid != undefined || params.vid != null || params.pid != undefined || params.pid != null || params.com != undefined || params.com != null) {
+                return parametros_clase_1.parametrosInstance.setVidAndPid(params.vid, params.pid, params.com).then((res) => {
                     if (res) {
                         return { error: false };
                     }

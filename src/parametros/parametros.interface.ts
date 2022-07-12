@@ -14,6 +14,7 @@ export interface ParametrosInterface {
     botonesConPrecios?: string,
     prohibirBuscarArticulos?: string,
     ultimoTicket: number,
+    visor?:string,
     idCurrentTrabajador: number,
     token: string,
     impresoraUsbInfo: {

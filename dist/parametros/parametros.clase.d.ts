@@ -11,7 +11,7 @@ export declare class ParametrosClase {
     checkParametrosOK(params: ParametrosInterface): boolean;
     actualizarParametros(): void;
     setUltimoTicket(idTicket: number): Promise<boolean>;
-    setVidAndPid(vid: string, pid: string): Promise<boolean>;
+    setVidAndPid(vid: string, pid: string, com: string): Promise<boolean>;
     setIpPaytef(ip: string): Promise<boolean>;
 }
 declare const parametrosInstance: ParametrosClase;

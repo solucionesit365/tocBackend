@@ -31,10 +31,10 @@ async function setUltimoTicket(idTicket) {
     return resultado;
 }
 exports.setUltimoTicket = setUltimoTicket;
-async function setVidAndPid(vid, pid) {
+async function setVidAndPid(vid, pid, com) {
     const database = (await mongodb_1.conexion).db('tocgame');
     const parametros = database.collection('parametros');
-    const resultado = await parametros.updateOne({ _id: "PARAMETROS" }, { $set: { "impresoraUsbInfo": { vid: vid, pid: pid } } }, { upsert: true });
+    const resultado = await parametros.updateOne({ _id: "PARAMETROS" }, { $set: { "impresoraUsbInfo": { vid: vid, pid: pid }, visor: com } }, { upsert: true });
     return resultado;
 }
 exports.setVidAndPid = setVidAndPid;
