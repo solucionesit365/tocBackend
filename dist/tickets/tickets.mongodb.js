@@ -124,8 +124,6 @@ async function getTicketMasAntiguo() {
 }
 exports.getTicketMasAntiguo = getTicketMasAntiguo;
 async function nuevoTicket(ticket) {
-    console.log("Nuevo ticket ");
-    console.log(ticket);
     const database = (await mongodb_1.conexion).db('tocgame');
     const tickets = database.collection('tickets');
     const resultado = tickets.insertOne(ticket);

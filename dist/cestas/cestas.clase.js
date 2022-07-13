@@ -377,7 +377,7 @@ class CestaClase {
                 }
                 let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[i]._id);
                 let gramos = cestainicial.lista[i].subtotal / (infoArticulo.precioConIva);
-                if (cestainicial.lista[i].subtotal / infoArticulo.precioConIva != 1 && !cesta.lista[i].suplementosId && cesta.lista[i].unidades == 1) {
+                if (infoArticulo.esSumable == false && !cesta.lista[i].suplementosId && cesta.lista[i].unidades == 1) {
                     let precioAplicado = infoArticulo.precioConIva * gramos;
                     cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva, { precioAplicado: precioAplicado });
                 }
