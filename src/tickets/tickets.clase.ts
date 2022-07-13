@@ -138,7 +138,7 @@ export class TicketsClase {
         }
         for (const key in cesta.lista) {
            let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-           let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )*1000
+           let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )
            if( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ){
             cesta.lista[key].unidades= gramos
            }
@@ -195,7 +195,7 @@ export class TicketsClase {
         }
         for (const key in cesta.lista) {
             let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )*1000
+            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )
             if( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ){
              cesta.lista[key].unidades= gramos
             }
@@ -255,7 +255,7 @@ export class TicketsClase {
         }
         for (const key in cesta.lista) {
             let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )*1000
+            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )
             if( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ){
              cesta.lista[key].unidades= gramos
             }
@@ -338,7 +338,7 @@ export class TicketsClase {
         }
         for (const key in cesta.lista) {
             let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )*1000
+            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )
             if( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ){
              cesta.lista[key].unidades= gramos
             }
@@ -397,7 +397,7 @@ export class TicketsClase {
         }
         for (const key in cesta.lista) {
             let infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )*1000
+            let gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva )
             if( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ){
              cesta.lista[key].unidades= gramos
             }
