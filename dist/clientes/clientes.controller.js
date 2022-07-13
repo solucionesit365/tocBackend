@@ -45,6 +45,7 @@ let ClientesController = class ClientesController {
     comprobarVIP(params) {
         const parametros = parametros_clase_1.parametrosInstance.getParametros();
         return axios_1.default.post('clientes/comprobarVIP', { database: parametros.database, idClienteFinal: params.idClienteFinal }).then((res) => {
+            console.log(res.data);
             if (res.data.error === false) {
                 if (res.data.articulosEspeciales != undefined) {
                     articulos_clase_1.articulosInstance.setEstadoTarifaEspecial(true);

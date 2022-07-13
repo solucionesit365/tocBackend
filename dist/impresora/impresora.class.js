@@ -117,7 +117,6 @@ class Impresora {
         }
     }
     async imprimirTicket(idTicket, esDevolucion = false) {
-        console.log('imprimir ticket ');
         const paramsTicket = await params_ticket_class_1.paramsTicketInstance.getParamsTicket();
         let infoTicket;
         if (!esDevolucion) {
@@ -528,9 +527,7 @@ class Impresora {
         }
     }
     async mostrarVisor(data) {
-        console.log(data);
         var eur = "E";
-        console.log(eur);
         var limitNombre = 0;
         var lengthTotal = '';
         var datosExtra = '';
@@ -554,7 +551,6 @@ class Impresora {
             let total = data.total + eur;
             let espacio = " ";
             let size = 20 - (dependienta.length + total.length);
-            console.log(size);
             let espacios = ["", " ", "  ", "   ", "    ", "      ", "       ", "        ", "        ", "         ", "         ", "           ", "            ", "            ", "              ",];
             datosExtra = dependienta + espacios[size] + total;
         }
