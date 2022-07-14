@@ -138,8 +138,8 @@ const parametrosVacios: ParametrosInterface = {
         });
     }
 
-    setVidAndPid(vid: string, pid: string) {
-        return schParametros.setVidAndPid(vid, pid).then((res) => {
+    setVidAndPid(vid: string, pid: string, com: string ) {
+        return schParametros.setVidAndPid(vid, pid, com).then((res) => {
             if (res.acknowledged) {
                 return true;
             } else {

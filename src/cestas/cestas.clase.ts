@@ -285,9 +285,7 @@ export class CestaClase {
     }
     return unaCesta;
   }
-    async insertarArticuloCesta(infoArticulo, unidades: number, idCesta: number, infoAPeso = null) {
-      console.log('insertarArticuloCesta')
-      
+    async insertarArticuloCesta(infoArticulo, unidades: number, idCesta: number, infoAPeso = null) {    
         var miCesta = await this.getCesta(idCesta);
         if(miCesta.lista.length > 0)
         {
@@ -304,7 +302,6 @@ export class CestaClase {
                       }
                       else
                       {
-                        console.log('insertarArticuloCesta info a perro')
                         miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
                         miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, viejoIva, infoAPeso);
                       }  
@@ -342,13 +339,13 @@ export class CestaClase {
                 miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, miCesta.tiposIva, infoAPeso);
             }            
         }
+  
 
         const temporal = await ofertas.buscarOfertas(miCesta, viejoIva);
         return temporal; //await ofertas.buscarOfertas(miCesta, viejoIva);
     }
 
     async addItem(idArticulo: number, idBoton: string, aPeso: boolean, infoAPeso: any, idCesta: number, unidades: number = 1) {
-      console.log('add item')
         var cestaRetornar: CestasInterface = null;
         let infoArticulo;
         if(cajaInstance.cajaAbierta()) {
@@ -444,6 +441,19 @@ export class CestaClase {
                  
                   cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                  }
+                 trabajadoresInstance.getCurrentTrabajador().then((data) => {
+                  // console.log(data.nombre);
+                  try {
+                    impresoraInstance.mostrarVisor({
+                      dependienta: data.nombre,
+                      total: (cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3).toFixed(2),
+                      precio: infoArticulo.precioConIva.toString(),
+                      texto: infoArticulo.nombre,
+                    });
+                  } catch(err) {
+                    console.log(err);
+                  }
+                })
             }
             else if(cesta.lista[i].promocion.esPromo === true) {
                     if(cesta.lista[i].nombre == 'Oferta combo') {
@@ -464,6 +474,7 @@ export class CestaClase {
                     }
                   }
             
+                
         }
         return await cesta;
     }

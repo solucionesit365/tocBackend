@@ -64,8 +64,53 @@ function dateToString2(fecha) {
     return `${finalYear}-${finalMonth}-${finalDay} ${finalHours}:${finalMinutes}:${finalSeconds}`;
 }
 class Impresora {
+    async binvenidacliente() {
+        try {
+            permisosImpresora();
+            const device = await dispositivos.getDeviceVisor();
+            if (device != null) {
+                var options = { encoding: "iso88591" };
+                var printer = new escpos.Screen(device, options);
+                try {
+                    device.open(function () {
+                        printer
+                            .clear()
+                            .text('Bon Dia!!')
+                            .close();
+                    });
+                }
+                catch (error) {
+                }
+            }
+        }
+        catch (err) {
+            console.log("Error1: ", err);
+        }
+    }
+    async despedircliente() {
+        try {
+            permisosImpresora();
+            const device = await dispositivos.getDeviceVisor();
+            if (device != null) {
+                var options = { encoding: "iso88591" };
+                var printer = new escpos.Screen(device, options);
+                try {
+                    device.open(function () {
+                        printer
+                            .clear()
+                            .text(' Moltes Gracies !!')
+                            .close();
+                    });
+                }
+                catch (error) {
+                }
+            }
+        }
+        catch (err) {
+            console.log("Error1: ", err);
+        }
+    }
     async imprimirTicket(idTicket, esDevolucion = false) {
-        console.log('imprimir ticket ');
         const paramsTicket = await params_ticket_class_1.paramsTicketInstance.getParamsTicket();
         let infoTicket;
         if (!esDevolucion) {
@@ -127,7 +172,6 @@ class Impresora {
         }
     }
     async imprimirRecibo(recibo) {
-        console.log('imprimir recibo');
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -285,8 +329,6 @@ class Impresora {
                     .control('LF')
                     .control('LF')
                     .control('LF')
-                    .cut('PAPER_FULL_CUT')
-                    .text(strRecibo)
                     .cut('PAPER_FULL_CUT')
                     .close();
             });
@@ -477,9 +519,8 @@ class Impresora {
             console.log(err);
         }
     }
-    mostrarVisor(data) {
-        console.log(data);
-        var eur = String.fromCharCode(128);
+    async mostrarVisor(data) {
+        var eur = "E";
         var limitNombre = 0;
         var lengthTotal = '';
         var datosExtra = '';
@@ -499,34 +540,40 @@ class Impresora {
                 limitNombre = 12;
             else if (lengthTotal.length == 7)
                 limitNombre = 11;
-            datosExtra = data.dependienta.substring(0, limitNombre) + " " + data.total + eur;
+            let dependienta = data.dependienta.substring(0, limitNombre);
+            let total = data.total + eur;
+            let espacio = " ";
+            let size = 20 - (dependienta.length + total.length);
+            let espacios = ["", " ", "  ", "   ", "    ", "      ", "       ", "        ", "        ", "         ", "         ", "           ", "            ", "            ", "              ",];
+            datosExtra = dependienta + espacios[size] + total;
         }
         if (datosExtra.length <= 2) {
             datosExtra = "";
             eur = "";
         }
-        data.texto = datosExtra + "" + data.texto.substring(0, 14);
+        data.texto = data.texto.substring(0, 14);
         data.texto += " " + data.precio + eur;
         try {
             permisosImpresora();
-            const device = dispositivos.getDeviceVisor();
-            console.log(dispositivos.getDeviceVisor());
+            const device = await dispositivos.getDeviceVisor();
             if (device != null) {
-                var options = { encoding: "ISO-8859-1" };
+                var options = { encoding: "iso88591" };
                 var printer = new escpos.Screen(device, options);
-                device.open(function () {
-                    printer
-                        .clear()
-                        .text(data.texto)
-                        .close();
-                });
-            }
-            else {
-                console.log("Controlado: dispositivo es null");
+                try {
+                    device.open(function () {
+                        printer
+                            .clear()
+                            .text(datosExtra)
+                            .text(data.texto)
+                            .close();
+                    });
+                }
+                catch (error) {
+                }
             }
         }
         catch (err) {
-            console.log("Error: ", err);
+            console.log("Error2: ", err);
         }
     }
     async imprimirEntregas() {

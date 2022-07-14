@@ -1,4 +1,6 @@
 export declare class Impresora {
+    binvenidacliente(): Promise<void>;
+    despedircliente(): Promise<void>;
     imprimirTicket(idTicket: number, esDevolucion?: boolean): Promise<void>;
     private imprimirRecibo;
     private _venta;
@@ -7,7 +9,7 @@ export declare class Impresora {
     imprimirTest(): Promise<void>;
     imprimirCaja(calaixFet: any, nombreTrabajador: any, descuadre: any, nClientes: any, recaudado: any, arrayMovimientos: any[], nombreTienda: any, fI: any, fF: any, cInicioCaja: any, cFinalCaja: any, tipoImpresora: any): Promise<void>;
     abrirCajon(): Promise<void>;
-    mostrarVisor(data: any): void;
+    mostrarVisor(data: any): Promise<void>;
     imprimirEntregas(): Promise<{
         error: boolean;
         info: string;

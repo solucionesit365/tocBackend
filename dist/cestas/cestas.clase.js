@@ -248,7 +248,6 @@ class CestaClase {
         return unaCesta;
     }
     async insertarArticuloCesta(infoArticulo, unidades, idCesta, infoAPeso = null) {
-        console.log('insertarArticuloCesta');
         var miCesta = await this.getCesta(idCesta);
         if (miCesta.lista.length > 0) {
             let encontrado = false;
@@ -262,7 +261,6 @@ class CestaClase {
                             miCesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, unidades, viejoIva);
                         }
                         else {
-                            console.log('insertarArticuloCesta info a perro');
                             miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
                             miCesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, unidades, viejoIva, infoAPeso);
                         }
@@ -296,7 +294,6 @@ class CestaClase {
         return temporal;
     }
     async addItem(idArticulo, idBoton, aPeso, infoAPeso, idCesta, unidades = 1) {
-        console.log('add item');
         var cestaRetornar = null;
         let infoArticulo;
         if (caja_clase_1.cajaInstance.cajaAbierta()) {
@@ -384,6 +381,19 @@ class CestaClase {
                 else {
                     cesta.tiposIva = (0, funciones_1.construirObjetoIvas)(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                 }
+                trabajadores_clase_1.trabajadoresInstance.getCurrentTrabajador().then((data) => {
+                    try {
+                        impresora_class_1.impresoraInstance.mostrarVisor({
+                            dependienta: data.nombre,
+                            total: (cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3).toFixed(2),
+                            precio: infoArticulo.precioConIva.toString(),
+                            texto: infoArticulo.nombre,
+                        });
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                });
             }
             else if (cesta.lista[i].promocion.esPromo === true) {
                 if (cesta.lista[i].nombre == 'Oferta combo') {

@@ -43,7 +43,7 @@ let InstaladorController = class InstaladorController {
                         parametrosfinales[final[0]] = 'Si';
                     }
                 }
-                const objParams = Object.assign(Object.assign({ _id: 'PARAMETROS', licencia: params.numLlicencia, tipoImpresora: params.tipoImpresora, tipoDatafono: params.tipoDatafono, impresoraCafeteria: params.impresoraCafeteria, ultimoTicket: res.data.info.ultimoTicket, codigoTienda: res.data.info.codigoTienda, nombreEmpresa: res.data.info.nombreEmpresa, nombreTienda: res.data.info.nombreTienda, token: res.data.info.token }, parametrosfinales), { database: res.data.info.database, impresoraUsbInfo: { pid: '', vid: '' }, idCurrentTrabajador: null });
+                const objParams = Object.assign(Object.assign({ _id: 'PARAMETROS', licencia: params.numLlicencia, tipoImpresora: params.tipoImpresora, tipoDatafono: params.tipoDatafono, impresoraCafeteria: params.impresoraCafeteria, ultimoTicket: res.data.info.ultimoTicket, codigoTienda: res.data.info.codigoTienda, nombreEmpresa: res.data.info.nombreEmpresa, nombreTienda: res.data.info.nombreTienda, token: res.data.info.token }, parametrosfinales), { database: res.data.info.database, visor: '', impresoraUsbInfo: { pid: '', vid: '' }, idCurrentTrabajador: null });
                 return parametros_clase_1.parametrosInstance.setParametros(objParams).then((res2) => {
                     if (res2) {
                         return { error: false };

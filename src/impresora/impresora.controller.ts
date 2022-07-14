@@ -18,4 +18,15 @@ export class ImpresoraController {
     imprimirEntregas() {
         return impresoraInstance.imprimirEntregas();
     }
+    
+    @Post('despedida')
+    despedircliente() {
+            impresoraInstance.despedircliente();  
+      
+         
+    }
+    @Post('bienvenida')
+    binvenidacliente() {
+         impresoraInstance.binvenidacliente();
+    }
 }

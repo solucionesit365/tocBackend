@@ -8,4 +8,6 @@ export declare class ImpresoraController {
         error: boolean;
         info: string;
     }>;
+    despedircliente(): void;
+    binvenidacliente(): void;
 }
