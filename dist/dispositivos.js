@@ -43,7 +43,11 @@ class Dispositivos {
                     return device;
                 }
                 else if (parametros.tipoImpresora == 'SERIE') {
-                    return null;
+                    const device = new escpos.Serial('COM1', {
+                        baudRate: 115200,
+                        stopBit: 2
+                    });
+                    return device;
                 }
                 else {
                     console.log("Parametros de impresora no configurados");
