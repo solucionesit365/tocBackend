@@ -17,7 +17,8 @@ async function bootstrap() {
   }});
   // app.enableCors();
  //await app.listen(3000);
-await app.listen(3000,"10.137.0.201"); //para iterum
+await app.listen(3000,"10.137.0.201"); //para iterum ubuntu
+await app.listen(3000,"10.137.0.243"); //para iterum windows
 
 }
 bootstrap();

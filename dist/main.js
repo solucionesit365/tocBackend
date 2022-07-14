@@ -12,6 +12,7 @@ async function bootstrap() {
             credentials: true
         } });
     await app.listen(3000, "10.137.0.201");
+    await app.listen(3000, "10.137.0.243");
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
