@@ -58,19 +58,21 @@ class Dispositivos {
     }
     async getDeviceVisor() {
         const parametros = await parametros_clase_1.parametrosInstance.getEspecialParametros();
-        if (parametros.visor.includes('COM') || parametros.visor == 'SI') {
-            if (os.platform() === 'win32') {
-                const device = new escpos.Serial(parametros.visor, {
-                    baudRate: 9600,
-                    stopBit: 2
-                });
-                return device;
-            }
-            else if (os.platform() === 'linux') {
-                return new escpos.Serial('/dev/ttyUSB0', {
-                    baudRate: 9600,
-                    stopBit: 2
-                });
+        if (parametros.visor != undefined) {
+            if (parametros.visor.includes('COM') || parametros.visor == 'SI') {
+                if (os.platform() === 'win32') {
+                    const device = new escpos.Serial(parametros.visor, {
+                        baudRate: 9600,
+                        stopBit: 2
+                    });
+                    return device;
+                }
+                else if (os.platform() === 'linux') {
+                    return new escpos.Serial('/dev/ttyUSB0', {
+                        baudRate: 9600,
+                        stopBit: 2
+                    });
+                }
             }
         }
         return null;

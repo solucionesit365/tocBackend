@@ -285,9 +285,7 @@ export class CestaClase {
     }
     return unaCesta;
   }
-    async insertarArticuloCesta(infoArticulo, unidades: number, idCesta: number, infoAPeso = null) {
-      console.log('insertarArticuloCesta')
-      
+    async insertarArticuloCesta(infoArticulo, unidades: number, idCesta: number, infoAPeso = null) {    
         var miCesta = await this.getCesta(idCesta);
         if(miCesta.lista.length > 0)
         {
@@ -304,7 +302,6 @@ export class CestaClase {
                       }
                       else
                       {
-                        console.log('insertarArticuloCesta info a perro')
                         miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
                         miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, viejoIva, infoAPeso);
                       }  
@@ -349,7 +346,6 @@ export class CestaClase {
     }
 
     async addItem(idArticulo: number, idBoton: string, aPeso: boolean, infoAPeso: any, idCesta: number, unidades: number = 1) {
-      console.log('add item')
         var cestaRetornar: CestasInterface = null;
         let infoArticulo;
         if(cajaInstance.cajaAbierta()) {

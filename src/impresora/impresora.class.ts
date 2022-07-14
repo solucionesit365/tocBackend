@@ -98,8 +98,6 @@ export class Impresora {
                     
                 }
                
-            } else {
-                console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
             console.log("Error1: ", err)
@@ -130,15 +128,12 @@ export class Impresora {
                     
                 }
                
-            } else {
-                console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
             console.log("Error1: ", err)
             //errorImpresora(err, event);
         }   }
     async imprimirTicket(idTicket: number, esDevolucion = false) {
-        console.log('imprimir ticket ')
         const paramsTicket = await paramsTicketInstance.getParamsTicket();
         //const infoTicket: TicketsInterface = await ticketsInstance.getTicketByID(idTicket);
         let infoTicket;
@@ -205,7 +200,6 @@ export class Impresora {
     }
 
     private async imprimirRecibo(recibo: string) {
-        console.log('imprimir recibo')
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -723,10 +717,8 @@ export class Impresora {
         }
     }
     async mostrarVisor(data) {
-        console.log(data)
         //var eur = String.fromCharCode(128);
        var eur = "E";
-        console.log(eur)
         var limitNombre = 0;
         var lengthTotal = '';
         var datosExtra = '';
@@ -745,7 +737,6 @@ export class Impresora {
            let total = data.total + eur
             let espacio= " "
             let size = 20-(dependienta.length + total.length)
-            console.log(size)
             let espacios = [""," ","  ","   ","    ","      ","       ","        ","        ","         ","         ","           ","            ","            ","              ",]
             datosExtra = dependienta +espacios[size] + total ; 
         }
@@ -783,8 +774,6 @@ export class Impresora {
                     
                 }
                
-            } else {
-                console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
             console.log("Error2: ", err)
