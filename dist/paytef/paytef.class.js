@@ -55,14 +55,14 @@ class PaytefClass {
                     this.consultarEstadoOperacion(client, idTicket);
                 }
                 else {
-                    client.emit('consultaPaytef', { error: true, mensaje: 'La operación no ha podido iniciar' });
+                    this.anularOperacion(idTicket, client, 'La operación no ha podido iniciar');
                 }
             }).catch((err) => {
-                client.emit('consultaPaytef', { error: true, mensaje: 'Backend: ' + err.message });
+                this.anularOperacion(idTicket, client, 'Backend: ' + err.message);
             });
         }
         else {
-            client.emit('consultaPaytef', { error: true, mensaje: 'IP TefPay no definida, contacta con informática' });
+            this.anularOperacion(idTicket, client, 'IP TefPay no definida, contacta con informática');
         }
     }
     async iniciarTransaccion(client, idCliente, idCesta) {
@@ -100,10 +100,10 @@ class PaytefClass {
             client.emit('consultaPaytef', { error: true, mensaje: err.message });
         }
     }
-    anularOperacion(idTicket, client) {
+    anularOperacion(idTicket, client, msj = '') {
         tickets_clase_1.ticketsInstance.anularTicket(idTicket).then((resAnulacion) => {
             if (resAnulacion) {
-                client.emit('consultaPaytef', { error: true, mensaje: 'Operación denegada. Ticket anulado' });
+                client.emit('consultaPaytef', { error: true, mensaje: msj + ' Operación denegada. Ticket anulado' });
             }
             else {
                 logs_class_1.LogsClass.newLog('Error nuevo grave', `Ticket denegado por PayTef pero no anulado por el toc: idTicket: ${idTicket} tiemstamp: ${Date.now()}`);
@@ -134,7 +134,7 @@ class PaytefClass {
             }
             else if (utiles_module_1.UtilesModule.checkVariable(resEstadoPaytef.data.info)) {
                 if (resEstadoPaytef.data.info.transactionStatus === 'cancelling') {
-                    client.emit('consultaPaytef', { error: true, mensaje: 'Operación cancelada' });
+                    this.anularOperacion(idTicket, client, 'Operación cancelada');
                 }
                 else {
                     await new Promise(r => setTimeout(r, 1000));
@@ -150,7 +150,7 @@ class PaytefClass {
             const ipDatafono = parametros_clase_1.parametrosInstance.getParametros().ipTefpay;
             axios_1.default.post(`http://${ipDatafono}:8887/pinpad/cancel`, { "pinpad": "*" });
             logs_class_1.LogsClass.newLog('Error backend paytefClass consultarEstadoOperacion', err.message);
-            client.emit('consultaPaytef', { error: true, mensaje: 'Error ' + err.message });
+            this.anularOperacion(idTicket, client, 'Error ' + err.message);
         }
     }
     async cerrarTicket(nuevoTicket) {

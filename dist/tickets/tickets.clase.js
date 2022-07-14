@@ -47,8 +47,8 @@ class TicketsClase {
             return null;
         });
     }
-    rectificativa(idTicket) {
-        return schTickets.duplicarTicket(idTicket).then((res) => {
+    anularTicket(idTicket) {
+        return schTickets.anularTicket(idTicket).then((res) => {
             if (res) {
                 return true;
             }
@@ -417,13 +417,6 @@ class TicketsClase {
             return res.acknowledged;
         }).catch((err) => {
             console.log(err);
-            return false;
-        });
-    }
-    anularTicket(idTicket) {
-        return schTickets.anularTicket(idTicket).then((res) => {
-            return res.acknowledged;
-        }).catch(() => {
             return false;
         });
     }

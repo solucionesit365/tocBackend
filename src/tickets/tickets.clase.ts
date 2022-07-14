@@ -49,15 +49,16 @@ export class TicketsClase {
             return null;
         });
     }
-    rectificativa(idTicket){
-            return schTickets.duplicarTicket(idTicket).then((res)=>{
-                if (res){
-                    return  true
-                }else {
-                   return false
-                }
-            });
-        }
+    anularTicket(idTicket) {
+        return schTickets.anularTicket(idTicket).then((res) => {
+            if (res) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
     getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]> {
         return schTickets.getTicketsIntervalo(fechaInicio, fechaFinal).then((resultado: TicketsInterface[]) => {
             return resultado;
@@ -425,14 +426,6 @@ export class TicketsClase {
             return res.acknowledged;
         }).catch((err) => {
             console.log(err);
-            return false;
-        });
-    }
-
-    anularTicket(idTicket: number) {
-        return schTickets.anularTicket(idTicket).then((res) => {
-            return res.acknowledged;
-        }).catch(() => {
             return false;
         });
     }

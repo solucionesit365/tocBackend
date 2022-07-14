@@ -175,7 +175,7 @@ export class TicketsController {
     @Post('rectificativa')
     rectificativa(@Body() params){
         
-        return ticketsInstance.rectificativa(params.ticketID).then((res)=>{
+        return ticketsInstance.anularTicket(params.ticketID).then((res)=>{
             if (res){
               return   { error: false, mensaje: "Rectificativa creada"}
             }else{

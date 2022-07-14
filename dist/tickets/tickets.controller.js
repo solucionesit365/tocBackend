@@ -154,7 +154,7 @@ let TicketsController = class TicketsController {
         }
     }
     rectificativa(params) {
-        return tickets_clase_1.ticketsInstance.rectificativa(params.ticketID).then((res) => {
+        return tickets_clase_1.ticketsInstance.anularTicket(params.ticketID).then((res) => {
             if (res) {
                 return { error: false, mensaje: "Rectificativa creada" };
             }

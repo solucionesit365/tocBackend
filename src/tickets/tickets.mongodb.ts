@@ -22,15 +22,15 @@ export async function getTicketsIntervalo(inicioTime: number, finalTime: number)
     return resultado;
 }
 
-export async function anularTicket(idTicket: number) {
-    const database = (await conexion).db('tocgame');
-    const tickets = database.collection('tickets');
-    const resultado = tickets.updateOne({ _id: idTicket }, { $set: {
-        "anulado": true
-    }});
+// export async function anularTicket(idTicket: number) {
+//     const database = (await conexion).db('tocgame');
+//     const tickets = database.collection('tickets');
+//     const resultado = tickets.updateOne({ _id: idTicket }, { $set: {
+//         "anulado": true
+//     }});
     
-    return resultado;
-}
+//     return resultado;
+// }
 
 export async function getTickets(): Promise<any> {
     const database = (await conexion).db('tocgame');
@@ -166,21 +166,21 @@ export async function actualizarComentario(ticket: TicketsInterface) {
     return resultado;
 }
 
-export async function duplicarTicket(ticket: TicketsInterface) {
+export async function anularTicket(ticket: TicketsInterface) {
     const duplicar = await this.getTicketByID(ticket)
-    if(duplicar.total > 0){
+    if(duplicar.total > 0) {
         const id =await this.getUltimoTicket() + 1
         duplicar.enviado = false;
         duplicar._id = id
         duplicar.total = ( duplicar.total *-1)
         duplicar.lista.forEach(element => {
-          
-           element.subtotal =  (element.subtotal * -1) 
-        
+            
+            element.subtotal =  (element.subtotal * -1) 
+
         });
-       const database = (await conexion).db('tocgame');
-       const tickets = database.collection('tickets');
-       const resultado = tickets.insertOne(duplicar);
+        const database = (await conexion).db('tocgame');
+        const tickets = database.collection('tickets');
+        const resultado = tickets.insertOne(duplicar);
         return resultado;
     }
     return false

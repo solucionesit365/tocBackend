@@ -8,7 +8,7 @@ declare class PaytefClass {
     cancelarOperacion(): void;
     iniciarDatafono(idTicket: number, total: number, client: Socket): void;
     iniciarTransaccion(client: Socket, idCliente: string, idCesta: number): Promise<void>;
-    anularOperacion(idTicket: number, client: Socket): void;
+    anularOperacion(idTicket: number, client: Socket, msj?: string): void;
     consultarEstadoOperacion(client: Socket, idTicket: number): Promise<void>;
     cerrarTicket(nuevoTicket: TicketsInterface): Promise<Respuesta>;
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicarTicket = exports.actualizarComentario = exports.actualizarEstadoTicket = exports.nuevoTicket = exports.getTicketMasAntiguo = exports.getUltimoTicket = exports.getTotalTkrs = exports.getDedudaGlovo = exports.getDedudaDeliveroo = exports.getTickets = exports.anularTicket = exports.getTicketsIntervalo = exports.getTicketByID = exports.limpiezaTickets = void 0;
+exports.anularTicket = exports.actualizarComentario = exports.actualizarEstadoTicket = exports.nuevoTicket = exports.getTicketMasAntiguo = exports.getUltimoTicket = exports.getTotalTkrs = exports.getDedudaGlovo = exports.getDedudaDeliveroo = exports.getTickets = exports.getTicketsIntervalo = exports.getTicketByID = exports.limpiezaTickets = void 0;
 const mongodb_1 = require("../conexion/mongodb");
 const utiles_module_1 = require("../utiles/utiles.module");
 async function limpiezaTickets() {
@@ -23,15 +23,6 @@ async function getTicketsIntervalo(inicioTime, finalTime) {
     return resultado;
 }
 exports.getTicketsIntervalo = getTicketsIntervalo;
-async function anularTicket(idTicket) {
-    const database = (await mongodb_1.conexion).db('tocgame');
-    const tickets = database.collection('tickets');
-    const resultado = tickets.updateOne({ _id: idTicket }, { $set: {
-            "anulado": true
-        } });
-    return resultado;
-}
-exports.anularTicket = anularTicket;
 async function getTickets() {
     const database = (await mongodb_1.conexion).db('tocgame');
     const tickets = database.collection('tickets');
@@ -153,7 +144,7 @@ async function actualizarComentario(ticket) {
     return resultado;
 }
 exports.actualizarComentario = actualizarComentario;
-async function duplicarTicket(ticket) {
+async function anularTicket(ticket) {
     const duplicar = await this.getTicketByID(ticket);
     if (duplicar.total > 0) {
         const id = await this.getUltimoTicket() + 1;
@@ -170,5 +161,5 @@ async function duplicarTicket(ticket) {
     }
     return false;
 }
-exports.duplicarTicket = duplicarTicket;
+exports.anularTicket = anularTicket;
 //# sourceMappingURL=tickets.mongodb.js.map
