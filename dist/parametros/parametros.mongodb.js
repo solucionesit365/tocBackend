@@ -13,7 +13,6 @@ async function setParametros(params) {
     const database = (await mongodb_1.conexion).db('tocgame');
     const parametros = database.collection('parametros');
     const resultado = await parametros.updateOne({ _id: "PARAMETROS" }, { $set: params }, { upsert: true });
-    console.log(resultado);
     return resultado;
 }
 exports.setParametros = setParametros;

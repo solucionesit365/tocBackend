@@ -53,25 +53,6 @@ export async function updateIdCestaTrabajador(id: number) {
     return resultado;
 }
 
-// export async function updateIdCestaTrabajadorMesas(id: string, idCesta: number) {
-//     console.log('updateIdCestaTrabajador')
-//     console.log(id)
-//     console.log(idCesta)
-//     const database = (await conexion).db('tocgame');
-//     const cesta = database.collection('cestas');
-//      const mesa = await cesta.findOne({ _id: idCesta });
-//      console.log('La lista de las mesas ------------------------------------------')
-//      console.log(mesa.lista)
-//     // resTemp._id = id;
-//     const resultado = await cesta.updateOne({ _id: `${id}` }, { $set: { lista: mesa.lista  } });
-//     const cestaTrabajadors = await cesta.findOne({ _id: `${id}` });
-//     console.log('--------------------------')
-//     console.log(cestaTrabajadors)
-//     console.log('El resultado del update ------------------------------------------')
-
-//   console.log(resultado)
-//     return resultado;
-// }
 export async function getAllCestas(): Promise<any> {
     const database = (await conexion).db('tocgame');
     const cesta = database.collection('cestas');

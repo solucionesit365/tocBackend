@@ -64,7 +64,6 @@ export class SocketGateway{
   
         /* Comprobación cesta correcta */
         if (cesta == null || cesta.lista.length == 0) {
-          console.log("Error, la cesta es null o está vacía");
           this.server.emit('resDatafono', {
             error: true,
             mensaje: 'Error, la cesta es null o está vacía',
@@ -187,7 +186,6 @@ export class SocketGateway{
                 });
               }            
           } else { //SERÁ DENEGADA
-            console.log("Denegada: ", objEnviar.data);
             aux.server.emit('resDatafono', {
               error: true,
               mensaje: 'Error, operación DENEGADA'

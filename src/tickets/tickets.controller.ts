@@ -128,26 +128,6 @@ export class TicketsController {
         }
     }
 
-    // @Post('crearTicketDatafonoClearOne')
-    // crearTicketDatafonoClearOne(@Body() params) {
-    //     return ticketsInstance.crearTicketDatafono3G(params.total, params.idCesta).then((res) => {
-    //         if (res) {
-    //             return {
-    //                 error: false
-    //             }
-    //         } else {
-    //             return {
-    //                 error: true
-    //             }
-    //         }
-    //     }).catch((err) => {
-    //         console.log(err);
-    //         return {
-    //             error: true
-    //         }
-    //     });
-    // }
-
     @Post('crearTicketTKRS')
     crearTicketTKRS(@Body() params) {
         if(params.total != undefined && params.idCesta != undefined && params.idCliente != undefined) {

@@ -106,13 +106,7 @@ export class TicketsClase {
         return schTickets.nuevoTicket(ticket).then((res) => {
             if (res.acknowledged) {
                 if (ticket.regalo == true) {
-                    axios.post('clientes/resetPuntosCliente', { database: parametrosInstance.getParametros().database, idClienteFinal: ticket.cliente }).then((resultado: any) => {
-                        if (resultado.data.error == false) {
-                            console.log('Puntos reseteados');
-                        } else {
-                            console.log(resultado.data.mensaje);
-                        }
-                    }).catch((err) => {
+                    axios.post('clientes/resetPuntosCliente', { database: parametrosInstance.getParametros().database, idClienteFinal: ticket.cliente }).catch((err) => {
                         console.log(err);
                     });
                 }
@@ -231,7 +225,6 @@ export class TicketsClase {
     }
 
     async crearTicketTKRS(total: number, totalTkrs: number, idCesta: number, idCliente: string) {
-        console.log("funcion crear tickets")
         const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
         const nuevoIdTicket = (await this.getUltimoTicket()) + 1;
         const cesta = await cestas.getCesta(idCesta);

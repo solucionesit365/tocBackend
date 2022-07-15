@@ -14,7 +14,6 @@ class TransaccionesClass {
                 return { error: true, mensaje: 'Error, no se ha podido insertar la transacción' };
             }
         }).catch((err) => {
-            console.log(err.message);
             return { error: true, mensaje: 'Error en CATCH transacciones.class/crearTransaccion' };
         });
     }

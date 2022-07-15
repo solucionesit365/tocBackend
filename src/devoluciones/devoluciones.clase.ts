@@ -15,7 +15,6 @@ export class Devoluciones {
             const cesta = await cestas.getCesta(idCesta);
     
             if (cesta == null || cesta.lista.length == 0) {
-                console.log("Error, la cesta es null o está vacía");
                 this.bloqueado = false;
                 return false;
             }

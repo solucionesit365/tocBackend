@@ -11,7 +11,6 @@ import { ofertas } from 'src/promociones/promociones.clase';
 export class TecladoController {
     @Post('clickTeclaArticulo')
     clickTecla(@Body() params) {
-        console.log('clickTeclaArticulo')
         return cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoPeso, params.idCesta).then((res) => {
             return {
                 error: false,

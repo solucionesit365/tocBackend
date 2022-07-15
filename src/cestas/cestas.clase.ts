@@ -38,16 +38,6 @@ export class CestaClase {
       return false;
     })
   }
-  // async updateIdCestaTrabajadoMesa(id: string, idCesta: number) {
-  //   return schCestas.updateIdCestaTrabajadorMesas(id , idCesta).then((res) => {
-  //     return res.acknowledged;
-  //   }).catch((err) => {
-  //     console.log(err);
-  //     return false;
-  //   })
-  // }
-
-
 
   getCesta(idCesta: number): Promise<CestasInterface> {
     return schCestas.getCestaConcreta(idCesta);
@@ -372,11 +362,10 @@ export class CestaClase {
               infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
               cestaRetornar = await this.insertarArticuloCesta(infoArticulo, 1, idCesta, infoAPeso);
             }
-            // console.log(cestaRetornar);
+
             if (cestaRetornar != undefined && cestaRetornar != null) {
               if (cestaRetornar.tiposIva != undefined && cestaRetornar.tiposIva != null) {
                 trabajadoresInstance.getCurrentTrabajador().then((data) => {
-                  // console.log(data.nombre);
                   try {
                     impresoraInstance.mostrarVisor({
                       dependienta: data.nombre,
@@ -442,7 +431,6 @@ export class CestaClase {
                   cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
                  }
                  trabajadoresInstance.getCurrentTrabajador().then((data) => {
-                  // console.log(data.nombre);
                   try {
                     impresoraInstance.mostrarVisor({
                       dependienta: data.nombre,

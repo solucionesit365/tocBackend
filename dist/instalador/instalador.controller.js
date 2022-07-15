@@ -82,7 +82,6 @@ let InstaladorController = class InstaladorController {
                 const info8 = await teclado_clase_1.tecladoInstance.insertarTeclas(res.data.info.teclas);
                 const info9 = await cestas_clase_1.cestas.insertarCestas(res.data.info.cestas);
                 const info10 = await doble_menus_clase_1.dobleMenusInstance.insertarMenus(res.data.info.dobleMenus);
-                console.log(res.data.info.dobleMenus);
                 if (info1 && info2 && info3 && info4 && info5 && info6 && info7 && info8 && info10) {
                     return { error: false };
                 }

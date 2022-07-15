@@ -6,7 +6,6 @@ export declare class Articulos {
     getEstadoTarifaEspecial(): boolean;
     getInfoArticulo(idArticulo: number): Promise<ArticulosInterface>;
     insertarArticulos(arrayArticulos: any, esTarifaEspecial?: boolean): Promise<boolean>;
-    setSuplemento(suplemento: any): void;
     getSuplementos(suplementos: any): Promise<any[]>;
     editarArticulo(id: any, nombre: any, precioBase: any, precioConIva: any): Promise<import("mongodb").UpdateResult>;
 }

@@ -35,10 +35,6 @@ export class Articulos {
         });
     }
 
-    setSuplemento(suplemento) {
-        console.log(suplemento);
-    }
-
     async getSuplementos(suplementos) {
         return await schArticulos.getSuplementos(suplementos);
     }

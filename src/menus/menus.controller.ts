@@ -5,7 +5,6 @@ import { menusInstance } from './menus.clase';
 export class MenusController {
     @Post('clickMenu')
     clickMenu(@Body() params) {
-        // console.log('Fecha de llegada: ', Date.now());
         if (menusInstance.getBloqueado() == false) {
             menusInstance.setBloqueado(true);
             return menusInstance.clickMenu(params.nombreMenu).then((res) => {

@@ -21,7 +21,6 @@ export class InstaladorController {
             password: params.password,
             numLlicencia: params.numLlicencia
         }).then((res: any) => {
-            //console.log(res.data.info)
             if (!res.data.error) {
                 let parametrosfinales ={};
               let paramstpv=  JSON.stringify(res.data.info).split(',')            
@@ -92,7 +91,6 @@ export class InstaladorController {
                 const info8 = await tecladoInstance.insertarTeclas(res.data.info.teclas);
                 const info9 = await cestas.insertarCestas(res.data.info.cestas);
                 const info10 = await dobleMenusInstance.insertarMenus(res.data.info.dobleMenus);
-                console.log(res.data.info.dobleMenus)
                 if (info1 && info2 && info3 && info4 && info5 && info6 && info7 && info8 && info10) {
                     return { error: false };
                 } else {

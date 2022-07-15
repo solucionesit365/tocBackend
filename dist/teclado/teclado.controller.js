@@ -19,7 +19,6 @@ const teclado_clase_1 = require("./teclado.clase");
 const promociones_clase_1 = require("../promociones/promociones.clase");
 let TecladoController = class TecladoController {
     clickTecla(params) {
-        console.log('clickTeclaArticulo');
         return cestas_clase_1.cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoPeso, params.idCesta).then((res) => {
             return {
                 error: false,

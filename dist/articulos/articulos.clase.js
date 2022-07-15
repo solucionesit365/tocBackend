@@ -28,9 +28,6 @@ class Articulos {
             return false;
         });
     }
-    setSuplemento(suplemento) {
-        console.log(suplemento);
-    }
     async getSuplementos(suplementos) {
         return await schArticulos.getSuplementos(suplementos);
     }

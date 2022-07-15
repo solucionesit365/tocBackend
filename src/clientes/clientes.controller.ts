@@ -14,7 +14,6 @@ export class ClientesController {
 
     @Post('getClienteByID')
     getClienteByID(@Body() params) {
-        // console.log(params);
         if (params.idCliente != undefined) {
             return clienteInstance.getClienteByID(params.idCliente).then((res) => {
                 if (res != null) {
@@ -51,7 +50,6 @@ export class ClientesController {
                         return { error: true, mensaje: 'Backend: Error en catch clientes/comprobarVIP > InsertarArticulos (especiales)' };
                     });
                 } else { // No tiene tarifa especial
-                    // console.log('Puntos: ', res.data.info.puntos);
                     return { error: false, info: res.data.info };
                 }
             } else {

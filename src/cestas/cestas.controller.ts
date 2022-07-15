@@ -132,34 +132,21 @@ export class CestasController {
     @Post('getCestaByID')
     getCestaByID(@Body() params) {
         if (params.idCesta != undefined && params.idCesta != null) {
-            console.log('primer if')
             if (params.idCesta == -1) {
-                console.log('segundo  if')
                 return trabajadoresInstance.getCurrentTrabajador().then((res) => {
-                    console.log('Hola', res)
                     return cestas.getCesta(res._id).then((res) => {
                         if (res) {
                             return { error: false, info: res };
                         }
-                        console.log('Holaa',res);
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                     }).catch((err) => {
                         console.log(err);
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
                     });
-                })
-                // return cestas.getCestaRandom().then((res) => {
-                //     return { error: false, info: res };
-                // }).catch((err) => {
-                //     console.log(err);
-                //     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID > getCestaRandom CATCH' };
-                // });
+                });
             } else {
-                console.log('es el else')
                 return cestas.getCesta(params.idCesta).then((res) => {
                     if (res) {
-                        console.log('este es el result ')
-                        console.log(res)
                         return { error: false, info: res };
                     }
                     
@@ -211,7 +198,6 @@ export class CestasController {
 
     @Post('cambiarCestaTrabajador')
     cambiarCestaTrabajador(@Body() params) {
-        console.log(params)
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
@@ -226,7 +212,6 @@ export class CestasController {
     }
     @Post('cerarCestaMesas')
     cerarCestaMesas(@Body() params) {
-        console.log(params)
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa)
         } else {

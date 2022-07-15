@@ -96,7 +96,6 @@ class PaytefClass {
         }
         catch (err) {
             this.cancelarOperacion();
-            console.log(err.message);
             client.emit('consultaPaytef', { error: true, mensaje: err.message });
         }
     }

@@ -119,7 +119,6 @@ let TrabajadoresController = class TrabajadoresController {
     }
     actualizarTrabajadores() {
         return trabajadores_clase_1.trabajadoresInstance.actualizarTrabajadores().then((res) => {
-            console.log(res);
             return res;
         }).catch((err) => {
             console.log(err);

@@ -121,7 +121,6 @@ export class TrabajadoresClase {
                 parametrosInstance.actualizarParametros();
                 return true;
             } else {
-                console.log(123);
                 return false;
             };
         }).catch((err) => {
@@ -178,12 +177,9 @@ export class TrabajadoresClase {
             if (res.acknowledged) {
                 return this.nuevoFichajesSincro("SALIDA", idTrabajador, '').then((res2) => {
                     if (res2.acknowledged) {
-                        cestas.eliminarCesta(idTrabajador).then((res) => {
-                            console.log(res)
-                        });
+                        cestas.eliminarCesta(idTrabajador);
                         return true;
                     } else {
-                        // console.log(123);
                         return false;
                     }
                 }).catch((err) => {
@@ -191,7 +187,6 @@ export class TrabajadoresClase {
                     return false;
                 });
             } else {
-                // console.log(432);
                 return false;
             }
         }).catch((err) => {
@@ -290,8 +285,6 @@ export class TrabajadoresClase {
                 arrayTrabajadores.push({ infoTrabajador: await this.getTrabajador(idsAyer[i].infoFichaje.idTrabajador), timestamp: idsAyer[i]._id});
             }
             
-            // console.log("lool:", arrayTrabajadores);
-
             const parametros = parametrosInstance.getParametros();
             return axios.post('turnos/getHorasExtraCoordinacion', {
                 parametros: parametros,
@@ -301,7 +294,7 @@ export class TrabajadoresClase {
                 if (res.data.error == false) {
                     return res.data.info;
                 } else {
-                    console.log(res.data.mensaje);
+                    throw Error(res.data.mensaje);
                 }
             }).catch((err) => {
                 console.log(err);

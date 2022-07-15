@@ -142,7 +142,6 @@ export class Impresora {
         } else {
             infoTicket = await devolucionesInstance.getDevolucionByID(idTicket);
         }
-        // console.log(infoTicket)
         const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajador(infoTicket.idTrabajador);
         const parametros = parametrosInstance.getParametros();
         var sendObject;
@@ -231,7 +230,6 @@ export class Impresora {
         const arrayCompra = info.arrayCompra;
         const total = info.total;
         const tipoPago = info.visa;
-        // console.log(tipoPago)
         const tiposIva = info.tiposIva;
         const cabecera = info.cabecera;
         const pie = info.pie;
@@ -339,7 +337,6 @@ export class Impresora {
     
             if(tipoPago == "DEVOLUCION")
             {
-                // console.log('Entramos en tipo pago devolucion')
                 pagoDevolucion = '-- ES DEVOLUCION --\n';
             }
     
@@ -779,7 +776,6 @@ export class Impresora {
             console.log("Error2: ", err)
             //errorImpresora(err, event);
         }
-        //console.log('El visor da muchos problemas');
     }
     async imprimirEntregas() {
         const params = parametrosInstance.getParametros();

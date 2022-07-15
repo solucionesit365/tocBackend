@@ -121,7 +121,6 @@ class TrabajadoresClase {
                 return true;
             }
             else {
-                console.log(123);
                 return false;
             }
             ;
@@ -175,9 +174,7 @@ class TrabajadoresClase {
             if (res.acknowledged) {
                 return this.nuevoFichajesSincro("SALIDA", idTrabajador, '').then((res2) => {
                     if (res2.acknowledged) {
-                        cestas_clase_1.cestas.eliminarCesta(idTrabajador).then((res) => {
-                            console.log(res);
-                        });
+                        cestas_clase_1.cestas.eliminarCesta(idTrabajador);
                         return true;
                     }
                     else {
@@ -284,7 +281,7 @@ class TrabajadoresClase {
                     return res.data.info;
                 }
                 else {
-                    console.log(res.data.mensaje);
+                    throw Error(res.data.mensaje);
                 }
             }).catch((err) => {
                 console.log(err);
