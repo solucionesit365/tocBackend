@@ -95,4 +95,27 @@ export declare class TrabajadoresController {
         error: boolean;
         mensaje: string;
     };
+    inicioDescanso(params: any): Promise<{
+        error: boolean;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+    } | {
+        error: boolean;
+        mensaje: string;
+    }> | {
+        error: boolean;
+        mensaje: string;
+    };
+    finDescanso(params: any): Promise<{
+        error: boolean;
+        mensaje?: undefined;
+    } | {
+        error: boolean;
+        mensaje: string;
+    } | {
+        error: boolean;
+        mensaje: string;
+    }>;
 }

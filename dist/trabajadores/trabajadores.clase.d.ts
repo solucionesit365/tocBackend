@@ -29,7 +29,9 @@ export declare class TrabajadoresClase {
     getTrabajador(idTrabajador: number): Promise<TrabajadoresInterface>;
     ficharTrabajador(idTrabajador: number, idPlan: string): Promise<boolean>;
     desficharTrabajador(idTrabajador: number): Promise<boolean>;
-    nuevoFichajesSincro(tipo: "ENTRADA" | "SALIDA", idTrabajador: number, idPlan: string): Promise<import("mongodb").InsertOneResult<import("bson").Document>>;
+    inicioDescanso(idTrabajador: number, idPlan: string): Promise<boolean>;
+    finDescanso(idTrabajador: number): Promise<boolean>;
+    nuevoFichajesSincro(tipo: "ENTRADA" | "SALIDA" | "DESCANSO" | "FINDESCANSO", idTrabajador: number, idPlan: string): Promise<import("mongodb").InsertOneResult<import("bson").Document>>;
     getFichados(): Promise<TrabajadoresInterface[]>;
     insertarTrabajadores(arrayTrabajadores: any): Promise<boolean>;
     getFichajeMasAntiguo(): Promise<import("bson").Document>;

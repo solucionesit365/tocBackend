@@ -159,4 +159,40 @@ export class TrabajadoresController {
             return { error: true, mensaje: 'Backend: Error faltan datos en trabajadores/guardarHorasExtrCoordinacion'};
         }
     }
+
+
+    @Post('inicioDescanso')
+   inicioDescanso(@Body() params) {
+        if (params.idTrabajador != undefined && params.idPlan != undefined && params.idPlan != null) {
+            return trabajadoresInstance.inicioDescanso(params.idTrabajador, params.idPlan).then((res) => {
+                if (res) {
+                    return { error: false };
+                } else {
+                    return { error: true, mensaje: 'Error en ficharTrabajador()' };
+                }
+            }).catch((err) => {
+                console.log(err);
+                return { error: true, mensaje: 'Error, mirar consola nest' };
+            });
+        } else {
+            return { error: true, mensaje: 'Backend: Faltan datos en trabajadores/fichar' };
+        }
+    }
+
+    @Post('finDescanso')
+    finDescanso(@Body() params) {
+        return trabajadoresInstance.finDescanso(params.idTrabajador).then((res) => {
+            if (res) {
+                return { error: false };
+            } else {
+                return { error: true, mensaje: 'Error en desficharTrabajador()' };
+            }
+        }).catch((err) => {
+            console.log(err);
+            return { error: true, mensaje: 'Error, mirar consola nest' };
+        });
+    }
+
+
+
 }

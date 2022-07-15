@@ -164,6 +164,37 @@ let TrabajadoresController = class TrabajadoresController {
             return { error: true, mensaje: 'Backend: Error faltan datos en trabajadores/guardarHorasExtrCoordinacion' };
         }
     }
+    inicioDescanso(params) {
+        if (params.idTrabajador != undefined && params.idPlan != undefined && params.idPlan != null) {
+            return trabajadores_clase_1.trabajadoresInstance.inicioDescanso(params.idTrabajador, params.idPlan).then((res) => {
+                if (res) {
+                    return { error: false };
+                }
+                else {
+                    return { error: true, mensaje: 'Error en ficharTrabajador()' };
+                }
+            }).catch((err) => {
+                console.log(err);
+                return { error: true, mensaje: 'Error, mirar consola nest' };
+            });
+        }
+        else {
+            return { error: true, mensaje: 'Backend: Faltan datos en trabajadores/fichar' };
+        }
+    }
+    finDescanso(params) {
+        return trabajadores_clase_1.trabajadoresInstance.finDescanso(params.idTrabajador).then((res) => {
+            if (res) {
+                return { error: false };
+            }
+            else {
+                return { error: true, mensaje: 'Error en desficharTrabajador()' };
+            }
+        }).catch((err) => {
+            console.log(err);
+            return { error: true, mensaje: 'Error, mirar consola nest' };
+        });
+    }
 };
 __decorate([
     (0, common_1.Post)('getTrabajadoresFichados'),
@@ -237,6 +268,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], TrabajadoresController.prototype, "guardarHorasExtraCoordinacion", null);
+__decorate([
+    (0, common_1.Post)('inicioDescanso'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TrabajadoresController.prototype, "inicioDescanso", null);
+__decorate([
+    (0, common_1.Post)('finDescanso'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TrabajadoresController.prototype, "finDescanso", null);
 TrabajadoresController = __decorate([
     (0, common_1.Controller)('trabajadores')
 ], TrabajadoresController);

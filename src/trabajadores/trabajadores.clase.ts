@@ -171,7 +171,7 @@ export class TrabajadoresClase {
             return false;
         });
     }
-
+    
     /* MongoDB Fichado = false + nuevo item sincro */
     desficharTrabajador(idTrabajador: number): Promise<boolean> {
         return schTrabajadores.desficharTrabajador(idTrabajador).then((res) => {
@@ -199,9 +199,74 @@ export class TrabajadoresClase {
             return false;
         });
     }
-
+   /* MongoDB Fichado = false + nuevo item sincro */
+   inicioDescanso(idTrabajador: number, idPlan: string): Promise<boolean> {
+    return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
+        if (res.acknowledged) {
+            return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
+                if (resSetCurrent) {
+                    return this.nuevoFichajesSincro("DESCANSO", idTrabajador, idPlan).then((res2) => {
+                        if (res2.acknowledged) {
+                            cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
+                                cestas.updateIdCestaTrabajador(idTrabajador);
+                            });
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                        return false;
+                    });
+                }
+                return false;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        } else {
+            return false;
+        }
+    }).catch((err) => {
+        console.log(err);
+        return false;
+    });
+}
+   /* MongoDB Fichado = false + nuevo item sincro */
+   finDescanso(idTrabajador: number): Promise<boolean> {
+    return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
+        if (res.acknowledged) {
+            return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
+                if (resSetCurrent) {
+                    return this.nuevoFichajesSincro("FINDESCANSO", idTrabajador, '').then((res2) => {
+                        if (res2.acknowledged) {
+                            cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
+                                cestas.updateIdCestaTrabajador(idTrabajador);
+                            });
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                        return false;
+                    });
+                }
+                return false;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        } else {
+            return false;
+        }
+    }).catch((err) => {
+        console.log(err);
+        return false;
+    });
+}
     /* Inserta en el sincro un nuevo movimiento de fichaje */
-    nuevoFichajesSincro(tipo: "ENTRADA" | "SALIDA", idTrabajador: number, idPlan: string) {
+    nuevoFichajesSincro(tipo: "ENTRADA" | "SALIDA" | "DESCANSO" | "FINDESCANSO", idTrabajador: number, idPlan: string) {
         const auxTime = new Date();
         const objGuardar: SincroFichajesInterface = {
             _id: Date.now(),

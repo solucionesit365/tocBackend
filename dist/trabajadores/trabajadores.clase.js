@@ -196,6 +196,74 @@ class TrabajadoresClase {
             return false;
         });
     }
+    inicioDescanso(idTrabajador, idPlan) {
+        return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
+            if (res.acknowledged) {
+                return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
+                    if (resSetCurrent) {
+                        return this.nuevoFichajesSincro("DESCANSO", idTrabajador, idPlan).then((res2) => {
+                            if (res2.acknowledged) {
+                                cestas_clase_1.cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
+                                    cestas_clase_1.cestas.updateIdCestaTrabajador(idTrabajador);
+                                });
+                                return true;
+                            }
+                            else {
+                                return false;
+                            }
+                        }).catch((err) => {
+                            console.log(err);
+                            return false;
+                        });
+                    }
+                    return false;
+                }).catch((err) => {
+                    console.log(err);
+                    return false;
+                });
+            }
+            else {
+                return false;
+            }
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
+    finDescanso(idTrabajador) {
+        return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
+            if (res.acknowledged) {
+                return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
+                    if (resSetCurrent) {
+                        return this.nuevoFichajesSincro("FINDESCANSO", idTrabajador, '').then((res2) => {
+                            if (res2.acknowledged) {
+                                cestas_clase_1.cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
+                                    cestas_clase_1.cestas.updateIdCestaTrabajador(idTrabajador);
+                                });
+                                return true;
+                            }
+                            else {
+                                return false;
+                            }
+                        }).catch((err) => {
+                            console.log(err);
+                            return false;
+                        });
+                    }
+                    return false;
+                }).catch((err) => {
+                    console.log(err);
+                    return false;
+                });
+            }
+            else {
+                return false;
+            }
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
     nuevoFichajesSincro(tipo, idTrabajador, idPlan) {
         const auxTime = new Date();
         const objGuardar = {

@@ -18,7 +18,7 @@ export interface SincroFichajesInterface {
             seconds: number;
         };
     };
-    tipo: "ENTRADA" | "SALIDA";
+    tipo: "ENTRADA" | "SALIDA" | "DESCANSO" | "FINDESCANSO";
     enviado: boolean;
     enTransito: boolean;
     intentos: number;
