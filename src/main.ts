@@ -4,7 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import axios from 'axios';
 require('./sincro');
 
-// axios.defaults.baseURL = 'http://localhost:3001';
+ //axios.defaults.baseURL = 'http://localhost:3001';
 axios.defaults.baseURL = 'https://sanpedro.cloud'; //(process.argv[2] === 'modoServer') ? ('http://localhost:3001') : ('http://34.78.247.153:3001'); // NORMAL
 
 async function bootstrap() {
@@ -16,10 +16,9 @@ async function bootstrap() {
     credentials: true
   }});
   // app.enableCors();
+ await app.listen(3000);
 //await app.listen(3000,"10.137.0.201"); //para iterum ubuntu
 //await app.listen(3000,"10.137.0.243"); //para iterum windows
-await app.listen(3000,"192.168.82.245"); //para iterum windows
-
 
 }
 bootstrap();
