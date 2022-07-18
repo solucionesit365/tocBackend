@@ -134,7 +134,7 @@ class TicketsClase {
         for (const key in cesta.lista) {
             let infoArticulo = await articulos_clase_1.articulosInstance.getInfoArticulo(cesta.lista[key]._id);
             let gramos = cesta.lista[key].subtotal / (infoArticulo.precioConIva);
-            if (infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1) {
+            if (infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 && !cesta.lista[key].promocion.esPromo) {
                 cesta.lista[key].unidades = gramos;
             }
         }
