@@ -269,7 +269,7 @@ class CajaClase {
         currentCaja.infoExtra['totalEnEfectivo'] = totalEnEfectivo - unaCaja.totalDatafono3G;
         currentCaja.infoExtra['totalTarjeta'] = totalTarjeta;
         currentCaja.infoExtra['totalDeuda'] = totalDeuda;
-        descuadre = cambioFinal - cambioInicial + totalSalidas - totalEntradas - totalTickets + unaCaja.totalDatafono3G;
+        descuadre = Math.round((cambioFinal - cambioInicial + totalSalidas - totalEntradas - totalTickets + unaCaja.totalDatafono3G) * 100) / 100;
         recaudado = totalTickets + descuadre - totalTarjeta - totalDeuda;
         const objImpresion = {
             calaixFet: totalTickets,

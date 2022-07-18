@@ -144,7 +144,6 @@ export class CajaClase {
         cajaInsertar['enTransito'] = caja.enTransito;
         cajaInsertar['totalDatafono3G'] = caja.totalDatafono3G;
         cajaInsertar['totalClearOne'] = caja.totalClearOne;
-
         return schCajas.nuevoItemSincroCajas(cajaInsertar);
     }
 
@@ -160,7 +159,6 @@ export class CajaClase {
             cajaActual.totalDatafono3G = totalDatafono3G;
             cajaActual.totalClearOne = 0;
             cajaActual = await this.calcularDatosCaja(cajaActual);
-
             const deudaDeliveroo = await schTickets.getDedudaDeliveroo(cajaActual.inicioTime, cajaActual.finalTime);
             const deudaGlovo = await schTickets.getDedudaGlovo(cajaActual.inicioTime, cajaActual.finalTime);
             const totalTkrs = await schTickets.getTotalTkrs(cajaActual.inicioTime, cajaActual.finalTime);
@@ -284,7 +282,7 @@ export class CajaClase {
         currentCaja.infoExtra['totalEnEfectivo'] = totalEnEfectivo-unaCaja.totalDatafono3G;
         currentCaja.infoExtra['totalTarjeta'] = totalTarjeta;
         currentCaja.infoExtra['totalDeuda'] = totalDeuda;
-        descuadre = cambioFinal-cambioInicial+totalSalidas-totalEntradas-totalTickets+unaCaja.totalDatafono3G;
+        descuadre = Math.round((cambioFinal-cambioInicial+totalSalidas-totalEntradas-totalTickets+unaCaja.totalDatafono3G)*100)/100;
         recaudado = totalTickets + descuadre - totalTarjeta - totalDeuda;
         
         const objImpresion = {

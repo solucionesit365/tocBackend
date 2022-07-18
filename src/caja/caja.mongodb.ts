@@ -58,7 +58,6 @@ export async function nuevoItemSincroCajas(unaCaja) {
     const database = (await conexion).db('tocgame');
     const sincroCajas = database.collection('sincro-cajas');
     const resultado = await sincroCajas.insertOne(unaCaja);
-    
     return resultado;
 }
 
