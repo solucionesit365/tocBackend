@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.16](https://github.com/solucionesit365/tocBackend/compare/v3.1.15...v3.1.16) (2022-07-20)
+
 ### [3.1.15](https://github.com/solucionesit365/tocBackend/compare/v3.1.11...v3.1.15) (2022-07-14)
 
 ### [3.1.14](https://github.com/solucionesit365/tocBackend/compare/v3.1.13...v3.1.14) (2022-06-07)
