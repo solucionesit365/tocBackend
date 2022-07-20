@@ -142,20 +142,32 @@ async function actualizarComentario(ticket) {
     return resultado;
 }
 exports.actualizarComentario = actualizarComentario;
-async function anularTicket(ticket) {
-    const duplicar = await this.getTicketByID(ticket);
-    if (duplicar.total > 0) {
+async function anularTicket(idTicket) {
+    const ticket = await getTicketByID(idTicket);
+    if (ticket.total > 0) {
         const id = await this.getUltimoTicket() + 1;
-        duplicar.enviado = false;
-        duplicar._id = id;
-        duplicar.total = (duplicar.total * -1);
-        duplicar.lista.forEach(element => {
+        ticket.enviado = false;
+        ticket._id = id;
+        ticket.total = (ticket.total * -1);
+        ticket.lista.forEach(element => {
             element.subtotal = (element.subtotal * -1);
         });
         const database = (await mongodb_1.conexion).db('tocgame');
         const tickets = database.collection('tickets');
-        const resultado = tickets.insertOne(duplicar);
-        return resultado;
+        const resultado = tickets.insertOne(ticket);
+        if (ticket.tipoPago == 'TARJETA') {
+            const movimientos = database.collection('movimientos');
+            const resultado2 = movimientos.deleteOne({ idTicket });
+            if ((await resultado).acknowledged && (await resultado2).acknowledged) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return (await resultado).acknowledged;
+        }
     }
     return false;
 }

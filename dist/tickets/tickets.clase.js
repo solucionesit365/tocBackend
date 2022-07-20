@@ -49,12 +49,7 @@ class TicketsClase {
     }
     anularTicket(idTicket) {
         return schTickets.anularTicket(idTicket).then((res) => {
-            if (res) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            return res;
         });
     }
     getTicketsIntervalo(fechaInicio, fechaFinal) {
