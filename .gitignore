@@ -1,4 +1,4 @@
 node_modules/
 *.map
 .vscode
-dist/tsconfig.build.tsbuildinfo
+dist/
