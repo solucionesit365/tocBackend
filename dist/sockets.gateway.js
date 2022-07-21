@@ -25,8 +25,22 @@ const dgram_1 = require("dgram");
 const net = require('net');
 const fs = require("fs");
 let SocketGateway = class SocketGateway {
+    constructor() {
+        this.tpv = 0;
+    }
     enviar(canal, data) {
         this.server.emit(canal, data);
+    }
+    handleConnection(client, ...args) {
+        this.tpv++;
+        console.log(process.env.npm_package_version);
+        console.log(this.tpv);
+        console.log('Hola alguien se conecto al socket 👌👌👌');
+    }
+    handleDisconnect() {
+        this.tpv--;
+        console.log('Disconnect ');
+        console.log(this.tpv);
     }
     test(params) {
         this.server.emit('test', 'O Rei Ezeee');
