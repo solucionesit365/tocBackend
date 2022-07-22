@@ -128,6 +128,14 @@ class CestaClase {
             return false;
         });
     }
+    borrarCestaTrabajador(idTrabajador) {
+        return schCestas.borrarCestaTrabajador(idTrabajador).then((res) => {
+            return res.acknowledged;
+        }).catch((err) => {
+            console.log(err);
+            return false;
+        });
+    }
     eliminarCesta(nombreCesta) {
         return schCestas.eliminarCesta(nombreCesta).then((res) => {
             return res.acknowledged;

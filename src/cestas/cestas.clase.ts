@@ -152,6 +152,14 @@ export class CestaClase {
       return false;
     });
   }
+  borrarCestaTrabajador(idTrabajador){
+    return schCestas.borrarCestaTrabajador(idTrabajador).then((res) => {
+      return res.acknowledged;
+    }).catch((err) => {
+      console.log(err);
+      return false;
+    })
+  }
 
   /* Eliminar cesta por nombre, versión de Santi */
   eliminarCesta(nombreCesta): Promise<boolean> {

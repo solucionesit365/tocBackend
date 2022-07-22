@@ -126,16 +126,12 @@ let CestasController = class CestasController {
     }
     getCestaByID(params) {
         if (params.idCesta != undefined && params.idCesta != null) {
-            console.log('primer if');
             if (params.idCesta == -1) {
-                console.log('segundo  if');
                 return trabajadores_clase_1.trabajadoresInstance.getCurrentTrabajador().then((res) => {
-                    console.log('Hola', res);
                     return cestas_clase_1.cestas.getCesta(res._id).then((res) => {
                         if (res) {
                             return { error: false, info: res };
                         }
-                        console.log('Holaa', res);
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                     }).catch((err) => {
                         console.log(err);
@@ -144,14 +140,10 @@ let CestasController = class CestasController {
                 });
             }
             else {
-                console.log('es el else');
                 return cestas_clase_1.cestas.getCesta(params.idCesta).then((res) => {
                     if (res) {
-                        console.log('este es el result ');
-                        console.log(res);
                         return { error: false, info: res };
                     }
-                    console.log(res);
                     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                 }).catch((err) => {
                     console.log(err);
@@ -197,7 +189,6 @@ let CestasController = class CestasController {
         }
     }
     cambiarCestaTrabajador(params) {
-        console.log(params);
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas_clase_1.cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
@@ -213,7 +204,6 @@ let CestasController = class CestasController {
         }
     }
     cerarCestaMesas(params) {
-        console.log(params);
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas_clase_1.cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa);
         }
@@ -320,6 +310,36 @@ let CestasController = class CestasController {
         else {
             return { error: true, mensaje: 'Backend error, faltan datos en cestas/getCestaByTrabajadorId' };
         }
+    }
+    borrarCestaTrabajador(params) {
+        return cestas_clase_1.cestas.borrarCestaTrabajador(params.id).then((res) => {
+            if (res) {
+                return cestas_clase_1.cestas.getTodasCestas().then((listaCestas) => {
+                    if (listaCestas.length > 0) {
+                        return {
+                            okey: true,
+                            cestaNueva: listaCestas[0],
+                        };
+                    }
+                }).catch((err) => {
+                    return {
+                        okey: false,
+                        error: "Error en getTodasCestas"
+                    };
+                });
+            }
+            else {
+                return {
+                    okey: false,
+                    error: "Error borrando cesta trabajador"
+                };
+            }
+        }).catch((err) => {
+            return {
+                okey: false,
+                error: "Error en borrarCesta"
+            };
+        });
     }
 };
 __decorate([
@@ -452,6 +472,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CestasController.prototype, "getCestaByTrabajadorId", null);
+__decorate([
+    (0, common_1.Post)('borrarCestaTrabajador'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CestasController.prototype, "borrarCestaTrabajador", null);
 CestasController = __decorate([
     (0, common_1.Controller)('cestas')
 ], CestasController);

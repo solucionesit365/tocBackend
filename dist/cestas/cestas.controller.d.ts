@@ -174,4 +174,14 @@ export declare class CestasController {
         mensaje: string;
         info?: undefined;
     }>;
+    borrarCestaTrabajador(params: any): Promise<{
+        okey: boolean;
+        cestaNueva: import("./cestas.interface").CestasInterface;
+    } | {
+        okey: boolean;
+        error: string;
+    } | {
+        okey: boolean;
+        error: string;
+    }>;
 }

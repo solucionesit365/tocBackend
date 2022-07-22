@@ -13,6 +13,7 @@ export declare class CestaClase {
     getTodasCestas(): Promise<CestasInterface[]>;
     cerarCestaMesas(idTrabajador: number, nombreMesa: string): void;
     borrarCesta(idCestaBorrar: any): Promise<boolean>;
+    borrarCestaTrabajador(idTrabajador: any): Promise<boolean>;
     eliminarCesta(nombreCesta: any): Promise<boolean>;
     setCesta(cesta: CestasInterface): Promise<boolean>;
     crearNuevaCesta(nombreCesta: string, idCestaSincro?: any): Promise<boolean | CestasInterface>;
