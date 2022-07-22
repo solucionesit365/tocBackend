@@ -28,6 +28,15 @@ export async function getCestaByID(idCesta: number) {
     return resultado;
 }
 
+
+export async function borrarCestaTrabajador(idTrabajador: string) {
+    const database = (await conexion).db('tocgame');
+    const cesta = database.collection('cestas');
+    const resultado = await cesta.deleteMany({ idTrabajador: idTrabajador });
+    console.log(resultado)
+    return resultado;
+}
+
 export async function eliminarCesta(nombre: string) {
     const database = (await conexion).db('tocgame');
     const cesta = database.collection('cestas');

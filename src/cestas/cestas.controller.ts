@@ -132,25 +132,37 @@ export class CestasController {
     @Post('getCestaByID')
     getCestaByID(@Body() params) {
         if (params.idCesta != undefined && params.idCesta != null) {
+
             if (params.idCesta == -1) {
+
                 return trabajadoresInstance.getCurrentTrabajador().then((res) => {
+             
                     return cestas.getCesta(res._id).then((res) => {
                         if (res) {
                             return { error: false, info: res };
                         }
+                      
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                     }).catch((err) => {
                         console.log(err);
                         return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH' };
                     });
-                });
+                })
+                // return cestas.getCestaRandom().then((res) => {
+                //     return { error: false, info: res };
+                // }).catch((err) => {
+                //     console.log(err);
+                //     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID > getCestaRandom CATCH' };
+                // });
             } else {
+               
                 return cestas.getCesta(params.idCesta).then((res) => {
                     if (res) {
+                      
                         return { error: false, info: res };
                     }
                     
-                    console.log(res);
+                
                     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID' };
                 }).catch((err) => {
                     console.log(err);
@@ -198,6 +210,7 @@ export class CestasController {
 
     @Post('cambiarCestaTrabajador')
     cambiarCestaTrabajador(@Body() params) {
+        
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas.updateIdCestaTrabajador(params.id).then((res) => {
                 if (res) {
@@ -212,6 +225,7 @@ export class CestasController {
     }
     @Post('cerarCestaMesas')
     cerarCestaMesas(@Body() params) {
+       
         if (params.id_cesta != undefined && params.id_cesta != null) {
             return cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa)
         } else {
@@ -348,4 +362,41 @@ export class CestasController {
             return { error: true, mensaje: 'Backend error, faltan datos en cestas/getCestaByTrabajadorId' };
         }
     }
+
+
+    @Post('borrarCestaTrabajador')
+    borrarCestaTrabajador(@Body() params) {
+      
+        return cestas.borrarCestaTrabajador(params.id).then((res) => {
+            if (res) {
+                return cestas.getTodasCestas().then((listaCestas) => {
+                    if (listaCestas.length > 0) {
+                        return {
+                            okey: true,
+                            cestaNueva: listaCestas[0],
+                        };
+                    }                    
+                }).catch((err) => {
+                    return {
+                        okey: false,
+                        error: "Error en getTodasCestas"
+                    };
+                });
+                
+            } else {
+                return {
+                    okey: false,
+                    error: "Error borrando cesta trabajador"
+                };
+            }
+            
+        }).catch((err) => {
+            return {
+                okey: false,
+                error: "Error en borrarCesta"
+            };
+        });
+    }
+
+
 }

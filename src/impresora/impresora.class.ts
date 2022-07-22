@@ -98,6 +98,8 @@ export class Impresora {
                     
                 }
                
+            } else {
+                console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
             console.log("Error1: ", err)
@@ -128,12 +130,15 @@ export class Impresora {
                     
                 }
                
+            } else {
+                console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
             console.log("Error1: ", err)
             //errorImpresora(err, event);
         }   }
     async imprimirTicket(idTicket: number, esDevolucion = false) {
+     
         const paramsTicket = await paramsTicketInstance.getParamsTicket();
         //const infoTicket: TicketsInterface = await ticketsInstance.getTicketByID(idTicket);
         let infoTicket;
@@ -142,6 +147,7 @@ export class Impresora {
         } else {
             infoTicket = await devolucionesInstance.getDevolucionByID(idTicket);
         }
+        // console.log(infoTicket)
         const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajador(infoTicket.idTrabajador);
         const parametros = parametrosInstance.getParametros();
         var sendObject;
@@ -199,6 +205,7 @@ export class Impresora {
     }
 
     private async imprimirRecibo(recibo: string) {
+        console.log('imprimir recibo')
         try {
             permisosImpresora();
             const device = await dispositivos.getDevice();
@@ -230,6 +237,7 @@ export class Impresora {
         const arrayCompra = info.arrayCompra;
         const total = info.total;
         const tipoPago = info.visa;
+        // console.log(tipoPago)
         const tiposIva = info.tiposIva;
         const cabecera = info.cabecera;
         const pie = info.pie;
@@ -337,6 +345,7 @@ export class Impresora {
     
             if(tipoPago == "DEVOLUCION")
             {
+                // console.log('Entramos en tipo pago devolucion')
                 pagoDevolucion = '-- ES DEVOLUCION --\n';
             }
     
@@ -714,8 +723,10 @@ export class Impresora {
         }
     }
     async mostrarVisor(data) {
+ 
         //var eur = String.fromCharCode(128);
        var eur = "E";
+
         var limitNombre = 0;
         var lengthTotal = '';
         var datosExtra = '';
@@ -734,6 +745,7 @@ export class Impresora {
            let total = data.total + eur
             let espacio= " "
             let size = 20-(dependienta.length + total.length)
+
             let espacios = [""," ","  ","   ","    ","      ","       ","        ","        ","         ","         ","           ","            ","            ","              ",]
             datosExtra = dependienta +espacios[size] + total ; 
         }
@@ -771,11 +783,14 @@ export class Impresora {
                     
                 }
                
+            } else {
+                console.log("Controlado: dispositivo es null");
             }
         } catch (err) {
             console.log("Error2: ", err)
             //errorImpresora(err, event);
         }
+        //console.log('El visor da muchos problemas');
     }
     async imprimirEntregas() {
         const params = parametrosInstance.getParametros();

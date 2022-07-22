@@ -33,15 +33,16 @@ export class Dispositivos {
             try {
                 if (parametros.tipoImpresora == 'USB') {
                     // const device: number = new escpos.USB();
+                    console.log("OBSERVÁ: ", parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
                     const device: number = new escpos.USB(parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
+                    console.log(device);
                     return device;
                 } else if (parametros.tipoImpresora == 'SERIE') {
-                    // const device = new escpos.Serial('COM1', {
-                    //     baudRate: 115200,
-                    //     stopBit: 2
-                    // });
-                    // return device;
-                    return null;
+                    const device = new escpos.Serial('COM1', {
+                        baudRate: 115200,
+                        stopBit: 2
+                    });
+                    return device;
                 } else {
                     console.log("Parametros de impresora no configurados");
                     return null;
@@ -55,25 +56,27 @@ export class Dispositivos {
 
     async getDeviceVisor() {
         const parametros = await parametrosInstance.getEspecialParametros();
-        if (parametros.visor != undefined) {
-            if (parametros.visor.includes('COM') || parametros.visor == 'SI') {
-                if (os.platform() === 'win32') {
-                    const device = new escpos.Serial(parametros.visor, {
-                                 baudRate: 9600,
-                                 stopBit: 2
-                             });
-                             return device;
-                 
-                 } else if (os.platform() === 'linux') {
-                     return new escpos.Serial('/dev/ttyUSB0', {
-                         baudRate: 9600,
-                          //baudRate: 115200,
-                         stopBit: 2
-                     }); 
-                 }
-            }
+       if (parametros.visor != undefined){
+        if(parametros.visor.includes('COM') || parametros.visor == 'SI'){
+            if (os.platform() === 'win32') {
+                const device = new escpos.Serial(parametros.visor, {
+                             baudRate: 9600,
+                             stopBit: 2
+                         });
+                         return device;
+             
+             } else if (os.platform() === 'linux') {
+                 return new escpos.Serial('/dev/ttyUSB0', {
+                     baudRate: 9600,
+                      //baudRate: 115200,
+                     stopBit: 2
+                 }); 
+             }
         }
-        return null;       
+        return null;
+       }
+    
+       
     }
 }
 
