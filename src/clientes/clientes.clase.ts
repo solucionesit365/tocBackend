@@ -9,6 +9,7 @@ export class Clientes {
     buscar(cadena: string) {
         return schClientes.buscar(cadena).then((res: ClientesInterface[]) => {
             if (res.length > 0) {
+                console.log(res);
                 return res;
             } else {
                 return [];

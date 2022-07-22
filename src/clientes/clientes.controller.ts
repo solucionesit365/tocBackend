@@ -35,7 +35,6 @@ export class ClientesController {
     comprobarVIP(@Body() params) {
         const parametros = parametrosInstance.getParametros();
         return axios.post('clientes/comprobarVIP', { database: parametros.database, idClienteFinal: params.idClienteFinal }).then((res: any) => {
-        console.log(res.data)
             if (res.data.error === false) { // No hay error
                 if (res.data.articulosEspeciales != undefined) { // Tiene tarifa especial
                     /* Añadir articulosTarifaEspecial a Mongo */
