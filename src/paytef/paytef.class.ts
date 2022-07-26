@@ -56,7 +56,7 @@ class PaytefClass {
       }).then((respuestaPaytef: any) => {
         if (respuestaPaytef.data.info.started) {
           // Arranca el ciclo de comprobaciones
-          this.consultarEstadoOperacion(client, idTicket);
+          this.consultarEstadoOperacion(client, idTicket, total);
         } else {
           this.anularOperacion(idTicket, client, 'La operación no ha podido iniciar');
           // client.emit('consultaPaytef', { error: true, mensaje: 'La operación no ha podido iniciar' });
@@ -119,7 +119,7 @@ class PaytefClass {
     });
   }
 
-  async consultarEstadoOperacion(client: Socket, idTicket: number): Promise<void> {
+  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number): Promise<void> {
     try {
       /* OBTENGO IP PAYTEF & ÚLTIMA TRANSACCIÓN DE MONGODB */
       const ipDatafono = parametrosInstance.getParametros().ipTefpay;
@@ -131,6 +131,7 @@ class PaytefClass {
       if (UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
           if (Number(resEstadoPaytef.data.result.transactionReference) === idTicket) {
             if (resEstadoPaytef.data.result.approved) {
+              movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket);
               client.emit('consultaPaytef', { error: false, operacionCorrecta: true });
             } else {
               this.anularOperacion(idTicket, client);
@@ -146,11 +147,11 @@ class PaytefClass {
           this.anularOperacion(idTicket, client, 'Operación cancelada');
         } else { // Vuelvo a empezar el ciclo
           await new Promise(r => setTimeout(r, 1000));
-          this.consultarEstadoOperacion(client, idTicket);
+          this.consultarEstadoOperacion(client, idTicket, total);
         }
       } else {
         await new Promise(r => setTimeout(r, 1000));
-        this.consultarEstadoOperacion(client, idTicket);
+        this.consultarEstadoOperacion(client, idTicket, total);
       }
     } catch(err) {
       const ipDatafono = parametrosInstance.getParametros().ipTefpay;
@@ -163,7 +164,7 @@ class PaytefClass {
   async cerrarTicket(nuevoTicket: TicketsInterface): Promise<Respuesta> {  
     if (await ticketsInstance.insertarTicket(nuevoTicket)) {
       if (await cestas.borrarCestaActiva()) { // Repasar esto porque no es la activa, sino una en concreto por id
-        movimientosInstance.nuevaSalida(nuevoTicket.total, 'Targeta', 'TARJETA', false, nuevoTicket._id);
+        
         if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
           return { error: false, info: nuevoTicket._id };
         } else {

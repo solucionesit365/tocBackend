@@ -179,19 +179,19 @@ export async function anularTicket(idTicket: number) {
         });
         const database = (await conexion).db('tocgame');
         const tickets = database.collection('tickets');
-        const resultado = tickets.insertOne(ticket);
-
-        if (ticket.tipoPago == 'TARJETA') {
-            const movimientos = database.collection('movimientos');
-            const resultado2 = movimientos.deleteOne({ idTicket });
-            if ((await resultado).acknowledged && (await resultado2).acknowledged) {
-                return true;
-            } else {
-                return false;
-            }
-        } else { // Efectivo
-            return (await resultado).acknowledged;
-        }
+        const resultado = await tickets.insertOne(ticket);
+        return resultado.acknowledged;
+        // if (ticket.tipoPago == 'TARJETA') {
+        //     const movimientos = database.collection('movimientos');
+        //     const resultado2 = movimientos.deleteOne({ idTicket });
+        //     if ((await resultado).acknowledged && (await resultado2).acknowledged) {
+        //         return true;
+        //     } else {
+        //         return false;
+        //     }
+        // } else { // Efectivo
+        //     return (await resultado).acknowledged;
+        // }
     }
     return false
      
