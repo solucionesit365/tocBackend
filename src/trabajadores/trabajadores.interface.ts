@@ -19,7 +19,7 @@ export interface SincroFichajesInterface {
             seconds: number
         }
     },
-    tipo: "ENTRADA" | "SALIDA" | "DESCANSO" | "FINDESCANSO",
+    tipo: 'ENTRADA' | 'SALIDA' | 'DESCANSO' | 'FINDESCANSO',
     enviado: boolean,
     enTransito: boolean,
     intentos: number,
@@ -28,9 +28,9 @@ export interface SincroFichajesInterface {
 }
 
 export const trabajadorVacio = {
-    _id: -1,
-    idTrabajador: -1,
-    nombre: '',
-    nombreCorto: '',
-    fichado: false
-}
+  _id: -1,
+  idTrabajador: -1,
+  nombre: '',
+  nombreCorto: '',
+  fichado: false,
+};

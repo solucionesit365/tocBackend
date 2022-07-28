@@ -1,5 +1,5 @@
 export interface CajaInterface {
-    _id: string, //siempre es 'CAJA'
+    _id: string, // siempre es 'CAJA'
     inicioTime: number,
     finalTime: number,
     idDependienta: number,
@@ -76,31 +76,31 @@ export interface CajaForSincroInterface {
 }
 
 export const cajaVacia: CajaInterface = {
-    _id: "CAJA",
-    inicioTime: null,
-    finalTime: null,
-    idDependienta: null,
-    totalApertura: null,
-    totalCierre: null,
-    calaixFetZ: null,
-    descuadre: null,
-    infoExtra: {
-        cambioInicial: null,
-        cambioFinal: null,
-        totalSalidas: null,
-        totalEntradas: null,
-        totalEnEfectivo: null,
-        totalTarjeta: null,
-        totalDeuda: null
-    },
-    primerTicket: null,
-    ultimoTicket: null,
-    recaudado: null,
-    nClientes: null,
-    detalleApertura: [],
-    detalleCierre: [],
-    enviado: false,
-    enTransito: false,
-    totalDatafono3G: null,
-    totalClearOne: null
+  _id: 'CAJA',
+  inicioTime: null,
+  finalTime: null,
+  idDependienta: null,
+  totalApertura: null,
+  totalCierre: null,
+  calaixFetZ: null,
+  descuadre: null,
+  infoExtra: {
+    cambioInicial: null,
+    cambioFinal: null,
+    totalSalidas: null,
+    totalEntradas: null,
+    totalEnEfectivo: null,
+    totalTarjeta: null,
+    totalDeuda: null,
+  },
+  primerTicket: null,
+  ultimoTicket: null,
+  recaudado: null,
+  nClientes: null,
+  detalleApertura: [],
+  detalleCierre: [],
+  enviado: false,
+  enTransito: false,
+  totalDatafono3G: null,
+  totalClearOne: null,
 };

@@ -1,4 +1,4 @@
-import { CestasInterface } from "src/cestas/cestas.interface";
+import {CestasInterface} from 'src/cestas/cestas.interface';
 
 export interface TransaccionesInterface {
     _id: string,

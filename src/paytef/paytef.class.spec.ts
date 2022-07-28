@@ -1,4 +1,4 @@
-import { PaytefClass } from './paytef.class';
+import {PaytefClass} from './paytef.class';
 
 describe('PaytefClass', () => {
   it('should be defined', () => {

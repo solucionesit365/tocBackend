@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { SocketsGateway } from './sockets.gateway';
+import {Test, TestingModule} from '@nestjs/testing';
+import {SocketsGateway} from './sockets.gateway';
 
 describe('SocketsGateway', () => {
   let gateway: SocketsGateway;

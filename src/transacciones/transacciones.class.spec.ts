@@ -1,4 +1,4 @@
-import { TransaccionesClass } from './transacciones.class';
+import {TransaccionesClass} from './transacciones.class';
 
 describe('TransaccionesClass', () => {
   it('should be defined', () => {

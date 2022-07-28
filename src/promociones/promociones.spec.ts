@@ -1,4 +1,4 @@
-import { ofertas } from './promociones.clase';
+import {ofertas} from './promociones.clase';
 
 describe('OfertasClase', () => {
   it('should be defined', () => {

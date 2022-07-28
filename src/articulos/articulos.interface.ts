@@ -4,7 +4,7 @@ export interface ArticulosInterface {
     precioConIva: number,
     precioBase: number,
     nombre: string,
-    familia: string,    
+    familia: string,
     esSumable: boolean,
     suplementos?: [],
 }

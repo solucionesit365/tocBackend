@@ -1,4 +1,4 @@
-import { TrabajadoresClase } from './trabajadores.clase';
+import {TrabajadoresClase} from './trabajadores.clase';
 
 describe('TrabajadoresClase', () => {
   it('should be defined', () => {

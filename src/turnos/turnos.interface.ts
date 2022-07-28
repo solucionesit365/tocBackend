@@ -1,5 +1,5 @@
 export interface TurnosInterface {
-    idTurno: string, 
+    idTurno: string,
     idPlan: string,
     fecha: string,
     turno: string

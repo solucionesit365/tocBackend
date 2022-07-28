@@ -1,13 +1,13 @@
 export class GlobalClase {
-    private stopNecesario: boolean;
+  private stopNecesario: boolean;
 
-    getStopNecesario(): boolean {
-        return this.stopNecesario;
-    }
+  getStopNecesario(): boolean {
+    return this.stopNecesario;
+  }
 
-    setStopNecesario(valor: boolean): void {
-        this.stopNecesario = valor;
-    }
+  setStopNecesario(valor: boolean): void {
+    this.stopNecesario = valor;
+  }
 }
 
 export const globalInstance = new GlobalClase();

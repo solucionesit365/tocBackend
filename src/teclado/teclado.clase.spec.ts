@@ -1,4 +1,4 @@
-import { TecladoClase } from './teclado.clase';
+import {TecladoClase} from './teclado.clase';
 
 describe('TecladoClase', () => {
   it('should be defined', () => {

@@ -1,4 +1,4 @@
-import { GlobalClase } from './global.clase';
+import {GlobalClase} from './global.clase';
 
 describe('GlobalClase', () => {
   it('should be defined', () => {

@@ -1,5 +1,5 @@
-import { conexion } from '../conexion/mongodb';
-import { CajaClase } from '../caja/caja.clase';
+import {conexion} from '../conexion/mongodb';
+import {CajaClase} from '../caja/caja.clase';
 
 describe('Caja', () => {
   const cajaInstance = new CajaClase();
@@ -8,17 +8,16 @@ describe('Caja', () => {
     expect(cajaInstance).toBeDefined();
   });
 
-  it('getInfoCaja', () => {    
+  it('getInfoCaja', () => {
     cajaInstance.getInfoCaja().then((caja) => {
       if (caja != null) {
-        expect(caja._id).toEqual("CAJA");
+        expect(caja._id).toEqual('CAJA');
       } else {
         expect(caja).toEqual(null);
       }
       conexion.then((client) => {
         client.close();
-      })
-      
+      });
     });
     // expect.assertions(1);
   });

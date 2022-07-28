@@ -1,4 +1,4 @@
-import { MovimientosClase } from './movimientos.clase';
+import {MovimientosClase} from './movimientos.clase';
 
 describe('MovimientosClase', () => {
   it('should be defined', () => {

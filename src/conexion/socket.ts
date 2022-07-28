@@ -1,7 +1,7 @@
-import { io } from "socket.io-client";
-import { parametrosInstance } from "../parametros/parametros.clase";
+import {io} from 'socket.io-client';
+import {parametrosInstance} from '../parametros/parametros.clase';
 
-const SERVER_URL = "https://sanpedroserver.com";
+const SERVER_URL = 'https://sanpedroserver.com';
 // const parametros = await tocGame.parametros.getParametros();
 // let tipoEntorno = '';
 
@@ -16,21 +16,21 @@ const SERVER_URL = "https://sanpedroserver.com";
 // export const socket = (parametros == null || typeof parametros.token === 'undefined') ? io.connect(tipoEntorno) : (io.connect(tipoEntorno, {query: `token=${parametros.token}`}));
 
 class TocSockets {
-    private socket: any;
+  private socket: any;
 
-    iniciarSockets() {
-        const parametros = parametrosInstance.getParametros();
-        let tipoEntorno = SERVER_URL;
-        if (tipoEntorno == SERVER_URL) {
-            this.socket = (parametros == null || typeof parametros.token === 'undefined') ? io.connect(tipoEntorno) : (io.connect(tipoEntorno, {query: `token=${parametros.token}`}));
-        } else {
-            this.socket = null;
-        }
+  iniciarSockets() {
+    const parametros = parametrosInstance.getParametros();
+    const tipoEntorno = SERVER_URL;
+    if (tipoEntorno == SERVER_URL) {
+      this.socket = (parametros == null || typeof parametros.token === 'undefined') ? io.connect(tipoEntorno) : (io.connect(tipoEntorno, {query: `token=${parametros.token}`}));
+    } else {
+      this.socket = null;
     }
+  }
 
-    emit(canal: string, data: any = null) {
+  emit(canal: string, data: any = null) {
         (data == null) ? (socket.emit(canal)) : (socket.emit(canal, data));
-    }
+  }
 }
 
 export const socket = new TocSockets();

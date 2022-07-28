@@ -1,4 +1,4 @@
-import { ParamsTicketClass } from './params-ticket.class';
+import {ParamsTicketClass} from './params-ticket.class';
 
 describe('ParamsTicketClass', () => {
   it('should be defined', () => {

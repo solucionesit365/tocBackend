@@ -1,4 +1,4 @@
-import { ParametrosClase } from './parametros.clase';
+import {ParametrosClase} from './parametros.clase';
 
 describe('ParametrosClase', () => {
   it('should be defined', () => {

@@ -12,7 +12,7 @@ export interface DevolucionesInterface {
         subtotal: number,
         unidades: number
     }[],
-    tipoPago: "DEVOLUCION",
+    tipoPago: 'DEVOLUCION',
     idTrabajador: number,
     tiposIva: {
         base1: number,

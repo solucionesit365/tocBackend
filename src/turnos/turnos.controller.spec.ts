@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TurnosController } from './turnos.controller';
+import {Test, TestingModule} from '@nestjs/testing';
+import {TurnosController} from './turnos.controller';
 
 describe('TurnosController', () => {
   let controller: TurnosController;

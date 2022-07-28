@@ -1,4 +1,4 @@
-import { Clientes } from './clientes.clase';
+import {Clientes} from './clientes.clase';
 
 describe('Clientes', () => {
   it('should be defined', () => {

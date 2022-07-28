@@ -1,4 +1,4 @@
-import { Dispositivos } from './dispositivos';
+import {Dispositivos} from './dispositivos';
 
 describe('Dispositivos', () => {
   it('should be defined', () => {

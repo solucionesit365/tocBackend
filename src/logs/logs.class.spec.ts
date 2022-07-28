@@ -1,4 +1,4 @@
-import { LogsClass } from './logs.class';
+import {LogsClass} from './logs.class';
 
 describe('LogsClass', () => {
   it('should be defined', () => {

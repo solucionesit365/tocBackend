@@ -1,4 +1,4 @@
-import { TurnosClass } from './turnos.class';
+import {TurnosClass} from './turnos.class';
 
 describe('TurnosClass', () => {
   it('should be defined', () => {

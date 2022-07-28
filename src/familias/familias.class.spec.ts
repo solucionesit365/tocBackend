@@ -1,4 +1,4 @@
-import { FamiliasClass } from './familias.class';
+import {FamiliasClass} from './familias.class';
 
 describe('FamiliasClass', () => {
   it('should be defined', () => {

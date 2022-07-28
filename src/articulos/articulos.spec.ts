@@ -1,5 +1,5 @@
 // 100%
-import { Articulos } from './articulos.clase';
+import {Articulos} from './articulos.clase';
 
 describe('Articulos', () => {
   const artiInstance = new Articulos();
@@ -13,7 +13,7 @@ describe('Articulos', () => {
   });
 
   it('getEstadoTarifaEspecial', async () => {
-    expect(typeof artiInstance.getEstadoTarifaEspecial()).toEqual("boolean");
+    expect(typeof artiInstance.getEstadoTarifaEspecial()).toEqual('boolean');
     expect(artiInstance.getEstadoTarifaEspecial()).toEqual(artiInstance.estadoTarifaVIP);
   });
 

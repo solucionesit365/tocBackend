@@ -1,32 +1,30 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { impresoraInstance } from './impresora.class';
+import {Controller, Post, Body} from '@nestjs/common';
+import {impresoraInstance} from './impresora.class';
 
 @Controller('impresora')
 export class ImpresoraController {
     @Post('imprimirTicket')
-    imprimirTicket(@Body() params) {
-        const idTicket: number = params.idTicket;
-        impresoraInstance.imprimirTicket(idTicket);
-    }
+  imprimirTicket(@Body() params) {
+    const idTicket: number = params.idTicket;
+    impresoraInstance.imprimirTicket(idTicket);
+  }
 
     @Post('abrirCajon')
     abrirCajon() {
-        impresoraInstance.abrirCajon();
+      impresoraInstance.abrirCajon();
     }
 
     @Post('imprimirEntregas')
     imprimirEntregas() {
-        return impresoraInstance.imprimirEntregas();
+      return impresoraInstance.imprimirEntregas();
     }
-    
+
     @Post('despedida')
     despedircliente() {
-            impresoraInstance.despedircliente();  
-      
-         
+      impresoraInstance.despedircliente();
     }
     @Post('bienvenida')
     binvenidacliente() {
-         impresoraInstance.binvenidacliente();
+      impresoraInstance.binvenidacliente();
     }
 }

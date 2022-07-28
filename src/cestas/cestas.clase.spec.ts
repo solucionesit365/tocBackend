@@ -1,4 +1,4 @@
-import { cestas } from './cestas.clase';
+import {cestas} from './cestas.clase';
 
 describe('CestasClase', () => {
   it('should be defined', () => {
