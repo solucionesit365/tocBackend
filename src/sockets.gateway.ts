@@ -16,17 +16,16 @@ import {Socket} from 'dgram';
 const net = require('net');
 const fs = require('fs');
 
-@WebSocketGateway({
+@WebSocketGateway(5051, {
   cors: {
     origin: true,
     credentials: true,
-    transports: ['websocket', 'polling'],
+    transports: ['websocket'],
   },
   allowEIO3: true,
 })
 
 export class SocketGateway {
-  private tpv = 0;
   @WebSocketServer()
     server: Socket;
 
@@ -35,16 +34,12 @@ export class SocketGateway {
   }
 
   handleConnection(client: any, ...args: any[]) {
-    this.tpv++;
-    console.log(process.env.npm_package_version);
-    console.log(this.tpv);
-    console.log('Hola alguien se conecto al socket 👌👌👌');
+    console.log('Nuevo cliente conectado por socket');
   }
   handleDisconnect() {
-    this.tpv--;
-    console.log('Disconnect ');
-    console.log(this.tpv);
+    console.log('Se ha desconectado un cliente del socket');
   }
+
   @SubscribeMessage('test')
   test(@MessageBody() params) {
     this.server.emit('test', 'O Rei Ezeee');

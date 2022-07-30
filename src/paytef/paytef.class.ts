@@ -92,7 +92,7 @@ class PaytefClass {
       if (!resAnulacion) {
         LogsClass.newLog('Error nuevo grave', `Ticket debía ser anulado pero no se ha podido: idTicket: ${idTicket} tiemstamp: ${Date.now()} y viene de ${msj}`);
       } else {
-        console.log("Anulación OK. Agregar idTicket a la colección de anulados");
+        LogsClass.newLog("Error en anulación", `El ticket ${idTicket} no ha podido anularse timestamp: ${Date.now()}`);
       }
     }).catch((err) => {
       console.log(err);
@@ -176,9 +176,9 @@ class PaytefClass {
             case "waitingConfirmation":
             case "finished":
               await new Promise((r) => setTimeout(r, 1000));
-              this.consultarEstadoOperacion(client, idTicket, total);
+              this.consultarEstadoOperacion(client, idTicket, total); break;
             default:
-              LogsClass.newLog("warning importante", `¡info.transactionStatus no tiene ningún valor de la documentación! - idTicket: ${idTicket} timestamp: ${Date.now()}`);
+              LogsClass.newLog("warning importante", `¡info.transactionStatus: (${resEstadoPaytef.data.info.transactionStatus}) no tiene ningún valor de la documentación! - idTicket: ${idTicket} timestamp: ${Date.now()}`);
               throw Error("¡No existe info en PayTef! Ver log warning importante");
           }
         }

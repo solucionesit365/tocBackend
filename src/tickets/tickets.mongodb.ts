@@ -166,38 +166,44 @@ export async function actualizarComentario(ticket: TicketsInterface) {
 
 export async function anularTicket(idTicket: number) {
   try {
-    const ticket = await getTicketByID(idTicket);
-    if (ticket.total > 0) {
-      const id = await this.getUltimoTicket() + 1;
-      ticket.enviado = false;
-      ticket._id = id;
-      ticket.total = ( ticket.total *-1);
-      ticket.lista.forEach((element) => {
-        element.subtotal = (element.subtotal * -1);
-      });
       const database = (await conexion).db('tocgame');
-      const tickets = database.collection('tickets');
-      const resultado = await tickets.insertOne(ticket);
-      return resultado.acknowledged;
-    }    
-  } catch (err) {
+      const ticketsAnulados = database.collection('ticketsAnulados');
+      const resultado = await ticketsAnulados.findOne({ idTicketAnulado: idTicket });
+      if (resultado === null) {
+        let ticket = await getTicketByID(idTicket);
+        if (ticket.total > 0) {
+          const id = await this.getUltimoTicket() + 1;
+          ticket.enviado = false;
+          ticket._id = id;
+          ticket.timestamp = Date.now();
+          ticket.total = ( ticket.total *-1);
+          ticket.lista.forEach((element) => {
+            element.subtotal = (element.subtotal * -1);
+          });
+          const tickets = database.collection('tickets');
+          const resultado = await tickets.insertOne(ticket);
+          await ticketsAnulados.insertOne({ idTicketAnulado: idTicket });
+          return resultado.acknowledged;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } catch (err) {
     console.log(err);
     return false;
   }
-
 }
 
-
-// export async function getDedudaDeliveroo(inicioTime: number, finalTime: number) {
-//     await
-//     const database = client.db('tocgame');
-//     const tickets = database.collection('tickets');
-//     const resultado = await tickets.aggregate([{$match: {$and: [
-//         {cliente: "CliBoti_000_{3F7EF049-80E2-4935-9366-0DB6DED30B67}"},
-//         {timestamp: {$gte: inicioTime}},
-//         {timestamp: {$lte: finalTime}}
-//     ]}}, {$group: {_id: null, suma: {$sum: "$total"}}}]);
-//
-
-//     return resultado;
+// export async function anotarAnulado(idTicket: number) {
+//   try {
+//       const database = (await conexion).db('tocgame');
+//       const tickets = database.collection('ticketsAnulados');
+//       const resultado = await tickets.insertOne({ idTicketAnulado: idTicket });
+//       return resultado.acknowledged;
+//     } catch (err) {
+//     console.log(err);
+//     return false;
+//   }
 // }

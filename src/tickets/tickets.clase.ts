@@ -48,14 +48,17 @@ export class TicketsClase {
       return null;
     });
   }
+
   anularTicket(idTicket) {
-    return schTickets.anularTicket(idTicket).then((res) => {
-      return res;
-    }).catch((err) => {
+    return schTickets.anularTicket(idTicket).catch((err) => {
       console.log(err);
       return false;
     });
   }
+
+  // anotarAnulado(idTicket: number) {
+  //   schTickets.anotarAnulado(idTicket);
+  // }
 
   getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]> {
     return schTickets.getTicketsIntervalo(fechaInicio, fechaFinal).then((resultado: TicketsInterface[]) => {
