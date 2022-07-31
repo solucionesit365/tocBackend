@@ -35,7 +35,7 @@ export class TicketsClase {
       comentario: '',
       regalo: cesta.regalo, // (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
       recibo: '',
-      anulado: false,
+      bloqueado: false,
     };
     return nuevoTicket;
   }
@@ -70,20 +70,15 @@ export class TicketsClase {
   }
 
   getUltimoTicket() {
-    return schTickets.getUltimoTicket().then((ultimoTicket: number) => {
-      if (ultimoTicket != null) {
-        return parametrosInstance.getEspecialParametros().then((res) => {
-          if (res.ultimoTicket > ultimoTicket) {
-            return res.ultimoTicket;
-          }
-          return ultimoTicket;
-        }).catch((err) => {
-          console.log(err.message);
-          return 0;
-        });
+    return parametrosInstance.getEspecialParametros().then((res) => {
+      if (typeof res.ultimoTicket === "number") {
+        return res.ultimoTicket;
       } else {
         return 0;
       }
+    }).catch((err) => {
+      console.log(err.message);
+      return 0;
     });
   }
 
@@ -164,7 +159,7 @@ export class TicketsClase {
       intentos: 0,
       comentario: '',
       regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
-      anulado: false,
+      bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
@@ -221,7 +216,7 @@ export class TicketsClase {
       intentos: 0,
       comentario: '',
       regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
-      anulado: false,
+      bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
@@ -280,7 +275,7 @@ export class TicketsClase {
       intentos: 0,
       comentario: '',
       regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
-      anulado: false,
+      bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
@@ -363,7 +358,7 @@ export class TicketsClase {
       enviado: false,
       intentos: 0,
       comentario: '',
-      anulado: false,
+      bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
@@ -422,7 +417,7 @@ export class TicketsClase {
       enviado: false,
       intentos: 0,
       comentario: '',
-      anulado: false,
+      bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
@@ -458,6 +453,20 @@ export class TicketsClase {
     return schTickets.actualizarComentario(ticket).then((res) => {
       return res.acknowledged;
     }).catch((err) => {
+      console.log(err);
+      return false;
+    });
+  }
+
+  desbloquearTicket(idTicket: number) {
+    return schTickets.desbloquearTicket(idTicket).catch((err) => {
+      console.log(err);
+      return false;
+    });
+  }
+
+  borrarTicket(idTicket: number) {
+    return schTickets.borrarTicket(idTicket).catch((err) => {
       console.log(err);
       return false;
     });

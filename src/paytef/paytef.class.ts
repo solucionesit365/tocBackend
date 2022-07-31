@@ -43,6 +43,7 @@ class PaytefClass {
           const total = this.getTotal(cesta);
           if (cesta.lista.length > 0 && total > 0) {
             const nuevoTicket = ticketsInstance.generarObjetoTicket((await ticketsInstance.getUltimoTicket())+1, total, cesta, 'TARJETA', idTrabajadorActivo, idCliente);
+            nuevoTicket.bloqueado = true;
             const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket);
             if (resCierreTicket.error === false) { // Ticket creado
               this.iniciarDatafono(resCierreTicket.info, total, client);
@@ -88,11 +89,9 @@ class PaytefClass {
 
   /* Anula el ticket creado (por algún error). NO detiene el ciclo (sin respuesta al cliente) */
   anularOperacion(idTicket: number, msj = '') {
-    ticketsInstance.anularTicket(idTicket).then((resAnulacion) => {
-      if (!resAnulacion) {
-        LogsClass.newLog('Error nuevo grave', `Ticket debía ser anulado pero no se ha podido: idTicket: ${idTicket} tiemstamp: ${Date.now()} y viene de ${msj}`);
-      } else {
-        LogsClass.newLog("Error en anulación", `El ticket ${idTicket} no ha podido anularse timestamp: ${Date.now()}`);
+    ticketsInstance.borrarTicket(idTicket).then((resAnulacion) => {
+      if (resAnulacion == false) {
+        LogsClass.newLog('Error nuevo grave', `Ticket debía ser borrado pero no se ha podido: idTicket: ${idTicket} tiemstamp: ${Date.now()} y viene de ${msj}`);
       }
     }).catch((err) => {
       console.log(err);
@@ -151,6 +150,7 @@ class PaytefClass {
       if (UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
         if (Number(resEstadoPaytef.data.result.transactionReference) == idTicket) {
           if (resEstadoPaytef.data.result.approved) {
+            ticketsInstance.desbloquearTicket(idTicket);
             movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket);
             client.emit('consultaPaytef', { // Operación aprobada. Todo OK
               error: false,

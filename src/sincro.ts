@@ -16,16 +16,12 @@ function sincronizarTickets() {
     if (parametros != null) {
       ticketsInstance.getTicketMasAntiguo().then((res) => {
         if (res.length > 0) {
-          emitSocket('sincroTickets', {
-            parametros,
-            arrayTickets: res,
-          });
-
-          // socket.emit('sincroTickets', {
-          //     parametros,
-          //     arrayTickets: res
-          // });
-          // console.log(socket.sendBuffer);
+          if (res[0].bloqueado === false) {
+            emitSocket('sincroTickets', {
+              parametros,
+              arrayTickets: res,
+            });
+          }
         }
       }).catch((err) => {
         console.log(err);

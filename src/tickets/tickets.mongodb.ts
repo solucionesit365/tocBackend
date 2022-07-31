@@ -1,6 +1,8 @@
 import {conexion} from '../conexion/mongodb';
 import {TicketsInterface} from './tickets.interface';
 import {UtilesModule} from '../utiles/utiles.module';
+import { ticketsInstance } from './tickets.clase';
+import { parametrosInstance } from '../parametros/parametros.clase';
 
 export async function limpiezaTickets() {
   const database = (await conexion).db('tocgame');
@@ -143,6 +145,13 @@ export async function nuevoTicket(ticket: any) {
   return resultado;
 }
 
+export async function desbloquearTicket(idTicket: number) {
+  const database = (await conexion).db('tocgame');
+  const tickets = database.collection('tickets');
+  const resultado = await tickets.updateOne({ _id: idTicket }, {$set: { "bloqueado": false }}, { upsert: true });
+  return resultado.acknowledged;
+}
+
 export async function actualizarEstadoTicket(ticket: TicketsInterface) {
   const database = (await conexion).db('tocgame');
   const tickets = database.collection('tickets');
@@ -164,6 +173,20 @@ export async function actualizarComentario(ticket: TicketsInterface) {
   return resultado;
 }
 
+export async function borrarTicket(idTicket: number) {
+  try {
+    const database = (await conexion).db('tocgame');
+    const tickets = database.collection('tickets');
+    const resultado = await tickets.deleteOne({ _id: idTicket });
+    const resSetUltimoTicket = await parametrosInstance.setUltimoTicket((idTicket-1 < 0) ? (0) : (idTicket-1));
+    return (resultado.acknowledged && resSetUltimoTicket);
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+}
+
+/* Solo se invoca manualmente desde la lista de tickets (frontend dependienta) */
 export async function anularTicket(idTicket: number) {
   try {
       const database = (await conexion).db('tocgame');
@@ -171,8 +194,11 @@ export async function anularTicket(idTicket: number) {
       const resultado = await ticketsAnulados.findOne({ idTicketAnulado: idTicket });
       if (resultado === null) {
         let ticket = await getTicketByID(idTicket);
+        if (ticket.tipoPago == "TARJETA") {
+          throw Error("Por el momento no es posible anular un ticket pagado con tarjeta");
+        }
         if (ticket.total > 0) {
-          const id = await this.getUltimoTicket() + 1;
+          const id = await ticketsInstance.getUltimoTicket() + 1;
           ticket.enviado = false;
           ticket._id = id;
           ticket.timestamp = Date.now();
@@ -183,7 +209,8 @@ export async function anularTicket(idTicket: number) {
           const tickets = database.collection('tickets');
           const resultado = await tickets.insertOne(ticket);
           await ticketsAnulados.insertOne({ idTicketAnulado: idTicket });
-          return resultado.acknowledged;
+          const resSetUltimoTicket = await parametrosInstance.setUltimoTicket(ticket._id);
+          return (resultado.acknowledged && resSetUltimoTicket);
         } else {
           return false;
         }
