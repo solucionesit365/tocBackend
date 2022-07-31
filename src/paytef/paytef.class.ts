@@ -166,7 +166,7 @@ class PaytefClass {
         }
       } else { // Aún no existe el resultado, pero sí el estado del datáfono
           switch (resEstadoPaytef.data.info.transactionStatus) {
-            case "cancelling": this.anularOperacion(idTicket, "Operación cancelada"); break;
+            case "cancelling": throw Error("Operación cancelada"); break;
             case "none":
             case "starting":
             case "waitingForUser":
