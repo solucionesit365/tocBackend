@@ -153,7 +153,7 @@ function limpiezaProfunda(): void {
   limpiezaMovimientos();
 }
 
-setInterval(sincronizarTickets, 30000);
+setInterval(sincronizarTickets, 8000);
 setInterval(sincronizarCajas, 40000);
 setInterval(sincronizarMovimientos, 50000);
 setInterval(sincronizarFichajes, 20000);
