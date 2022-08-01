@@ -16,7 +16,7 @@ function sincronizarTickets() {
     if (parametros != null) {
       ticketsInstance.getTicketMasAntiguo().then((res) => {
         if (res.length > 0) {
-          if (res[0].bloqueado === false) {
+          if (!Boolean(res[0].bloqueado) === true) {
             emitSocket('sincroTickets', {
               parametros,
               arrayTickets: res,
