@@ -436,8 +436,11 @@ export class TicketsClase {
     return false;
   }
 
-  getTicketMasAntiguo() {
-    return schTickets.getTicketMasAntiguo();
+  getTicketMasAntiguo(): Promise<TicketsInterface> {
+    return schTickets.getTicketMasAntiguo().catch((err) => {
+      console.log(err);
+      return null;
+    });
   }
 
   actualizarEstadoTicket(ticket: TicketsInterface) {

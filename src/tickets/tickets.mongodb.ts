@@ -134,7 +134,7 @@ export async function getUltimoTicket(): Promise<number> {
 export async function getTicketMasAntiguo() {
   const database = (await conexion).db('tocgame');
   const tickets = database.collection('tickets');
-  const resultado = await (await tickets.find({enviado: false}, {sort: {_id: 1}, limit: 1})).toArray();
+  const resultado = await tickets.findOne({enviado: false}, {sort: {_id: 1}});
   return resultado;
 }
 

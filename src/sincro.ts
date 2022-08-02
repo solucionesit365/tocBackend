@@ -14,12 +14,12 @@ import {limpiezaMovimientos} from './movimientos/movimientos.mongodb';
 function sincronizarTickets() {
   parametrosInstance.getEspecialParametros().then((parametros) => {
     if (parametros != null) {
-      ticketsInstance.getTicketMasAntiguo().then((res) => {
-        if (res.length > 0) {
-          if (!Boolean(res[0].bloqueado) === true) {
-            emitSocket('sincroTickets', {
+      ticketsInstance.getTicketMasAntiguo().then((ticket) => {
+        if (ticket) {
+          if (!Boolean(ticket.bloqueado) === true) {
+            emitSocket("sincroTicketsNueva", {
               parametros,
-              arrayTickets: res,
+              arrayTickets: ticket,
             });
           }
         }
@@ -27,7 +27,7 @@ function sincronizarTickets() {
         console.log(err);
       });
     } else {
-      console.log('No hay parámetros definidos en la BBDD');
+      console.log("No hay parámetros definidos en la BBDD");
     }
   }).catch((err) => {
     console.log(err);
