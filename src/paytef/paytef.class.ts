@@ -46,7 +46,7 @@ class PaytefClass {
             nuevoTicket.bloqueado = true;
             const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket);
             if (resCierreTicket.error === false) { // Ticket creado
-              this.iniciarDatafono(resCierreTicket.info, total, client);
+              this.iniciarDatafono(resCierreTicket.info, total, client, cesta._id);
             } else {
               throw Error(resCierreTicket.mensaje);
             }
@@ -99,7 +99,7 @@ class PaytefClass {
     });
   }
 
-  iniciarDatafono(idTicket: number, total: number, client: Socket) {
+  iniciarDatafono(idTicket: number, total: number, client: Socket, idCesta: number) {
     const params = parametrosInstance.getParametros();
     if (UtilesModule.checkVariable(params.ipTefpay)) {
       axios.post(`http://${params.ipTefpay}:8887/transaction/start`, {
@@ -117,7 +117,7 @@ class PaytefClass {
       }).then((respuestaPaytef: any) => {
         if (respuestaPaytef.data.info.started) {
           // Arranca el ciclo de comprobaciones
-          this.consultarEstadoOperacion(client, idTicket, total);
+          this.consultarEstadoOperacion(client, idTicket, total, idCesta);
         } else {
           throw Error("La operación no ha podido iniciar");
         }
@@ -139,7 +139,7 @@ class PaytefClass {
   }
 
   /* Función recursiva y asíncrona */
-  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number): Promise<void> {
+  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number, idCesta: number): Promise<void> {
     try {
       const ipDatafono = parametrosInstance.getParametros().ipTefpay;
       const resEstadoPaytef: any = await axios.post(`http://${ipDatafono}:8887/transaction/poll`, {
@@ -152,6 +152,7 @@ class PaytefClass {
           if (resEstadoPaytef.data.result.approved) {
             ticketsInstance.desbloquearTicket(idTicket);
             movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket);
+            await cestas.borrarCesta(idCesta);
             client.emit('consultaPaytef', { // Operación aprobada. Todo OK
               error: false,
             });
@@ -176,7 +177,7 @@ class PaytefClass {
             case "waitingConfirmation":
             case "finished":
               await new Promise((r) => setTimeout(r, 1000));
-              this.consultarEstadoOperacion(client, idTicket, total); break;
+              this.consultarEstadoOperacion(client, idTicket, total, idCesta); break;
             default:
               LogsClass.newLog("warning importante", `¡info.transactionStatus: (${resEstadoPaytef.data.info.transactionStatus}) no tiene ningún valor de la documentación! - idTicket: ${idTicket} timestamp: ${Date.now()}`);
               throw Error("¡No existe info en PayTef! Ver log warning importante");
