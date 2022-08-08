@@ -18,22 +18,20 @@ function emitSocket(canal: string, datos: any = null) {
 
 socket.on('resSincroTickets', async (data) => {
   if (data.error == false) {
-    if (data.arrayTickets.length > 0) {
-      if (await ticketsInstance.actualizarEstadoTicket(data.arrayTickets[0])) {
+    if (data.ticket) {
+      if (await ticketsInstance.actualizarEstadoTicket(data.ticket)) {
         sincronizarTickets();
       } else {
-        console.log('Error al actualizar el ticket');
+        console.log("Error al actualizar el ticket");
       }
-    } else {
-      console.log('Nada que insertar');
     }
   } else {
-    if (typeof data.arrayTickets[0].comentario == 'string') {
-      if (data.mensaje == 'SanPedro: Error, parámetros incorrectos') {
-        data.arrayTickets[0].comentario = 'SanPedro: Error, parámetros incorrectos';
+    if (typeof data.ticket.comentario == "string") {
+      if (data.mensaje == "SanPedro: Error, parámetros incorrectos") {
+        data.ticket.comentario = "SanPedro: Error, parámetros incorrectos";
       }
 
-      ticketsInstance.actualizarComentario(data.arrayTickets[0]);
+      ticketsInstance.actualizarComentario(data.ticket);
     }
   }
 });
