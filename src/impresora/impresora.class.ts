@@ -1,7 +1,6 @@
 import {articulosInstance} from '../articulos/articulos.clase';
 import {paramsTicketInstance} from '../params-ticket/params-ticket.class';
 import {ticketsInstance} from '../tickets/tickets.clase';
-import {TicketsInterface} from '../tickets/tickets.interface';
 import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
 import {TrabajadoresInterface} from '../trabajadores/trabajadores.interface';
 import {clienteInstance} from '../clientes/clientes.clase';
@@ -9,6 +8,9 @@ import {parametrosInstance} from '../parametros/parametros.clase';
 import {Dispositivos} from '../dispositivos';
 import {devolucionesInstance} from 'src/devoluciones/devoluciones.clase';
 import axios from 'axios';
+import { cajaInstance } from "../caja/caja.clase";
+import { CajaForSincroInterface } from "../caja/caja.interface";
+import { movimientosInstance } from '../movimientos/movimientos.clase';
 
 
 const dispositivos = new Dispositivos();
@@ -104,6 +106,33 @@ export class Impresora {
       // errorImpresora(err, event);
     }
   }
+
+  async imprimirUltimoCierre(): Promise<void> {
+    try {
+      const ultimoCierre: CajaForSincroInterface = await cajaInstance.getUltimoCierre();
+      const nombreTrabajador = (await trabajadoresInstance.getTrabajador(ultimoCierre.idDependienta)).nombreCorto;
+      const arrayMovimientos = await movimientosInstance.getMovimientosIntervalo(ultimoCierre.inicioTime, ultimoCierre.finalTime);
+      const nombreTienda = parametrosInstance.getParametros().nombreTienda;
+      const tipoImpresora = parametrosInstance.getParametros().tipoImpresora;
+      this.imprimirCaja(
+        ultimoCierre.calaixFetZ,
+        nombreTrabajador,
+        ultimoCierre.descuadre,
+        ultimoCierre.nClientes,
+        ultimoCierre.recaudado,
+        arrayMovimientos,
+        nombreTienda,
+        ultimoCierre.inicioTime,
+        ultimoCierre.finalTime,
+        ultimoCierre.totalApertura,
+        ultimoCierre.totalCierre,
+        tipoImpresora,
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async despedircliente() {
     try {
       permisosImpresora();

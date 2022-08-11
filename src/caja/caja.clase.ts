@@ -146,42 +146,33 @@ export class CajaClase {
     return schCajas.nuevoItemSincroCajas(cajaInsertar);
   }
 
-  async cerrarCaja(total: number, detalleCierre, guardarInfoMonedas, totalDatafono3G: number) { // Promise<boolean> {
-    const estaAbierta = await this.cajaAbierta();
+  async cerrarCaja(total: number, detalleCierre, guardarInfoMonedas, totalDatafono3G: number) {
+    try {
+      const estaAbierta = await this.cajaAbierta();
 
-    if (estaAbierta) {
-      let cajaActual: CajaInterface = await this.getInfoCaja();
-      cajaActual.totalCierre = total;
-      cajaActual.detalleCierre = detalleCierre;
-      cajaActual.finalTime = Date.now();
-      cajaActual.idDependienta = await trabajadoresInstance.getCurrentIdTrabajador(); // this.getCurrentTrabajador()._id;
-      cajaActual.totalDatafono3G = totalDatafono3G;
-      cajaActual.totalClearOne = 0;
-      cajaActual = await this.calcularDatosCaja(cajaActual);
-      const deudaDeliveroo = await schTickets.getDedudaDeliveroo(cajaActual.inicioTime, cajaActual.finalTime);
-      const deudaGlovo = await schTickets.getDedudaGlovo(cajaActual.inicioTime, cajaActual.finalTime);
-      const totalTkrs = await schTickets.getTotalTkrs(cajaActual.inicioTime, cajaActual.finalTime);
-
-      const objEmail = {
-        caja: cajaActual,
-        nombreTienda: parametrosInstance.getParametros().nombreTienda,
-        nombreDependienta: (await trabajadoresInstance.getCurrentTrabajador()).nombre,
-        arrayMovimientos: await movimientosInstance.getMovimientosIntervalo(cajaActual.inicioTime, cajaActual.finalTime), // ipcRenderer.sendSync('get-rango-movimientos', {fechaInicio: cajaActual.inicioTime, fechaFinal: cajaActual.finalTime}),
-        deudaGlovo: deudaGlovo,
-        deudaDeliveroo: deudaDeliveroo,
-        totalTkrs: totalTkrs,
-      };
-
-      const res = await this.nuevoItemSincroCajas(cajaActual);
-      if (res.acknowledged) {
-        // ipcRenderer.send('enviar-email', objEmail);
-        const res2 = await schMonedas.setMonedas({
-          _id: 'INFO_MONEDAS',
-          infoDinero: guardarInfoMonedas,
-        });
-        if (res2.acknowledged) {
-          if (await this.borrarCaja()) {
-            return true;
+      if (estaAbierta) {
+        let cajaActual: CajaInterface = await this.getInfoCaja();
+        cajaActual.totalCierre = total;
+        cajaActual.detalleCierre = detalleCierre;
+        cajaActual.finalTime = Date.now();
+        cajaActual.idDependienta = await trabajadoresInstance.getCurrentIdTrabajador(); // this.getCurrentTrabajador()._id;
+        cajaActual.totalDatafono3G = totalDatafono3G;
+        cajaActual.totalClearOne = 0;
+        cajaActual = await this.calcularDatosCaja(cajaActual);
+    
+        const res = await this.nuevoItemSincroCajas(cajaActual);
+        if (res.acknowledged) {
+          // ipcRenderer.send('enviar-email', objEmail);
+          const res2 = await schMonedas.setMonedas({
+            _id: 'INFO_MONEDAS',
+            infoDinero: guardarInfoMonedas,
+          });
+          if (res2.acknowledged) {
+            if (await this.borrarCaja()) {
+              return true;
+            } else {
+              return false;
+            }
           } else {
             return false;
           }
@@ -191,7 +182,8 @@ export class CajaClase {
       } else {
         return false;
       }
-    } else {
+    } catch (err) {
+      console.log("Backend: ", err);
       return false;
     }
   }
@@ -207,6 +199,10 @@ export class CajaClase {
       console.log(err);
       return false;
     });
+  }
+
+  getUltimoCierre() {
+    return schCajas.getUltimoCierre();
   }
 
   async calcularDatosCaja(unaCaja: CajaInterface): Promise<CajaInterface> {

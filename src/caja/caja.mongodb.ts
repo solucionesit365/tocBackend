@@ -21,6 +21,18 @@ export async function guardarMonedas(arrayMonedas: any, tipo: 'APERTURA' | 'CLAU
   const resultado = await caja.updateOne({_id: tipo}, {$set: {'array': arrayMonedas}}, {upsert: true});
   return resultado;
 }
+export async function getUltimoCierre():Promise<any> {
+  try {
+    const database = (await conexion).db('tocgame');
+    const sincroCajas = database.collection('sincro-cajas');
+    const resultado = await sincroCajas.findOne({ enviado: false }, { sort: { _id: 1 } });
+    return resultado;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+
+}
 
 export async function getMonedas(tipo: 'APERTURA' | 'CLAUSURA') {
   const database = (await conexion).db('tocgame');
