@@ -1,6 +1,3 @@
-// 100%
-import {globalInstance} from '../global/global.clase';
-import {socket} from '../conexion/socket';
 import {SincroFichajesInterface, TrabajadoresInterface} from './trabajadores.interface';
 import * as schTrabajadores from './trabajadores.mongodb';
 import {parametrosInstance} from '../parametros/parametros.clase';
@@ -128,7 +125,7 @@ export class TrabajadoresClase {
     });
   }
 
-  getTrabajadoresFichados() {
+  getTrabajadoresFichados(): Promise<any> {
     return schTrabajadores.getTrabajadoresFichados();
   }
 

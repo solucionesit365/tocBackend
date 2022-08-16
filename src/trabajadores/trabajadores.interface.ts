@@ -3,7 +3,8 @@ export interface TrabajadoresInterface {
     idTrabajador: number,
     nombre: string,
     nombreCorto: string,
-    fichado: boolean
+    fichado: boolean,
+    idCesta: number
 }
 
 export interface SincroFichajesInterface {

@@ -40,7 +40,7 @@ export class CestaClase {
   }
 
   getCesta(idCesta: number): Promise<CestasInterface> {
-    return schCestas.getCestaConcreta(idCesta);
+    return schCestas.getCestaByID(idCesta);
   }
 
   getCestaRandom(): Promise<CestasInterface> {

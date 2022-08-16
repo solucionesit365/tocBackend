@@ -82,46 +82,15 @@ export class CestasController {
     }
 
     @Post('getCesta')
-    getCesta() {
-      // params.id = 1631781881687; // para postman
-      // params.idArticulo = 8571;
-
-      return cestas.getCestaRandom().then((res) => {
-        return res;
-      }).catch((err) => {
-        return {
-          okey: false,
-          error: 'Error en borrarItemCesta',
-        };
-      });
-    }
-
-    @Post('getCestaDiferente')
-    getCestaDiferent(@Body() params) {
-      // params.id = 1631781881687; // para postman
-      // params.idArticulo = 8571;
-      if (params.id_cesta) {
-        return cestas.getCestaDiferente(params.id_cesta).then((res) => {
-          return res;
-        }).catch((err) => {
-          return {
-            okey: false,
-            error: 'Error en borrarItemCesta',
-          };
+    getCesta(@Body() params) {
+      if (UtilesModule.checkVariable(params.idCesta)) {
+        return cestas.getCesta(params.idCesta).catch((err) => {
+          console.log(err);
+          return { error: true, mensaje: err.message };
         });
+      } else {
+        return { error: true, mensaje: "Backend: Faltan parámetros en cestas/getCesta" };
       }
-    }
-    @Post('getCestaCurrent')
-    PostCestaCurrent(@Body() params) {
-      return cestas.getCestaByID(params.idCesta).then((res) => {
-        if (res) {
-          return {error: false, info: res};
-        }
-        return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID'};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH'};
-      });
     }
 
     @Post('getCestaByID')

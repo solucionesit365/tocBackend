@@ -21,7 +21,7 @@ export async function getCestaByTrabajadorID(idTrabajador: number) {
   const resultado = await cesta.findOne({idTrabajador: idTrabajador});
   return resultado;
 }
-export async function getCestaByID(idCesta: number) {
+export async function getCestaByID(idCesta: number): Promise<any> {
   const database = (await conexion).db('tocgame');
   const cesta = database.collection('cestas');
   const resultado = await cesta.findOne({_id: idCesta});

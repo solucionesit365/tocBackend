@@ -28,6 +28,8 @@ import {PromocionesController} from './promociones/promociones.controller';
 import {DobleMenusController} from './doble-menus/doble-menus.controller';
 import {TransaccionesController} from './transacciones/transacciones.controller';
 import {ApagarController} from './apagar/apagar.controller';
+import { DoctorController } from './doctor/doctor.controller';
+import { SatelitesController } from './satelites/satelites.controller';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -43,7 +45,7 @@ import {ApagarController} from './apagar/apagar.controller';
     ParametrosController,
     TicketsController,
     ApagarController,
-    TrabajadoresController, CajaController, ClientesController, ImpresoraController, DevolucionesController, MovimientosController, PruebasController, InstaladorController, FamiliasController, ParamsTicketController, PaytefController, VersionController, TestController, TurnosController, PromocionesController, DobleMenusController, TransaccionesController],
+    TrabajadoresController, CajaController, ClientesController, ImpresoraController, DevolucionesController, MovimientosController, PruebasController, InstaladorController, FamiliasController, ParamsTicketController, PaytefController, VersionController, TestController, TurnosController, PromocionesController, DobleMenusController, TransaccionesController, DoctorController, SatelitesController],
   providers: [SocketGateway],
 })
 export class AppModule {}
