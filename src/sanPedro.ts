@@ -6,8 +6,8 @@ import {trabajadoresInstance} from './trabajadores/trabajadores.clase';
 import {devolucionesInstance} from './devoluciones/devoluciones.clase';
 
 const io = require('socket.io-client');
-const socket = io('https://sanpedro.cloud'); // NORMAL //io('http://34.78.247.153:3001'); // NORMAL
-// const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
+//const socket = io('https://sanpedro.cloud'); // NORMAL //io('http://34.78.247.153:3001'); // NORMAL
+const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
 
 
 function emitSocket(canal: string, datos: any = null) {
@@ -20,7 +20,7 @@ socket.on('resSincroTickets', async (data) => {
   if (data.error == false) {
     if (data.ticket) {
       if (await ticketsInstance.actualizarEstadoTicket(data.ticket)) {
-        sincronizarTickets();
+        sincronizarTickets(true);
       } else {
         console.log("Error al actualizar el ticket");
       }
@@ -69,7 +69,7 @@ socket.on('resMovimientos', (data) => {
   if (data.error == false) {
     movimientosInstance.actualizarEstadoMovimiento(data.movimiento).then((res) => {
       if (res) {
-        sincronizarMovimientos();
+        sincronizarMovimientos(true);
       } else {
         console.log('Error al actualizar el estado del movimiento');
       }

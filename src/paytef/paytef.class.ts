@@ -161,7 +161,12 @@ class PaytefClass {
           }
         } else if (resEstadoPaytef.data.result.approved) {
           LogsClass.newLog('Error nuevo (sin referencia)', `Ticket aprobado por PayTef y creado en el toc, pero no coincide la referencia: referenciaPaytef: ${Number(resEstadoPaytef.data.result.transactionReference)} idTicketFuncion: ${idTicket} timestamp: ${Date.now()}`);
-          client.emit('consultaPaytef', { error: false });
+          ticketsInstance.desbloquearTicket(idTicket);
+          movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket);
+          await cestas.borrarCesta(idCesta);
+          client.emit('consultaPaytef', { // Operación aprobada. Todo OK
+            error: false,
+          });
         } else {
           throw Error("Operación denegada por PayTef. 2");
         }

@@ -11,27 +11,35 @@ import {limpiezaFichajes} from './trabajadores/trabajadores.mongodb';
 import {limpiezaCajas} from './caja/caja.mongodb';
 import {limpiezaMovimientos} from './movimientos/movimientos.mongodb';
 
-function sincronizarTickets() {
-  parametrosInstance.getEspecialParametros().then((parametros) => {
-    if (parametros != null) {
-      ticketsInstance.getTicketMasAntiguo().then((ticket) => {
+let enProcesoTickets = false;
+let enProcesoMovimientos = false;
+
+async function sincronizarTickets(continuar: boolean = false) {
+  try {
+    if (!enProcesoTickets || continuar) {
+      enProcesoTickets = true;
+      const parametros = await parametrosInstance.getEspecialParametros();
+      if (parametros != null) {
+        const ticket = await ticketsInstance.getTicketMasAntiguo();
         if (ticket) {
           if (!Boolean(ticket.bloqueado) === true) {
             emitSocket("sincroTicketsNueva", {
               parametros,
               arrayTickets: ticket,
             });
+            return true;
           }
         }
-      }).catch((err) => {
-        console.log(err);
-      });
-    } else {
-      console.log("No hay parámetros definidos en la BBDD");
+      } else {
+        console.log("No hay parámetros definidos en la BBDD");
+      }
     }
-  }).catch((err) => {
+    enProcesoTickets = false;
+    return false;
+  } catch (err) {
+    enProcesoTickets = false;
     console.log(err);
-  });
+  }
 }
 
 function sincronizarCajas() {
@@ -60,30 +68,29 @@ function sincronizarCajas() {
   });
 }
 
-function sincronizarMovimientos() {
-  parametrosInstance.getEspecialParametros().then((parametros) => {
-    if (parametros != null) {
-      movimientosInstance.getMovimientoMasAntiguo().then((res) => {
+async function sincronizarMovimientos(continuar: boolean = false) {
+  try {
+    if (!enProcesoMovimientos || continuar) {
+      enProcesoMovimientos = true;
+      const parametros = await parametrosInstance.getEspecialParametros();
+      if (parametros != null) {
+        const res = await movimientosInstance.getMovimientoMasAntiguo();
         if (res != null) {
-          emitSocket('sincroMovimientos', {
+          emitSocket("sincroMovimientos", {
             parametros,
             movimiento: res,
           });
-
-          // socket.emit('sincroMovimientos', {
-          //     parametros,
-          //     movimiento: res
-          // });
+          return true;
         }
-      }).catch((err) => {
-        console.log(err);
-      });
-    } else {
-      console.log('No hay parámetros definidos en la BBDD');
+      } else {
+        console.log('No hay parámetros definidos en la BBDD');
+      }
     }
-  }).catch((err) => {
+    enProcesoMovimientos = false;
+  } catch (err) {
+    enProcesoMovimientos = false;
     console.log(err);
-  });
+  }
 }
 
 function sincronizarFichajes() {
