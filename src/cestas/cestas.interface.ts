@@ -34,7 +34,4 @@ export interface CestasInterface {
         },
         regalo?: boolean
     }[],
-    nombreCesta?: string;
-    idCestaSincro?: string,
-    idTrabajador: number
 }

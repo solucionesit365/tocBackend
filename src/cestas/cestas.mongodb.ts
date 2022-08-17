@@ -1,3 +1,4 @@
+import { TrabajadoresInterface } from 'src/trabajadores/trabajadores.interface';
 import {conexion} from '../conexion/mongodb';
 import {CestasInterface} from './cestas.interface';
 
@@ -28,19 +29,29 @@ export async function getCestaByID(idCesta: number): Promise<any> {
   return resultado;
 }
 
-
-export async function borrarCestaTrabajador(idTrabajador: string) {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await cesta.deleteMany({idTrabajador: idTrabajador});
-  console.log(resultado);
-  return resultado;
+/* Eze v23 */
+export async function borrarCestaDelTrabajador(idTrabajador: string) {
+  try {
+    const database = (await conexion).db("tocgame");
+    const trabajadores = database.collection("trabajadores");
+    const trabajador = await trabajadores.findOne({ _id: idTrabajador });
+    if (trabajador) {
+      const cesta = database.collection("cestas");
+      const resultado = await cesta.deleteOne({ _id: trabajador.idCesta });
+      return resultado.acknowledged;
+    } else {
+      throw Error("No existe el trabajador");
+    }
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 }
 
-export async function eliminarCesta(nombre: string) {
+export async function eliminarCesta(idCesta: number) {
   const database = (await conexion).db('tocgame');
   const cesta = database.collection('cestas');
-  const resultado = await cesta.deleteMany({_id: nombre.toString()});
+  const resultado = await cesta.deleteOne({_id: idCesta});
   return resultado;
 }
 
@@ -96,9 +107,7 @@ export async function setCesta(cesta: CestasInterface) {
   const resultado = await unaCesta.replaceOne({_id: cesta._id}, {
     tiposIva: cesta.tiposIva,
     lista: cesta.lista,
-    nombreCesta: (cesta.nombreCesta != undefined || cesta.nombreCesta != '') ? (cesta.nombreCesta) : ('PRINCIPAL'),
     regalo: (cesta.regalo != undefined) ? (cesta.regalo): (false),
-    idTrabajador: cesta.idTrabajador,
   }, {upsert: true});
 
   return resultado;

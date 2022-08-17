@@ -313,9 +313,9 @@ export class CestasController {
     }
 
 
-    @Post('borrarCestaTrabajador')
-    borrarCestaTrabajador(@Body() params) {
-      return cestas.borrarCestaTrabajador(params.id).then((res) => {
+    @Post('borrarCestaDelTrabajador')
+    borrarCestaDelTrabajador(@Body() params) {
+      return cestas.borrarCestaDelTrabajador(params.id).then((res) => {
         if (res) {
           return cestas.getTodasCestas().then((listaCestas) => {
             if (listaCestas.length > 0) {

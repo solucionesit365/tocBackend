@@ -1,10 +1,12 @@
 export interface TrabajadoresInterface {
-    _id: number,
-    idTrabajador: number,
+    _id: number, // IGUAL A idTrabajador
+    idTrabajador: number, // IGUAL A _id
     nombre: string,
     nombreCorto: string,
     fichado: boolean,
-    idCesta: number
+    idCesta: number,
+    satelite: string,
+    descansando: boolean,
 }
 
 export interface SincroFichajesInterface {
@@ -22,11 +24,9 @@ export interface SincroFichajesInterface {
     },
     tipo: 'ENTRADA' | 'SALIDA' | 'DESCANSO' | 'FINDESCANSO',
     enviado: boolean,
-    enTransito: boolean,
-    intentos: number,
-    comentario: string,
-    idPlan: string
 }
+
+export type TiposSincroFichaje = "ENTRADA" | "SALIDA" | "DESCANSO" | "FINDESCANSO";
 
 export const trabajadorVacio = {
   _id: -1,
@@ -34,4 +34,7 @@ export const trabajadorVacio = {
   nombre: '',
   nombreCorto: '',
   fichado: false,
+  idCesta: null,
+  satelite: null,
+  descansando: false,
 };
