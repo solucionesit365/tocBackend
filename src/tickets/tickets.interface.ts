@@ -22,7 +22,7 @@ export interface TicketsInterface {
         subtotal: number,
         unidades: number
     }[],
-    tipoPago: string,
+    tipoPago: TiposPago,
     idTrabajador: number,
     tiposIva: {
         base1: number,
@@ -36,9 +36,6 @@ export interface TicketsInterface {
         importe3: number
     },
     enviado: boolean,
-    enTransito: boolean,
-    intentos: number,
-    comentario: string,
     cliente?: string,
     infoClienteVip?: {
         esVip: boolean,
@@ -53,3 +50,5 @@ export interface TicketsInterface {
     recibo?: string,
     bloqueado: boolean
 }
+
+export type TiposPago = "EFECTIVO" | "TARJETA" | "TKRS" | "DEUDA" | "CONSUMO_PERSONAL";

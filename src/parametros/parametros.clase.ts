@@ -1,164 +1,102 @@
 // 100%
-import {ParametrosInterface} from './parametros.interface';
-import * as schParametros from './parametros.mongodb';
-import * as schTickets from '../tickets/tickets.mongodb';
-
-const TIPO_USB = 'USB';
-const TIPO_SERIE = 'SERIE';
-const TIPO_CLEARONE = 'CLEARONE';
-const TIPO_3G = '3G';
-const TIPO_ENTRADA = 'ENTRADA';
-const TIPO_SALIDA = 'SALIDA';
-const parametrosVacios: ParametrosInterface = {
-  _id: '',
-  licencia: 0,
-  codigoTienda: 0,
-  database: '',
-  nombreEmpresa: '',
-  nombreTienda: '',
-  tipoImpresora: TIPO_USB,
-  tipoDatafono: TIPO_CLEARONE,
-  impresoraCafeteria: 'NO',
-  clearOneCliente: 0,
-  clearOneTienda: 0,
-  clearOneTpv: 0,
-  botonesConPrecios: 'No',
-  prohibirBuscarArticulos: 'No',
-  ultimoTicket: -1,
-  idCurrentTrabajador: -1,
-  impresoraUsbInfo: {vid: '', pid: ''},
-  token: undefined,
-
-};
+import { ParametrosInterface } from "./parametros.interface";
+import * as schParametros from "./parametros.mongodb";
 
 export class ParametrosClase {
-  private parametros: ParametrosInterface;
-
-  constructor() {
-    schParametros.getParametros().then((infoParams: ParametrosInterface) => {
-      if (infoParams != null) {
-        schTickets.getUltimoTicket().then((ultimoIDTicket) => {
-          infoParams.ultimoTicket = ultimoIDTicket;
-          this.parametros = infoParams;
-        }).catch((err) => {
-          console.log(err);
-        });
-      } else {
-        this.parametros = parametrosVacios;
-      }
-    }).catch((err) => {
-      console.log(err);
-      this.parametros = parametrosVacios;
-    });
+  /* Eze v23 */
+  getParametros(): Promise<ParametrosInterface> {
+    return schParametros.getParametros();
   }
 
-  getParametros(): ParametrosInterface {
-    return this.parametros;
+  /* Eze v23 */
+  actParametros(params: ParametrosInterface) {
+    return schParametros.setParametros(params);
   }
 
-  getEspecialParametros(): Promise <ParametrosInterface | null> {
-    return schParametros.getParametros().then((infoParams: ParametrosInterface) => {
-      return infoParams;
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
-  }
-  async actParametros(params: ParametrosInterface) {
-    this.parametros = params;
-    return await schParametros.setParametros(this.parametros).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-  async getlicencia() {
-    return await schParametros.getLicencia().then((res) => {
-      return res.licencia;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze v23 */
   setParametros(params: ParametrosInterface): Promise<boolean> {
-    this.parametros = params;
-    return schParametros.setParametros(this.parametros).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
+    return schParametros.setParametros(params);
+  }
+
+  /* Eze v23 */
+  async todoInstalado(): Promise<boolean> {
+    try {
+      const params = await this.getParametros();
+      if (params) {
+        return this.checkParametrosOK(params);
+      }
+      return false;
+    } catch (err) {
       console.log(err);
       return false;
-    });
-  }
-
-  todoInstalado(): boolean {
-    const params = this.getParametros();
-    if (params._id === '' || params.licencia === 0 || params.codigoTienda === 0) {
-      return false;
-    } else {
-      return true;
     }
   }
 
-  checkParametrosOK(params: ParametrosInterface) {
-    if (params.licencia > 0 && params.codigoTienda > 0 && params.database.length > 0 && params.nombreEmpresa.length > 0 && params.nombreTienda.length > 0 && params.tipoImpresora.length > 0 && params.tipoDatafono.length > 0) {
+  /* Eze v23 */
+  checkParametrosOK(params: ParametrosInterface): boolean {
+    if (
+      params._id === "PARAMETROS" &&
+      params.licencia > 0 &&
+      params.codigoTienda > 0 &&
+      params.database.length > 0 &&
+      params.nombreEmpresa.length > 0 &&
+      params.nombreTienda.length > 0 &&
+      params.tipoImpresora.length > 0 &&
+      params.tipoDatafono.length > 0
+    ) {
       return true;
     }
+    return false;
   }
 
+  /* Eze v23 */
   actualizarParametros() {
-    schParametros.getParametros().then((infoParams: ParametrosInterface) => {
-      if (infoParams != null) {
-        this.parametros = infoParams;
-      } else {
-        this.parametros = parametrosVacios;
-      }
-    }).catch((err) => {
-      console.log(err);
-      this.parametros = parametrosVacios;
-    });
+    console.log("Lee el comentario");
+    /*
+      Esto antes actualizaba los parámetros del this.parametros de esta clase, pero
+      a partir de ahora, actualizarParametros se refiere a descargar datos del San Pedro
+      o Gestión de la Tienda y hará un set en mongodb del tpv.
+     */
   }
 
-  setUltimoTicket(idTicket: number) {
-    return schParametros.setUltimoTicket(idTicket).then((res) => {
-      if (res.acknowledged) {
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze v23 */
+  setUltimoTicket(idTicket: number): Promise<boolean> {
+    return schParametros.setUltimoTicket(idTicket);
   }
 
-  setVidAndPid(vid: string, pid: string, com: string ) {
-    return schParametros.setVidAndPid(vid, pid, com).then((res) => {
-      if (res.acknowledged) {
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze v23 */
+  setVidAndPid(vid: string, pid: string, com: string): Promise<boolean> {
+    return schParametros.setVidAndPid(vid, pid, com);
   }
 
-  setIpPaytef(ip: string) {
-    return schParametros.setIpPaytef(ip).then((res) => {
-      if (res.acknowledged) {
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze v23 */
+  setIpPaytef(ip: string): Promise<boolean> {
+    return schParametros.setIpPaytef(ip);
+  }
+
+  generarObjetoParametros(): ParametrosInterface {
+    return {
+      _id: "PARAMETROS",
+      licencia: 0,
+      codigoTienda: 0,
+      database: "",
+      nombreEmpresa: "",
+      nombreTienda: "",
+      tipoImpresora: "USB",
+      tipoDatafono: "PAYTEF",
+      impresoraCafeteria: "NO",
+      clearOneCliente: 0,
+      clearOneTienda: 0,
+      clearOneTpv: 0,
+      botonesConPrecios: "No",
+      prohibirBuscarArticulos: "No",
+      ultimoTicket: -1,
+      impresoraUsbInfo: { vid: "", pid: "" },
+      token: undefined,
+    }; 
   }
 }
 
 const parametrosInstance = new ParametrosClase();
 
-export {parametrosInstance};
+export { parametrosInstance };
