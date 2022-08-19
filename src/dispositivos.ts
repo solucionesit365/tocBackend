@@ -9,7 +9,7 @@ escpos.Screen = require('escpos-screen');
 
 export class Dispositivos {
   async getDevice() {
-    const parametros = await parametrosInstance.getEspecialParametros();
+    const parametros = await parametrosInstance.getParametros();
     if (os.platform() === 'linux') {
       try {
         if (parametros.tipoImpresora == 'USB') {
@@ -55,7 +55,7 @@ export class Dispositivos {
   }
 
   async getDeviceVisor() {
-    const parametros = await parametrosInstance.getEspecialParametros();
+    const parametros = await parametrosInstance.getParametros();
     if (parametros.visor != undefined) {
       if (parametros.visor.includes('COM') || parametros.visor == 'SI') {
         if (os.platform() === 'win32') {

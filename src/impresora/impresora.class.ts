@@ -110,10 +110,10 @@ export class Impresora {
   async imprimirUltimoCierre(): Promise<void> {
     try {
       const ultimoCierre: CajaForSincroInterface = await cajaInstance.getUltimoCierre();
-      const nombreTrabajador = (await trabajadoresInstance.getTrabajador(ultimoCierre.idDependienta)).nombreCorto;
+      const nombreTrabajador = (await trabajadoresInstance.getTrabajadorById(ultimoCierre.idDependienta)).nombreCorto;
       const arrayMovimientos = await movimientosInstance.getMovimientosIntervalo(ultimoCierre.inicioTime, ultimoCierre.finalTime);
-      const nombreTienda = parametrosInstance.getParametros().nombreTienda;
-      const tipoImpresora = parametrosInstance.getParametros().tipoImpresora;
+      const parametros = await parametrosInstance.getParametros();
+
       this.imprimirCaja(
         ultimoCierre.calaixFetZ,
         nombreTrabajador,
@@ -121,12 +121,12 @@ export class Impresora {
         ultimoCierre.nClientes,
         ultimoCierre.recaudado,
         arrayMovimientos,
-        nombreTienda,
+        parametros.nombreTienda,
         ultimoCierre.inicioTime,
         ultimoCierre.finalTime,
         ultimoCierre.totalApertura,
         ultimoCierre.totalCierre,
-        tipoImpresora,
+        parametros.tipoImpresora,
       );
     } catch (err) {
       console.log(err);
@@ -174,8 +174,8 @@ export class Impresora {
       infoTicket = await devolucionesInstance.getDevolucionByID(idTicket);
     }
     // console.log(infoTicket)
-    const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajador(infoTicket.idTrabajador);
-    const parametros = parametrosInstance.getParametros();
+    const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajadorById(infoTicket.idTrabajador);
+    const parametros = await parametrosInstance.getParametros();
     let sendObject;
 
     if (infoTicket != null) {
@@ -491,29 +491,10 @@ export class Impresora {
   }
 
   async imprimirEntrada(totalIngresado: number, fecha: number, nombreDependienta: string) {
-    const parametros = parametrosInstance.getParametros();
+    const parametros = await parametrosInstance.getParametros();
     try {
       const fechaStr = dateToString2(fecha);
       permisosImpresora();
-      // if(parametros.tipoImpresora === 'USB')
-      // {
-      //     const arrayDevices = escpos.USB.findPrinter();
-      //     if (arrayDevices.length > 0) {
-      //         /* Solo puede haber un dispositivo USB */
-      //         const dispositivoUnico = arrayDevices[0];
-      //         var device = new escpos.USB(dispositivoUnico); //USB
-      //     } else if (arrayDevices.length == 0) {
-      //         throw 'Error, no hay ningún dispositivo USB conectado';
-      //     } else {
-      //         throw 'Error, hay más de un dispositivo USB conectado';
-      //     }
-      // }
-      // else if(parametros.tipoImpresora === 'SERIE') {
-      //     var device = new escpos.Serial('/dev/ttyS0', {
-      //         baudRate: 115000,
-      //         stopBit: 2
-      //     });
-      // }
       const device = await dispositivos.getDevice();
 
       const options = {encoding: 'GB18030'};
@@ -784,7 +765,7 @@ export class Impresora {
     // console.log('El visor da muchos problemas');
   }
   async imprimirEntregas() {
-    const params = parametrosInstance.getParametros();
+    const params = await parametrosInstance.getParametros();
     return axios.post('entregas/getEntregas', {database: params.database, licencia: params.licencia}).then(async (res: any) => {
       try {
         permisosImpresora();

@@ -62,11 +62,18 @@ export class SocketGateway {
   @SubscribeMessage("iniciarTransaccion")
   iniciarPaytef(@MessageBody() params, @ConnectedSocket() client: Socket) {
     if (UtilesModule.checkVariable(params)) {
-      if (UtilesModule.checkVariable(params.idClienteFinal, params.idCesta)) {
+      if (
+        UtilesModule.checkVariable(
+          params.idClienteFinal,
+          params.idCesta,
+          params.idTrabajador
+        )
+      ) {
         paytefInstance.iniciarTransaccion(
           client,
           params.idClienteFinal,
-          params.idCesta
+          params.idCesta,
+          params.idTrabajador
         );
       } else {
         client.emit("consultaPaytef", {

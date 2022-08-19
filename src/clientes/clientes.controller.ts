@@ -32,8 +32,8 @@ export class ClientesController {
     }
 
     @Post('comprobarVIP')
-    comprobarVIP(@Body() params) {
-      const parametros = parametrosInstance.getParametros();
+    async comprobarVIP(@Body() params) {
+      const parametros = await parametrosInstance.getParametros();
       return axios.post('clientes/comprobarVIP', {database: parametros.database, idClienteFinal: params.idClienteFinal}).then((res: any) => {
         if (res.data.error === false) { // No hay error
           if (res.data.articulosEspeciales != undefined) { // Tiene tarifa especial
@@ -62,8 +62,8 @@ export class ClientesController {
     }
 
     @Post('descargarClientesFinales')
-    descargarClientesFinales() {
-      const parametros = parametrosInstance.getParametros();
+    async descargarClientesFinales() {
+      const parametros = await parametrosInstance.getParametros();
       return axios.post('clientes/getClientesFinales', {database: parametros.database}).then((res: any) => {
         if (res.data.error == false) {
           return clienteInstance.insertarClientes(res.data.info).then((operacionResult) => {
@@ -83,11 +83,11 @@ export class ClientesController {
       });
     }
 
-    @Post('crearNuevoCliente')
-    crearNuevoCliente(@Body() params) {
+    @Post("crearNuevoCliente")
+    async crearNuevoCliente(@Body() params) {
       if (UtilesModule.checkVariable(params.idTarjetaCliente, params.nombreCliente)) {
         if (params.idTarjetaCliente.toString().length > 5 && params.nombreCliente.length >= 3) {
-          const parametros = parametrosInstance.getParametros();
+          const parametros = await parametrosInstance.getParametros();
           return axios.post('clientes/crearNuevoCliente', {
             idTarjetaCliente: params.idTarjetaCliente,
             nombreCliente: params.nombreCliente,

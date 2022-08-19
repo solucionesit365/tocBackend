@@ -1,40 +1,43 @@
-import {Controller, Post, Body} from '@nestjs/common';
-import {movimientosInstance} from './movimientos.clase';
-@Controller('movimientos')
+import { Controller, Post, Body } from "@nestjs/common";
+import { UtilesModule } from "../utiles/utiles.module";
+import { movimientosInstance } from "./movimientos.clase";
+@Controller("movimientos")
 export class MovimientosController {
-    @Post('nuevaSalida')
+
+  /* Eze v23 - Solo salidas normales, sin ticket relacionado */
+  @Post("nuevaSalida")
   nuevaSalida(@Body() params) {
-    if (params.cantidad != undefined && params.concepto != undefined) {
-      return movimientosInstance.nuevaSalida(params.cantidad, params.concepto, 'SALIDA').then((res) => {
-        if (res) {
-          return {error: false};
-        } else {
-          return {error: true, mensaje: 'Error en nuevaSalida()'};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Error, ver log nest'};
-      });
+    if (
+      params.cantidad != undefined &&
+      UtilesModule.checkVariable(params.concepto, params.idTrabajador)
+    ) {
+      return movimientosInstance.nuevaSalida(
+        params.cantidad,
+        params.concepto,
+        "SALIDA",
+        true,
+        null,
+        params.idTrabajador
+      );
     } else {
-      return {error: true, mensaje: 'Error, faltan datos'};
+      return { error: true, mensaje: "Error, faltan datos" };
     }
   }
 
-    @Post('nuevaEntrada')
-    nuevaEntrada(@Body() params) {
-      if (params.cantidad != undefined && params.concepto != undefined) {
-        return movimientosInstance.nuevaEntrada(params.cantidad, params.concepto).then((res) => {
-          if (res) {
-            return {error: false};
-          } else {
-            return {error: true, mensaje: 'Error en nuevaEntrada()'};
-          }
-        }).catch((err) => {
-          console.log(err);
-          return {error: true, mensaje: 'Error, ver log nest'};
-        });
-      } else {
-        return {error: true, mensaje: 'Error, faltan datos'};
-      }
-    }
+  /* Eze v23 - Solo entradas normales, sin ticket relacionado */
+  @Post("nuevaEntrada")
+  nuevaEntrada(@Body() params) {
+    if (
+      params.cantidad != undefined &&
+      UtilesModule.checkVariable(params.concepto, params.idTrabajador)
+    )
+      return movimientosInstance.nuevaEntrada(
+        params.cantidad,
+        params.concepto,
+        true,
+        params.idTrabajador
+      );
+
+    return false;
+  }
 }

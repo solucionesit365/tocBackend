@@ -74,6 +74,7 @@ export class ParametrosClase {
     return schParametros.setIpPaytef(ip);
   }
 
+  /* Eze v23 */
   generarObjetoParametros(): ParametrosInterface {
     return {
       _id: "PARAMETROS",

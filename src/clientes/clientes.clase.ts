@@ -38,20 +38,17 @@ export class Clientes {
     });
   }
 
-  getPuntosCliente(idClienteFinal: string) {
-    return axios.post('clientes/getPuntosCliente', {database: parametrosInstance.getParametros().database, idClienteFinal}).then((res: any) => {
-      if (res.data.error == false) {
-        return res.data.info;
-      } else {
-        console.log(res.data.error);
-        return 0;
-      }
-    }).catch((err) => {
+  /* Eze v23 */
+  async getPuntosCliente(idClienteFinal: string): Promise<number> {
+    try {
+      return (await axios.post<any>('clientes/getPuntosCliente', {database: (await parametrosInstance.getParametros()).database, idClienteFinal})).data.info;
+    } catch (err) {
       console.log(err);
       return 0;
-    });
+    }    
   }
 
+  /* Eze v23 */
   setEstadoClienteVIP(nuevoEstado: boolean) {
     this.clienteVip = nuevoEstado;
   }

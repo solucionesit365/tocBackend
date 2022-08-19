@@ -8,6 +8,7 @@ export class Articulos {
     this.estadoTarifaVIP = false;
   }
 
+  /* Eze v23 */
   setEstadoTarifaEspecial(payload: boolean) {
     this.estadoTarifaVIP = payload;
   }

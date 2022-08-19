@@ -11,6 +11,11 @@ import { cestas } from "../cestas/cestas.clase";
 export class TrabajadoresClase {
 
   /* Eze v23 */
+  getTrabajadorById(idTrabajador: number) {
+    return schTrabajadores.getTrabajador(idTrabajador);
+  }
+
+  /* Eze v23 */
   buscar(busqueda: string) {
     return schTrabajadores.buscar(busqueda);
   }
@@ -38,7 +43,7 @@ export class TrabajadoresClase {
   /* Eze v23 */
   async actualizarTrabajadores(): Promise<boolean> {
     try {
-      const params = parametrosInstance.getParametros();
+      const params = await parametrosInstance.getParametros();
       const res: any = await axios.post("dependientas/descargar", { database: params.database });
       if (!res.data.error && res.data.info.length > 0) {
         const resKeep = await this.mantenerTrabajadoresFichados(res.data.info);

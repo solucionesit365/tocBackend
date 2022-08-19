@@ -34,19 +34,18 @@ class PaytefClass {
   }
 
   /* Parámetros de entrada OK */
-  async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number): Promise<void> {
+  async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number, idTrabajador: number): Promise<void> {
     try {
-      const idTrabajadorActivo = await trabajadoresInstance.getCurrentIdTrabajador();
-      if (idTrabajadorActivo != null) {
+      if (idTrabajador != null) {
         const cesta = await cestas.getCestaByID(idCesta);
         if (cesta != null) {
           const total = this.getTotal(cesta);
           if (cesta.lista.length > 0 && total > 0) {
-            const nuevoTicket = ticketsInstance.generarObjetoTicket((await ticketsInstance.getUltimoTicket())+1, total, cesta, 'TARJETA', idTrabajadorActivo, idCliente);
+            const nuevoTicket = ticketsInstance.generarObjetoTicket((await ticketsInstance.getUltimoTicket())+1, total, cesta, "TARJETA", idTrabajador, idCliente);
             nuevoTicket.bloqueado = true;
             const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket);
             if (resCierreTicket.error === false) { // Ticket creado
-              this.iniciarDatafono(resCierreTicket.info, total, client, cesta._id);
+              this.iniciarDatafono(resCierreTicket.info, total, client, cesta._id, idTrabajador);
             } else {
               throw Error(resCierreTicket.mensaje);
             }
@@ -82,8 +81,8 @@ class PaytefClass {
   }
 
   /* Cancela la operación en el propio datáfono */
-  cancelarOperacion() {
-    const params = parametrosInstance.getParametros();
+  async cancelarOperacion(): Promise<void> {
+    const params = await parametrosInstance.getParametros();
     axios.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, {'pinpad': '*'});
   }
 
@@ -99,8 +98,8 @@ class PaytefClass {
     });
   }
 
-  iniciarDatafono(idTicket: number, total: number, client: Socket, idCesta: number) {
-    const params = parametrosInstance.getParametros();
+  async iniciarDatafono(idTicket: number, total: number, client: Socket, idCesta: number, idTrabajador: number) {
+    const params = await parametrosInstance.getParametros();
     if (UtilesModule.checkVariable(params.ipTefpay)) {
       axios.post(`http://${params.ipTefpay}:8887/transaction/start`, {
         pinpad: '*',
@@ -117,7 +116,7 @@ class PaytefClass {
       }).then((respuestaPaytef: any) => {
         if (respuestaPaytef.data.info.started) {
           // Arranca el ciclo de comprobaciones
-          this.consultarEstadoOperacion(client, idTicket, total, idCesta);
+          this.consultarEstadoOperacion(client, idTicket, total, idCesta, idTrabajador);
         } else {
           throw Error("La operación no ha podido iniciar");
         }
@@ -139,11 +138,11 @@ class PaytefClass {
   }
 
   /* Función recursiva y asíncrona */
-  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number, idCesta: number): Promise<void> {
+  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number, idCesta: number, idTrabajador: number): Promise<void> {
     try {
-      const ipDatafono = parametrosInstance.getParametros().ipTefpay;
+      const ipDatafono = (await parametrosInstance.getParametros()).ipTefpay;
       const resEstadoPaytef: any = await axios.post(`http://${ipDatafono}:8887/transaction/poll`, {
-        pinpad: '*'
+        pinpad: "*"
       });
 
       /* ¿Ya existe el resultado de PayTef? */
@@ -151,7 +150,7 @@ class PaytefClass {
         if (Number(resEstadoPaytef.data.result.transactionReference) == idTicket) {
           if (resEstadoPaytef.data.result.approved) {
             ticketsInstance.desbloquearTicket(idTicket);
-            movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket);
+            movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket, idTrabajador);
             await cestas.borrarCesta(idCesta);
             client.emit('consultaPaytef', { // Operación aprobada. Todo OK
               error: false,
@@ -162,7 +161,7 @@ class PaytefClass {
         } else if (resEstadoPaytef.data.result.approved) {
           LogsClass.newLog('Error nuevo (sin referencia)', `Ticket aprobado por PayTef y creado en el toc, pero no coincide la referencia: referenciaPaytef: ${Number(resEstadoPaytef.data.result.transactionReference)} idTicketFuncion: ${idTicket} timestamp: ${Date.now()}`);
           ticketsInstance.desbloquearTicket(idTicket);
-          movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket);
+          movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket, idTrabajador);
           await cestas.borrarCesta(idCesta);
           client.emit('consultaPaytef', { // Operación aprobada. Todo OK
             error: false,
@@ -182,7 +181,7 @@ class PaytefClass {
             case "waitingConfirmation":
             case "finished":
               await new Promise((r) => setTimeout(r, 1000));
-              this.consultarEstadoOperacion(client, idTicket, total, idCesta); break;
+              this.consultarEstadoOperacion(client, idTicket, total, idCesta, idTrabajador); break;
             default:
               LogsClass.newLog("warning importante", `¡info.transactionStatus: (${resEstadoPaytef.data.info.transactionStatus}) no tiene ningún valor de la documentación! - idTicket: ${idTicket} timestamp: ${Date.now()}`);
               throw Error("¡No existe info en PayTef! Ver log warning importante");

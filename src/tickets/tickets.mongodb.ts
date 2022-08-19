@@ -177,9 +177,9 @@ export async function anularTicket(idTicket: number): Promise<boolean> {
       const resultado = await ticketsAnulados.findOne({ idTicketAnulado: idTicket });
       if (resultado === null) {
         let ticket = await getTicketByID(idTicket);
-        if (ticket.tipoPago == "TARJETA") {
+        if (ticket.tipoPago == "TARJETA")
           throw Error("Por el momento no es posible anular un ticket pagado con tarjeta");
-        }
+        
         if (ticket.total > 0) {
           const id = await ticketsInstance.getUltimoTicket() + 1;
           ticket.enviado = false;
@@ -194,12 +194,9 @@ export async function anularTicket(idTicket: number): Promise<boolean> {
           await ticketsAnulados.insertOne({ idTicketAnulado: idTicket });
           const resSetUltimoTicket = await parametrosInstance.setUltimoTicket(ticket._id);
           return (resultado && resSetUltimoTicket);
-        } else {
-          return false;
         }
-      } else {
-        return false;
       }
+      return false;
     } catch (err) {
     console.log(err);
     return false;

@@ -1,42 +1,28 @@
-import { TrabajadoresInterface } from 'src/trabajadores/trabajadores.interface';
-import {conexion} from '../conexion/mongodb';
-import {CestasInterface} from './cestas.interface';
+import { TrabajadoresInterface } from "src/trabajadores/trabajadores.interface";
+import { conexion } from "../conexion/mongodb";
+import { cestas } from "./cestas.clase";
+import { CestasInterface } from "./cestas.interface";
 
-export async function getUnaCesta(): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await cesta.findOne();
-  return resultado;
-}
-
-export async function getCestaConcreta(idCesta: number): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  let resultado = await cesta.findOne({_id: idCesta});
-  if (!resultado) resultado = await cesta.findOne({_id: idCesta.toString()});
-  return resultado;
-}
-export async function getCestaByTrabajadorID(idTrabajador: number) {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await cesta.findOne({idTrabajador: idTrabajador});
-  return resultado;
-}
-export async function getCestaByID(idCesta: number): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await cesta.findOne({_id: idCesta});
-  return resultado;
+/* Eze v23 */
+export async function getCestaByID(idCesta: number): Promise<CestasInterface> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const cesta = database.collection<CestasInterface>("cestas");
+    return await cesta.findOne({ _id: idCesta });
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
 /* Eze v23 */
-export async function borrarCestaDelTrabajador(idTrabajador: string) {
+export async function borrarCestaDelTrabajador(idTrabajador: number): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
+    const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
     const trabajador = await trabajadores.findOne({ _id: idTrabajador });
     if (trabajador) {
-      const cesta = database.collection("cestas");
+      const cesta = database.collection<CestasInterface>("cestas");
       const resultado = await cesta.deleteOne({ _id: trabajador.idCesta });
       return resultado.acknowledged;
     } else {
@@ -48,74 +34,56 @@ export async function borrarCestaDelTrabajador(idTrabajador: string) {
   }
 }
 
-export async function eliminarCesta(idCesta: number) {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await cesta.deleteOne({_id: idCesta});
-  return resultado;
+/* Eze v23 */
+export async function deleteCesta(idCesta: number): Promise<boolean> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const cesta = database.collection<CestasInterface>("cestas");
+    return (await cesta.deleteOne({ _id: idCesta })).acknowledged;
+  } catch (err) {
+    console.log(err);
+  }
 }
 
-export async function eliminarCestaByIdTrabajador(idTrabajador: number) {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await cesta.deleteMany({idTrabajador: idTrabajador});
-  return resultado;
+/* Eze v23 */
+export async function getAllCestas(): Promise<CestasInterface[]> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const cesta = database.collection<CestasInterface>("cestas");
+    return (await cesta.find().toArray());
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
 }
 
-export async function updateIdCestaTrabajador(id: number) {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resTemp = await cesta.findOne({nombreCesta: id.toString()});
-  resTemp._id = id;
-  resTemp.nombreCesta = `Trabajador ${id}`;
-  const resultado = await cesta.insertOne(resTemp);
-  await cesta.deleteMany({nombreCesta: id.toString()});
-  return resultado;
+/* Eze v23 */
+export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const unaCesta = database.collection<CestasInterface>("cestas");
+    return (await unaCesta.updateOne(
+      { _id: cesta._id },
+      { $set: {
+        tiposIva: cesta.tiposIva,
+        lista: cesta.lista,
+        regalo: cesta.regalo != undefined ? cesta.regalo : false
+      }}
+    )).acknowledged;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 }
 
-export async function getAllCestas(): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const resultado = await (await cesta.find()).toArray();
-
-  return resultado;
-}
-
-/* Esto es mentira, no borra la cesta. */
-export async function borrarCesta(idCesta: number) {
-  const database = (await conexion).db('tocgame');
-  const cesta = database.collection('cestas');
-  const tiposIva = {
-    base1: 0,
-    base2: 0,
-    base3: 0,
-    valorIva1: 0,
-    valorIva2: 0,
-    valorIva3: 0,
-    importe1: 0,
-    importe2: 0,
-    importe3: 0,
-  };
-  const resultado = await cesta.updateOne({_id: idCesta}, {$set: {'lista': [], 'tiposIva': tiposIva}}, {upsert: true});
-  return resultado;
-}
-
-/* Reemplaza una cesta o la crea nueva si no existe */
-export async function setCesta(cesta: CestasInterface) {
-  const database = (await conexion).db('tocgame');
-  const unaCesta = database.collection('cestas');
-  const resultado = await unaCesta.replaceOne({_id: cesta._id}, {
-    tiposIva: cesta.tiposIva,
-    lista: cesta.lista,
-    regalo: (cesta.regalo != undefined) ? (cesta.regalo): (false),
-  }, {upsert: true});
-
-  return resultado;
-}
-
-export async function getCestaDiferente(id_cesta: string) {
-  const database = (await conexion).db('tocgame');
-  const cestas = database.collection('cestas');
-  const resultado = await cestas.findOne({_id: {$ne: id_cesta}, nombreCesta: {$ne: 'PRINCIPAL'}});
-  return resultado;
+/* Eze v23 */
+export async function createCesta(cesta: CestasInterface): Promise<boolean> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const cestasColeccion = database.collection<CestasInterface>("cestas");
+    return (await cestasColeccion.insertOne(cesta)).acknowledged;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
 }

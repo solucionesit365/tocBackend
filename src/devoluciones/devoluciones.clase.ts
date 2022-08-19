@@ -1,16 +1,14 @@
 import {impresoraInstance} from 'src/impresora/impresora.class';
 import {cestas} from '../cestas/cestas.clase';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
 import {DevolucionesInterface} from './devoluciones.interface';
 import * as schDevoluciones from './devoluciones.mongodb';
 
 export class Devoluciones {
   private bloqueado = false;
 
-  async nuevaDevolucion(total: number, idCesta: number): Promise<boolean> {
+  async nuevaDevolucion(total: number, idCesta: number, idTrabajador: number): Promise<boolean> {
     if (this.bloqueado == false) {
       this.bloqueado = true;
-      const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
       const nuevoIdTicket = Date.now();
       const cesta = await cestas.getCesta(idCesta);
 
@@ -23,8 +21,8 @@ export class Devoluciones {
         timestamp: Date.now(),
         total: total,
         lista: cesta.lista,
-        tipoPago: 'DEVOLUCION',
-        idTrabajador: infoTrabajador._id,
+        tipoPago: "DEVOLUCION",
+        idTrabajador: idTrabajador,
         tiposIva: cesta.tiposIva,
         enviado: false,
         enTransito: false,

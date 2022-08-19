@@ -16,7 +16,7 @@ function emitSocket(canal: string, datos: any = null) {
   }
 }
 
-socket.on('resSincroTickets', async (data) => {
+socket.on("resSincroTickets", async (data) => {
   if (data.error == false) {
     if (data.ticket) {
       if (await ticketsInstance.actualizarEstadoTicket(data.ticket)) {
@@ -30,8 +30,6 @@ socket.on('resSincroTickets', async (data) => {
       if (data.mensaje == "SanPedro: Error, parámetros incorrectos") {
         data.ticket.comentario = "SanPedro: Error, parámetros incorrectos";
       }
-
-      ticketsInstance.actualizarComentario(data.ticket);
     }
   }
 });

@@ -5,10 +5,8 @@ import { construirObjetoIvas, crearCestaVacia } from "../funciones/funciones";
 import { articulosInstance } from "../articulos/articulos.clase";
 import { ofertas } from "../promociones/promociones.clase";
 import { cajaInstance } from "../caja/caja.clase";
-import { clienteInstance } from "../clientes/clientes.clase";
 import { impresoraInstance } from "../impresora/impresora.class";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
-import axios from "axios";
 import { parametrosInstance } from "../parametros/parametros.clase";
 
 /* Siempre cargar la cesta desde MongoDB */
@@ -16,28 +14,7 @@ export class CestaClase {
   private cesta: CestasInterface;
   private udsAplicar: number;
 
-  constructor() {
-    /* CARGA DESDE MONGO UNA CESTA EN MEMORIA DE NODE */
-    schCestas.getUnaCesta().then((respuesta: CestasInterface) => {
-      if (
-        respuesta != undefined &&
-        respuesta != null &&
-        respuesta.lista.length != 0 &&
-        respuesta._id != null
-      ) {
-        for (let i = 0; i < respuesta.lista.length; i++) {
-          respuesta.lista[i].subtotal = Number(
-            respuesta.lista[i].subtotal.toFixed(2)
-          );
-        }
-        this.cesta = respuesta;
-      } else {
-        this.cesta = crearCestaVacia();
-      }
-    });
-    this.udsAplicar = 1;
-  }
-
+  /* Eze v23 */
   getCesta(idCesta: number): Promise<CestasInterface> {
     return schCestas.getCestaByID(idCesta);
   }
@@ -110,12 +87,10 @@ export class CestaClase {
 
   /* Eze v23 */
   borrarCestaDelTrabajador(idTrabajador) {
-    return schCestas
-      .borrarCestaDelTrabajador(idTrabajador)
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
+    return schCestas.borrarCestaDelTrabajador(idTrabajador).catch((err) => {
+      console.log(err);
+      return false;
+    });
   }
 
   eliminarCesta(idCesta: number): Promise<boolean> {

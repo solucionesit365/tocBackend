@@ -1,23 +1,22 @@
-import {Controller, Post, Body} from '@nestjs/common';
-import {devolucionesInstance} from './devoluciones.clase';
+import { Controller, Post, Body } from "@nestjs/common";
+import { UtilesModule } from "src/utiles/utiles.module";
+import { devolucionesInstance } from "./devoluciones.clase";
 
-@Controller('devoluciones')
+@Controller("devoluciones")
 export class DevolucionesController {
-    @Post('nuevaDevolucion')
+  /* Eze v23 */
+  @Post("nuevaDevolucion")
   nuevaDevolucion(@Body() params) {
-    if (params.total != undefined && params.idCesta != undefined) {
-      return devolucionesInstance.nuevaDevolucion(params.total, params.idCesta).then((res) => {
-        if (res) {
-          return {error: false};
-        } else {
-          return {error: true, mensaje: 'Error en nuevaDevolucion()'};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Error, ver log en nest'};
-      });
-    } else {
-      return {error: true, mensaje: 'Datos no definidos'};
-    }
+    if (
+      params.total != undefined &&
+      UtilesModule.checkVariable(params.idCesta, params.idTrabajador)
+    )
+      return devolucionesInstance.nuevaDevolucion(
+        params.total,
+        params.idCesta,
+        params.idTrabajador
+      );
+
+    return false;
   }
 }
