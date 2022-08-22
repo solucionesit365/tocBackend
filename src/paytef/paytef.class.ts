@@ -67,11 +67,9 @@ class PaytefClass {
   async cerrarTicket(nuevoTicket: TicketsInterface): Promise<boolean> {
     try {
       if (await ticketsInstance.insertarTicket(nuevoTicket)) {
-        if (await cestas.borrarCestaActiva()) {
           if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
             return true;
           }
-        }
         this.anularOperacion(nuevoTicket._id, "cerrarTicket()");
         return false;
       }
