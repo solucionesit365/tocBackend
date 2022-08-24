@@ -1,28 +1,17 @@
 import { Controller, Post, Get, Body, Query } from "@nestjs/common";
 import { ticketsInstance } from "./tickets.clase";
 import { cajaInstance } from "../caja/caja.clase";
+import { UtilesModule } from "src/utiles/utiles.module";
 
 @Controller("tickets")
 export class TicketsController {
-  /* NO */
+  /* Eze v23 */
   @Post("getTicketsIntervalo")
   getTicketsIntervalo(@Query() params) {
-    return cajaInstance
-      .getInfoCaja()
-      .then((infoCaja) => {
-        if (infoCaja != null) {
-          return ticketsInstance.getTicketsIntervalo(
-            infoCaja.inicioTime,
-            Date.now()
-          );
-        } else {
-          return [];
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        return [];
-      });
+    if (UtilesModule.checkVariable(params.inicioTime, params.finalTime)) {
+      return ticketsInstance.getTicketsIntervalo(params.inicioTime, params.finalTime);
+    }
+    return null;
   }
 
   /* Eze v23 */

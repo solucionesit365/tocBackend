@@ -1,6 +1,6 @@
 export interface ArticulosInterface {
     _id: number,
-    tipoIva: number,
+    tipoIva: TiposIva,
     precioConIva: number,
     precioBase: number,
     nombre: string,
@@ -8,3 +8,5 @@ export interface ArticulosInterface {
     esSumable: boolean,
     suplementos?: [],
 }
+
+export type TiposIva = 1 | 2 | 3;

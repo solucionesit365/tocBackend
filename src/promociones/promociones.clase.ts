@@ -28,19 +28,19 @@ export class OfertasClase {
     No sirve para ofertas con productos a peso */
   deshacerOfertas(cesta: CestasInterface) {
     for (let i = 0; i < cesta.lista.length; i++) {
-      if (cesta.lista[i].promocion.esPromo) {
+      if (cesta.lista[i].esPromo) {
         const auxItemLista = cesta.lista[i];
         cesta.lista.splice(i, i); // Elimina la posición concreta del array.
 
-        if (cesta.lista[i].promocion.infoPromo.idPrincipal != 0) {
-          const idPrincipal = cesta.lista[i].promocion.infoPromo.idPrincipal;
-          const unidades = cesta.lista[i].unidades*cesta.lista[i].promocion.infoPromo.cantidadPrincipal;
+        if (cesta.lista[i].promocion.idPrincipal != 0) {
+          const idPrincipal = cesta.lista[i].promocion.idPrincipal;
+          const unidades = cesta.lista[i].unidades*cesta.lista[i].promocion.cantidadPrincipal;
           cestas.addItem(idPrincipal, '', false, null, cesta._id, unidades);
         }
 
-        if (cesta.lista[i].promocion.infoPromo.idSecundario != 0) {
-          const idSecundario = cesta.lista[i].promocion.infoPromo.idSecundario;
-          const unidades = cesta.lista[i].unidades*cesta.lista[i].promocion.infoPromo.cantidadSecundario;
+        if (cesta.lista[i].promocion.idSecundario != 0) {
+          const idSecundario = cesta.lista[i].promocion.idSecundario;
+          const unidades = cesta.lista[i].unidades*cesta.lista[i].promocion.cantidadSecundario;
           cestas.addItem(idSecundario, '', false, null, cesta._id, unidades);
         }
       }
@@ -159,23 +159,23 @@ export class OfertasClase {
 
       cesta.lista.push({
         _id: -2,
-        nombre: 'Oferta combo',
+        nombre: "Oferta combo",
         unidades: unidades,
         subtotal: total,
         promocion: {
           _id: idPromo,
-          esPromo: true,
-          infoPromo: {
-            idPrincipal: idPrincipal,
-            cantidadPrincipal: cantidadPrincipal,
-            idSecundario: idSecundario,
-            cantidadSecundario: cantidadSecundario,
-            precioRealPrincipal: dtoAplicado.precioRealPrincipal,
-            precioRealSecundario: dtoAplicado.precioRealSecundario,
-            unidadesOferta: unidades,
-            tipoPromo: 'COMBO',
-          },
+          idPrincipal: idPrincipal,
+          cantidadPrincipal: cantidadPrincipal,
+          idSecundario: idSecundario,
+          cantidadSecundario: cantidadSecundario,
+          precioRealPrincipal: dtoAplicado.precioRealPrincipal,
+          precioRealSecundario: dtoAplicado.precioRealSecundario,
+          unidadesOferta: unidades,
+          tipoPromo: "COMBO",
+          
         },
+        esPromo: true,
+        seRegala: false
       });
     }
     return cesta;
@@ -189,23 +189,22 @@ export class OfertasClase {
     {
       cesta.lista.push({
         _id: -2,
-        nombre: 'Oferta individual',
+        nombre: "Oferta individual",
         unidades: unidades,
         subtotal: total,
         promocion: {
           _id: idPromo,
-          esPromo: true,
-          infoPromo: {
-            idPrincipal: idPrincipal,
-            cantidadPrincipal: cantidadPrincipal,
-            idSecundario: 0,
-            cantidadSecundario: 0, // si es 0 no existe
-            precioRealPrincipal: dtoAplicado.precioRealPrincipal,
-            precioRealSecundario: 0,
-            unidadesOferta: unidades,
-            tipoPromo: 'INDIVIDUAL',
-          },
+          idPrincipal: idPrincipal,
+          cantidadPrincipal: cantidadPrincipal,
+          idSecundario: 0,
+          cantidadSecundario: 0,
+          precioRealPrincipal: dtoAplicado.precioRealPrincipal,
+          precioRealSecundario: 0,
+          unidadesOferta: unidades,
+          tipoPromo: "INDIVIDUAL"
         },
+        esPromo: true,
+        seRegala: false
       });
     }
 

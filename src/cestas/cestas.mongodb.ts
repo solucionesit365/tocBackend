@@ -16,10 +16,13 @@ export async function getCestaByID(idCesta: number): Promise<CestasInterface> {
 }
 
 /* Eze v23 */
-export async function borrarCestaDelTrabajador(idTrabajador: number): Promise<boolean> {
+export async function borrarCestaDelTrabajador(
+  idTrabajador: number
+): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+    const trabajadores =
+      database.collection<TrabajadoresInterface>("trabajadores");
     const trabajador = await trabajadores.findOne({ _id: idTrabajador });
     if (trabajador) {
       const cesta = database.collection<CestasInterface>("cestas");
@@ -39,7 +42,8 @@ export async function deleteCesta(idCesta: number): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
     const cesta = database.collection<CestasInterface>("cestas");
-    return (await cesta.deleteOne({ _id: idCesta })).acknowledged;
+    const resultado = await cesta.deleteOne({ _id: idCesta });
+    return resultado.acknowledged && resultado.deletedCount === 1;
   } catch (err) {
     console.log(err);
   }
@@ -50,7 +54,7 @@ export async function getAllCestas(): Promise<CestasInterface[]> {
   try {
     const database = (await conexion).db("tocgame");
     const cesta = database.collection<CestasInterface>("cestas");
-    return (await cesta.find().toArray());
+    return await cesta.find().toArray();
   } catch (err) {
     console.log(err);
     return [];
@@ -62,14 +66,11 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
     const unaCesta = database.collection<CestasInterface>("cestas");
-    return (await unaCesta.updateOne(
+    const resultado = await unaCesta.updateOne(
       { _id: cesta._id },
-      { $set: {
-        tiposIva: cesta.tiposIva,
-        lista: cesta.lista,
-        regalo: cesta.regalo != undefined ? cesta.regalo : false
-      }}
-    )).acknowledged;
+      { $set: cesta }
+    );
+    return resultado.acknowledged && resultado.matchedCount === 1;
   } catch (err) {
     console.log(err);
     return false;
@@ -77,13 +78,16 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
 }
 
 /* Eze v23 */
-export async function createCesta(cesta: CestasInterface): Promise<boolean> {
+export async function createCesta(cesta: CestasInterface): Promise<number> {
   try {
     const database = (await conexion).db("tocgame");
     const cestasColeccion = database.collection<CestasInterface>("cestas");
-    return (await cestasColeccion.insertOne(cesta)).acknowledged;
+    const resultado = await cestasColeccion.insertOne(cesta);
+    if (resultado.acknowledged) return resultado.insertedId;
+
+    return null;
   } catch (err) {
     console.log(err);
-    return false;
+    return null;
   }
 }

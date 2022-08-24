@@ -1,4 +1,4 @@
-import { TicketsInterface, TiposPago } from "./tickets.interface";
+import { Iva, TicketsInterface, TiposPago } from "./tickets.interface";
 import * as schTickets from "./tickets.mongodb";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { CestaClase, cestas } from "../cestas/cestas.clase";
@@ -7,7 +7,8 @@ import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { articulosInstance } from "../articulos/articulos.clase";
 import axios from "axios";
 import { clienteInstance } from "../clientes/clientes.clase";
-import { CestasInterface } from "src/cestas/cestas.interface";
+import { CestasInterface } from "../cestas/cestas.interface";
+import { construirObjetoIvas } from "../funciones/funciones";
 
 export class TicketsClase {
   /* Eze v23 */
@@ -27,7 +28,7 @@ export class TicketsClase {
       lista: cesta.lista,
       tipoPago: tipoPago,
       idTrabajador: idCurrentTrabajador,
-      tiposIva: cesta.tiposIva,
+      objIva: cesta.tiposIva,
       cliente: idCliente,
       infoClienteVip: infoVip,
       enviado: false,
@@ -53,7 +54,10 @@ export class TicketsClase {
     fechaInicio: number,
     fechaFinal: number
   ): Promise<TicketsInterface[]> {
-    const arrayTickets = await schTickets.getTicketsIntervalo(fechaInicio, fechaFinal);
+    const arrayTickets = await schTickets.getTicketsIntervalo(
+      fechaInicio,
+      fechaFinal
+    );
     if (arrayTickets.length > 0) return arrayTickets;
 
     throw Error("Error: No hay tickets en este intervalo");
@@ -122,7 +126,7 @@ export class TicketsClase {
           infoArticulo.esSumable == false &&
           !cesta.lista[key].suplementosId &&
           cesta.lista[key].unidades == 1 &&
-          !cesta.lista[key].promocion.esPromo
+          !cesta.lista[key].esPromo
         ) {
           cesta.lista[key].unidades = gramos;
         }
@@ -139,7 +143,7 @@ export class TicketsClase {
       );
 
       if (await this.insertarTicket(objTicket)) {
-        if (await cestas.borrarCesta(idCesta)) {
+        if (await cestas.deleteCesta(idCesta)) {
           return await parametrosInstance.setUltimoTicket(objTicket._id);
         }
       }
@@ -160,7 +164,7 @@ export class TicketsClase {
     try {
       const nuevoIdTicket: number = await this.getProximoId();
       const cesta = await cestas.getCesta(idCesta);
-      if (cesta == null || cesta.lista.length == 0) 
+      if (cesta == null || cesta.lista.length == 0)
         throw Error("Error, la cesta es null o está vacía");
 
       /* Código Santi o Fran */
@@ -189,7 +193,7 @@ export class TicketsClase {
       );
 
       if (await this.insertarTicket(objTicket)) {
-        if (await cestas.borrarCesta(idCesta)) {
+        if (await cestas.deleteCesta(idCesta)) {
           if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
             return await movimientosInstance.nuevaSalida(
               objTicket.total,
@@ -250,7 +254,7 @@ export class TicketsClase {
       );
 
       if (await this.insertarTicket(objTicket)) {
-        if (await cestas.borrarCesta(idCesta)) {
+        if (await cestas.deleteCesta(idCesta)) {
           if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
             objTicket["cantidadTkrs"] = totalTkrs;
             const diferencia = total - totalTkrs;
@@ -263,7 +267,8 @@ export class TicketsClase {
                 objTicket._id,
                 idTrabajador
               );
-            } else { // Aquí hace dos salidas
+            } else {
+              // Aquí hace dos salidas
               const salida1 = await movimientosInstance.nuevaSalida(
                 Number((diferencia * -1).toFixed(2)),
                 `Pagat TkRs (TkRs): ${objTicket._id}`,
@@ -344,7 +349,7 @@ export class TicketsClase {
       );
 
       if (await this.insertarTicket(objTicket)) {
-        if (await cestas.borrarCesta(idCesta)) {
+        if (await cestas.deleteCesta(idCesta)) {
           if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
             return await movimientosInstance.nuevaSalida(
               objTicket.total,
@@ -407,7 +412,7 @@ export class TicketsClase {
       );
 
       if (await this.insertarTicket(objTicket)) {
-        if (await cestas.borrarCesta(idCesta)) {
+        if (await cestas.deleteCesta(idCesta)) {
           return await parametrosInstance.setUltimoTicket(objTicket._id);
         } else {
           throw Error("Error, no se ha podido borrar la cesta");
@@ -439,6 +444,86 @@ export class TicketsClase {
   /* Eze v23 */
   borrarTicket(idTicket: number): Promise<boolean> {
     return schTickets.borrarTicket(idTicket);
+  }
+
+  /* Eze v23 */
+  generarObjetoIva(): Iva {
+    return {
+      base1: 0,
+      base2: 0,
+      base3: 0,
+      importe1: 0,
+      importe2: 0,
+      importe3: 0,
+      valorIva1: 0,
+      valorIva2: 0,
+      valorIva3: 0,
+    };
+  }
+
+  /* Nueva función Eze v23 */
+  async calcularIvaTicket(cesta: CestasInterface) {
+    let objetoIva: Iva = this.generarObjetoIva();
+
+    for (let i = 0; i < cesta.lista.length; i++) {
+      if (!cesta.lista[i].seRegala) {
+        if (cesta.lista[i].esPromo) {
+          if (cesta.lista[i].promocion.tipoPromo === "COMBO") {
+            const articuloPrincipal = await articulosInstance.getInfoArticulo(
+              cesta.lista[i].promocion.idPrincipal
+            );
+            const articuloSecundario = await articulosInstance.getInfoArticulo(
+              cesta.lista[i].promocion.idSecundario
+            );
+            objetoIva = construirObjetoIvas(
+              cesta.lista[i].promocion.precioRealPrincipal,
+              articuloPrincipal.tipoIva,
+              cesta.lista[i].promocion.cantidadPrincipal *
+                cesta.lista[i].unidades,
+              objetoIva
+            );
+            objetoIva = construirObjetoIvas(
+              cesta.lista[i].promocion.precioRealSecundario,
+              articuloSecundario.tipoIva,
+              cesta.lista[i].promocion.cantidadSecundario *
+                cesta.lista[i].unidades,
+              objetoIva
+            );
+          } else if (cesta.lista[i].promocion.tipoPromo === "INDIVIDUAL") {
+            const articuloIndividual = await articulosInstance.getInfoArticulo(
+              cesta.lista[i].promocion.idPrincipal
+            );
+            objetoIva = construirObjetoIvas(
+              cesta.lista[i].promocion.precioRealPrincipal,
+              articuloIndividual.tipoIva,
+              cesta.lista[i].unidades,
+              objetoIva
+            );
+          } else {
+            throw Error("Error: El tipo de oferta no es correcto");
+          }
+        } else {
+          const infoArticulo = cesta.lista[i].infoArticulo;
+          if (cesta.lista[i].infoArticulo.precioPesaje) {
+            // Significa que es a peso
+            objetoIva = construirObjetoIvas(
+              infoArticulo.precioConIva,
+              infoArticulo.tipoIva,
+              cesta.lista[i].unidades,
+              objetoIva,
+              infoArticulo.precioPesaje
+            );
+          } else {
+            objetoIva = construirObjetoIvas(
+              infoArticulo.precioConIva,
+              infoArticulo.tipoIva,
+              cesta.lista[i].unidades,
+              objetoIva
+            );
+          }
+        }
+      }
+    }
   }
 }
 

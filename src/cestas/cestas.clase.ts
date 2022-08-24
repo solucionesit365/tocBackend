@@ -19,38 +19,17 @@ export class CestaClase {
     return schCestas.getCestaByID(idCesta);
   }
 
-  reiniciarCesta(idCestaBorrar) {
-    return this.borrarCesta(idCestaBorrar).then(() => {
-      return this.getTodasCestas().then((res) => {
-        if (res.length > 0) {
-          // Hay alguna cesta
-          return res[0]; // Devuelvo la primera que encuentro.
-        } else {
-          // No quedan cestas
-          const nuevaCesta = this.nuevaCestaVacia();
-          this.setCesta(nuevaCesta);
-          return nuevaCesta;
-        }
-      });
-    });
+  /* Eze v23 */
+  async resetCesta(idCesta: number): Promise<boolean> {
+    const cesta = this.generarObjetoCesta();
+    cesta._id = idCesta;
+    if (cesta) return schCestas.updateCesta(cesta);
+    
+    return false;
   }
 
-  /* La cesta activa es la del trabajador activo */
-  borrarCestaActiva() {
-    return parametrosInstance.getEspecialParametros().then((parametros) => {
-      return schCestas
-        .eliminarCestaByIdTrabajador(parametros.idCurrentTrabajador)
-        .then((res) => {
-          return res.acknowledged;
-        })
-        .catch((err) => {
-          console.log(err.message);
-          return false;
-        });
-    });
-  }
-
-  nuevaCestaVacia() {
+  /* Eze v23 */
+  generarObjetoCesta(): CestasInterface {
     const nuevaCesta: CestasInterface = {
       _id: Date.now(),
       tiposIva: {
@@ -69,20 +48,14 @@ export class CestaClase {
     return nuevaCesta;
   }
 
-  getTodasCestas(): Promise<CestasInterface[]> {
+  /* Eze v23 */
+  getAllCestas(): Promise<CestasInterface[]> {
     return schCestas.getAllCestas();
   }
 
-  borrarCesta(idCestaBorrar): Promise<boolean> {
-    return schCestas
-      .borrarCesta(idCestaBorrar)
-      .then((res) => {
-        return res.acknowledged;
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
+  /* Eze v23 */
+  deleteCesta(idCesta: number): Promise<boolean> {
+    return schCestas.deleteCesta(idCesta);
   }
 
   /* Eze v23 */
@@ -93,53 +66,10 @@ export class CestaClase {
     });
   }
 
-  eliminarCesta(idCesta: number): Promise<boolean> {
-    return schCestas
-      .eliminarCesta(idCesta)
-      .then((res) => {
-        return res.acknowledged;
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
-  }
-
-  /* Guarda la cesta en Mongo */
-  setCesta(cesta: CestasInterface): Promise<boolean> {
-    for (let i = 0; i < cesta.lista.length; i++) {
-      cesta.lista[i].subtotal = Number(cesta.lista[i].subtotal.toFixed(2));
-    }
-    return schCestas
-      .setCesta(cesta)
-      .then((res) => {
-        if (res.acknowledged) {
-          return true;
-        } else {
-          return false;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
-  }
-
-  async crearNuevaCesta(): Promise<CestasInterface> {
-    const nuevaCesta = this.nuevaCestaVacia();
-
-    return this.setCesta(nuevaCesta)
-      .then((res) => {
-        if (res) {
-          return nuevaCesta;
-        } else {
-          return null;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        return null;
-      });
+  /* Eze v23 */
+  async createCesta(): Promise<number> {
+    const nuevaCesta = this.generarObjetoCesta();
+    return schCestas.createCesta(nuevaCesta);
   }
 
   /* Obtiene la cesta, borra el  item y devuelve la cesta final */
