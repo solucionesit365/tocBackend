@@ -9,7 +9,11 @@ export class Articulos {
   }
 
   setEstadoTarifaEspecial(payload: boolean) {
-    this.estadoTarifaVIP = payload;
+    try {
+      this.estadoTarifaVIP = payload;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   getEstadoTarifaEspecial() {

@@ -119,17 +119,8 @@ export class ParametrosClase {
     });
   }
 
-  setUltimoTicket(idTicket: number) {
-    return schParametros.setUltimoTicket(idTicket).then((res) => {
-      if (res.acknowledged) {
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  setUltimoTicket(idTicket: number): Promise<boolean> {
+    return schParametros.setUltimoTicket(idTicket);
   }
 
   setVidAndPid(vid: string, pid: string, com: string ) {

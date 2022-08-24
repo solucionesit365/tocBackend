@@ -1,17 +1,24 @@
-import {TicketsInterface} from './tickets.interface';
-import * as schTickets from './tickets.mongodb';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
-import {CestaClase, cestas} from '../cestas/cestas.clase';
-import {parametrosInstance} from '../parametros/parametros.clase';
-import {movimientosInstance} from '../movimientos/movimientos.clase';
-import {articulosInstance} from '../articulos/articulos.clase';
-import axios from 'axios';
-import {clienteInstance} from '../clientes/clientes.clase';
-import {CestasInterface} from 'src/cestas/cestas.interface';
+import { TicketsInterface } from "./tickets.interface";
+import * as schTickets from "./tickets.mongodb";
+import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+import { CestaClase, cestas } from "../cestas/cestas.clase";
+import { parametrosInstance } from "../parametros/parametros.clase";
+import { movimientosInstance } from "../movimientos/movimientos.clase";
+import { articulosInstance } from "../articulos/articulos.clase";
+import axios from "axios";
+import { clienteInstance } from "../clientes/clientes.clase";
+import { CestasInterface } from "src/cestas/cestas.interface";
 
 export class TicketsClase {
   /* No válido para clientes especiales que pagan en tienda (infoClienteVip) */
-  generarObjetoTicket(idTicket: number, total: number, cesta: CestasInterface, tipoPago: string, idCurrentTrabajador: number, idCliente: string) {
+  generarObjetoTicket(
+    idTicket: number,
+    total: number,
+    cesta: CestasInterface,
+    tipoPago: string,
+    idCurrentTrabajador: number,
+    idCliente: string
+  ) {
     const nuevoTicket: TicketsInterface = {
       _id: idTicket,
       timestamp: Date.now(),
@@ -23,30 +30,33 @@ export class TicketsClase {
       cliente: idCliente,
       infoClienteVip: {
         esVip: false,
-        nif: '',
-        nombre: '',
-        cp: '',
-        direccion: '',
-        ciudad: '',
+        nif: "",
+        nombre: "",
+        cp: "",
+        direccion: "",
+        ciudad: "",
       },
       enviado: false,
       enTransito: false,
       intentos: 0,
-      comentario: '',
+      comentario: "",
       regalo: cesta.regalo, // (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
-      recibo: '',
+      recibo: "",
       bloqueado: false,
     };
     return nuevoTicket;
   }
 
-  getTicketByID(idTicket: number): Promise <TicketsInterface> {
-    return schTickets.getTicketByID(idTicket).then((res: TicketsInterface) => {
-      return res;
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
+  getTicketByID(idTicket: number): Promise<TicketsInterface> {
+    return schTickets
+      .getTicketByID(idTicket)
+      .then((res: TicketsInterface) => {
+        return res;
+      })
+      .catch((err) => {
+        console.log(err);
+        return null;
+      });
   }
 
   anularTicket(idTicket) {
@@ -60,64 +70,62 @@ export class TicketsClase {
   //   schTickets.anotarAnulado(idTicket);
   // }
 
-  getTicketsIntervalo(fechaInicio: number, fechaFinal: number): Promise<TicketsInterface[]> {
-    return schTickets.getTicketsIntervalo(fechaInicio, fechaFinal).then((resultado: TicketsInterface[]) => {
-      return resultado;
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
+  getTicketsIntervalo(
+    fechaInicio: number,
+    fechaFinal: number
+  ): Promise<TicketsInterface[]> {
+    return schTickets
+      .getTicketsIntervalo(fechaInicio, fechaFinal)
+      .then((resultado: TicketsInterface[]) => {
+        return resultado;
+      })
+      .catch((err) => {
+        console.log(err);
+        return null;
+      });
   }
 
   getUltimoTicket() {
-    return parametrosInstance.getEspecialParametros().then((res) => {
-      if (typeof res.ultimoTicket === "number") {
-        return res.ultimoTicket;
-      } else {
+    return parametrosInstance
+      .getEspecialParametros()
+      .then((res) => {
+        if (typeof res.ultimoTicket === "number") {
+          return res.ultimoTicket;
+        } else {
+          return 0;
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
         return 0;
-      }
-    }).catch((err) => {
-      console.log(err.message);
-      return 0;
-    });
+      });
   }
 
-  insertarTicket(ticket: TicketsInterface) {
-    if (ticket.lista.length == 0) {
-      const itemVacio = {
-        _id: 5724,
-        nombre: 'Lista rota',
-        promocion: {
-          _id: null,
-          esPromo: false,
-        },
-        subtotal: ticket.total,
-        unidades: 1,
-      };
-
-      ticket.lista.push(itemVacio);
-    }
-
-    return schTickets.nuevoTicket(ticket).then((res) => {
-      if (res.acknowledged) {
-        if (ticket.regalo == true) {
-          axios.post('clientes/resetPuntosCliente', {
-            database: parametrosInstance.getParametros().database,
-            idClienteFinal: ticket.cliente,
-          }).catch((err) => {
-            console.log(err);
-          });
-        }
-        articulosInstance.setEstadoTarifaEspecial(false);
-        clienteInstance.setEstadoClienteVIP(false);
-        return true;
-      } else {
-        return false;
+  async insertarTicket(ticket: TicketsInterface): Promise<boolean> {
+    try {
+      if (ticket.lista.length == 0) {
+        throw Error("La cesta no puede estar vacía");
       }
-    }).catch((err) => {
+      if (await schTickets.nuevoTicket(ticket)) {
+        if (ticket.regalo === true) {
+          axios
+            .post("clientes/resetPuntosCliente", {
+              database: parametrosInstance.getParametros().database,
+              idClienteFinal: ticket.cliente,
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+          articulosInstance.setEstadoTarifaEspecial(false);
+          clienteInstance.setEstadoClienteVIP(false);
+        }
+        return true;
+      }
+      return false;
+    } catch (err) {
       console.log(err);
       return false;
-    });
+    }
   }
 
   async crearTicketEfectivo(total: number, idCesta: number, idCliente: string) {
@@ -126,14 +134,21 @@ export class TicketsClase {
     const cesta = await cestas.getCesta(idCesta);
 
     if (cesta == null || cesta.lista.length == 0) {
-      console.log('Error, la cesta es null o está vacía');
+      console.log("Error, la cesta es null o está vacía");
       return false;
     }
     for (const key in cesta.lista) {
-      const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-      const gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva );
-      if ( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 && !cesta.lista[key].promocion.esPromo ) {
-        cesta.lista[key].unidades= gramos;
+      const infoArticulo = await articulosInstance.getInfoArticulo(
+        cesta.lista[key]._id
+      );
+      const gramos = cesta.lista[key].subtotal / infoArticulo.precioConIva;
+      if (
+        infoArticulo.esSumable == false &&
+        !cesta.lista[key].suplementosId &&
+        cesta.lista[key].unidades == 1 &&
+        !cesta.lista[key].promocion.esPromo
+      ) {
+        cesta.lista[key].unidades = gramos;
       }
     }
 
@@ -142,23 +157,26 @@ export class TicketsClase {
       timestamp: Date.now(),
       total: total,
       lista: cesta.lista,
-      tipoPago: 'EFECTIVO',
+      tipoPago: "EFECTIVO",
       idTrabajador: infoTrabajador._id,
       tiposIva: cesta.tiposIva,
-      cliente: (idCliente != '' && idCliente != null) ? (idCliente) : (null),
+      cliente: idCliente != "" && idCliente != null ? idCliente : null,
       infoClienteVip: {
         esVip: false,
-        nif: '',
-        nombre: '',
-        cp: '',
-        direccion: '',
-        ciudad: '',
+        nif: "",
+        nombre: "",
+        cp: "",
+        direccion: "",
+        ciudad: "",
       },
       enviado: false,
       enTransito: false,
       intentos: 0,
-      comentario: '',
-      regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
+      comentario: "",
+      regalo:
+        cesta.regalo == true && idCliente != "" && idCliente != null
+          ? true
+          : false,
       bloqueado: false,
     };
 
@@ -167,30 +185,40 @@ export class TicketsClase {
         if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
           return true;
         } else {
-          console.log('Error no se ha podido cambiar el último id ticket');
+          console.log("Error no se ha podido cambiar el último id ticket");
         }
       } else {
-        console.log('Error, no se ha podido borrar la cesta');
+        console.log("Error, no se ha podido borrar la cesta");
       }
     } else {
-      console.log('Error, no se ha podido insertar el ticket');
+      console.log("Error, no se ha podido insertar el ticket");
     }
     return false;
   }
 
-  async crearTicketDatafono3G(total: number, idCesta: number, idCliente: string) {
+  async crearTicketDatafono3G(
+    total: number,
+    idCesta: number,
+    idCliente: string
+  ) {
     const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
     const nuevoIdTicket = (await this.getUltimoTicket()) + 1;
     const cesta = await cestas.getCesta(idCesta);
     if (cesta == null || cesta.lista.length == 0) {
-      console.log('Error, la cesta es null o está vacía');
+      console.log("Error, la cesta es null o está vacía");
       return false;
     }
     for (const key in cesta.lista) {
-      const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-      const gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva );
-      if ( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ) {
-        cesta.lista[key].unidades= gramos;
+      const infoArticulo = await articulosInstance.getInfoArticulo(
+        cesta.lista[key]._id
+      );
+      const gramos = cesta.lista[key].subtotal / infoArticulo.precioConIva;
+      if (
+        infoArticulo.esSumable == false &&
+        !cesta.lista[key].suplementosId &&
+        cesta.lista[key].unidades == 1
+      ) {
+        cesta.lista[key].unidades = gramos;
       }
     }
 
@@ -199,57 +227,77 @@ export class TicketsClase {
       timestamp: Date.now(),
       total: total,
       lista: cesta.lista,
-      tipoPago: 'TARJETA',
+      tipoPago: "TARJETA",
       idTrabajador: infoTrabajador._id,
       tiposIva: cesta.tiposIva,
-      cliente: (idCliente != '' && idCliente != null) ? (idCliente) : (null),
+      cliente: idCliente != "" && idCliente != null ? idCliente : null,
       infoClienteVip: {
         esVip: false,
-        nif: '',
-        nombre: '',
-        cp: '',
-        direccion: '',
-        ciudad: '',
+        nif: "",
+        nombre: "",
+        cp: "",
+        direccion: "",
+        ciudad: "",
       },
       enviado: false,
       enTransito: false,
       intentos: 0,
-      comentario: '',
-      regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
+      comentario: "",
+      regalo:
+        cesta.regalo == true && idCliente != "" && idCliente != null
+          ? true
+          : false,
       bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
       if (await cestas.borrarCesta(idCesta)) {
         if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
-          movimientosInstance.nuevaSalida(objTicket.total, 'Targeta 3G', 'TARJETA', false, objTicket._id);
+          movimientosInstance.nuevaSalida(
+            objTicket.total,
+            "Targeta 3G",
+            "TARJETA",
+            false,
+            objTicket._id
+          );
           return true;
         } else {
-          console.log('Error no se ha podido cambiar el último id ticket');
+          console.log("Error no se ha podido cambiar el último id ticket");
         }
       } else {
-        console.log('Error, no se ha podido borrar la cesta');
+        console.log("Error, no se ha podido borrar la cesta");
       }
     } else {
-      console.log('Error, no se ha podido insertar el ticket');
+      console.log("Error, no se ha podido insertar el ticket");
     }
     return false;
   }
 
-  async crearTicketTKRS(total: number, totalTkrs: number, idCesta: number, idCliente: string) {
+  async crearTicketTKRS(
+    total: number,
+    totalTkrs: number,
+    idCesta: number,
+    idCliente: string
+  ) {
     const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
     const nuevoIdTicket = (await this.getUltimoTicket()) + 1;
     const cesta = await cestas.getCesta(idCesta);
 
     if (cesta == null || cesta.lista.length == 0) {
-      console.log('Error, la cesta es null o está vacía');
+      console.log("Error, la cesta es null o está vacía");
       return false;
     }
     for (const key in cesta.lista) {
-      const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-      const gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva );
-      if ( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ) {
-        cesta.lista[key].unidades= gramos;
+      const infoArticulo = await articulosInstance.getInfoArticulo(
+        cesta.lista[key]._id
+      );
+      const gramos = cesta.lista[key].subtotal / infoArticulo.precioConIva;
+      if (
+        infoArticulo.esSumable == false &&
+        !cesta.lista[key].suplementosId &&
+        cesta.lista[key].unidades == 1
+      ) {
+        cesta.lista[key].unidades = gramos;
       }
     }
 
@@ -258,94 +306,134 @@ export class TicketsClase {
       timestamp: Date.now(),
       total: total,
       lista: cesta.lista,
-      tipoPago: 'TKRS',
+      tipoPago: "TKRS",
       idTrabajador: infoTrabajador._id,
       tiposIva: cesta.tiposIva,
-      cliente: (idCliente != '' && idCliente != null) ? (idCliente) : (null),
+      cliente: idCliente != "" && idCliente != null ? idCliente : null,
       infoClienteVip: {
         esVip: false,
-        nif: '',
-        nombre: '',
-        cp: '',
-        direccion: '',
-        ciudad: '',
+        nif: "",
+        nombre: "",
+        cp: "",
+        direccion: "",
+        ciudad: "",
       },
       enviado: false,
       enTransito: false,
       intentos: 0,
-      comentario: '',
-      regalo: (cesta.regalo == true && idCliente != '' && idCliente != null) ? (true): (false),
+      comentario: "",
+      regalo:
+        cesta.regalo == true && idCliente != "" && idCliente != null
+          ? true
+          : false,
       bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
       if (await cestas.borrarCesta(idCesta)) {
         if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
-          objTicket['cantidadTkrs'] = totalTkrs;
+          objTicket["cantidadTkrs"] = totalTkrs;
           const diferencia = total - totalTkrs;
           if (diferencia >= 0) {
-            return movimientosInstance.nuevaSalida(objTicket.total, `Pagat TkRs (TkRs): ${objTicket._id}`, 'TKRS_SIN_EXCESO', false, objTicket._id).then((salida0) => {
-              return salida0;
-            }).catch((err) => {
-              console.log(err);
-              return false;
-            });
-          } else {
-            return movimientosInstance.nuevaSalida(Number((diferencia*-1).toFixed(2)), `Pagat TkRs (TkRs): ${objTicket._id}`, 'TKRS_CON_EXCESO', false, objTicket._id).then((salida1) => {
-              if (salida1) {
-                return movimientosInstance.nuevaSalida(objTicket.total, `Pagat TkRs (TkRs): ${objTicket._id}`, 'TKRS_SIN_EXCESO', false, objTicket._id).then((salida2) => {
-                  return salida2;
-                }).catch((err) => {
-                  console.log(err);
-                  return false;
-                });
-              } else {
+            return movimientosInstance
+              .nuevaSalida(
+                objTicket.total,
+                `Pagat TkRs (TkRs): ${objTicket._id}`,
+                "TKRS_SIN_EXCESO",
+                false,
+                objTicket._id
+              )
+              .then((salida0) => {
+                return salida0;
+              })
+              .catch((err) => {
+                console.log(err);
                 return false;
-              }
-            }).catch((err) => {
-              console.log(err);
-              return false;
-            });
+              });
+          } else {
+            return movimientosInstance
+              .nuevaSalida(
+                Number((diferencia * -1).toFixed(2)),
+                `Pagat TkRs (TkRs): ${objTicket._id}`,
+                "TKRS_CON_EXCESO",
+                false,
+                objTicket._id
+              )
+              .then((salida1) => {
+                if (salida1) {
+                  return movimientosInstance
+                    .nuevaSalida(
+                      objTicket.total,
+                      `Pagat TkRs (TkRs): ${objTicket._id}`,
+                      "TKRS_SIN_EXCESO",
+                      false,
+                      objTicket._id
+                    )
+                    .then((salida2) => {
+                      return salida2;
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                      return false;
+                    });
+                } else {
+                  return false;
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+                return false;
+              });
           }
         } else {
-          console.log('Error no se ha podido cambiar el último id ticket');
+          console.log("Error no se ha podido cambiar el último id ticket");
         }
       } else {
-        console.log('Error, no se ha podido borrar la cesta');
+        console.log("Error, no se ha podido borrar la cesta");
       }
     } else {
-      console.log('Error, no se ha podido insertar el ticket');
+      console.log("Error, no se ha podido insertar el ticket");
     }
     return false;
   }
 
-  async crearTicketDeuda(total: number, idCesta: number, idCliente: string, infoClienteVip: any) {
+  async crearTicketDeuda(
+    total: number,
+    idCesta: number,
+    idCliente: string,
+    infoClienteVip: any
+  ) {
     const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
     const nuevoIdTicket = (await this.getUltimoTicket()) + 1;
     const cesta = await cestas.getCesta(idCesta);
 
     if (cesta == null || cesta.lista.length == 0) {
-      console.log('Error, la cesta es null o está vacía');
+      console.log("Error, la cesta es null o está vacía");
       return false;
     }
     for (const key in cesta.lista) {
-      const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-      const gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva );
-      if ( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ) {
-        cesta.lista[key].unidades= gramos;
+      const infoArticulo = await articulosInstance.getInfoArticulo(
+        cesta.lista[key]._id
+      );
+      const gramos = cesta.lista[key].subtotal / infoArticulo.precioConIva;
+      if (
+        infoArticulo.esSumable == false &&
+        !cesta.lista[key].suplementosId &&
+        cesta.lista[key].unidades == 1
+      ) {
+        cesta.lista[key].unidades = gramos;
       }
     }
-
 
     const objTicket: TicketsInterface = {
       _id: nuevoIdTicket,
       timestamp: Date.now(),
       total: total,
       lista: cesta.lista,
-      tipoPago: 'DEUDA',
+      tipoPago: "DEUDA",
       idTrabajador: infoTrabajador._id,
       tiposIva: cesta.tiposIva,
-      cliente: (idCliente != '' && idCliente != null) ? (idCliente) : (null), // Es clienteFinal
+      cliente: idCliente != "" && idCliente != null ? idCliente : null, // Es clienteFinal
       infoClienteVip: {
         esVip: infoClienteVip.esVip,
         nif: infoClienteVip.nif,
@@ -357,23 +445,29 @@ export class TicketsClase {
       enTransito: false,
       enviado: false,
       intentos: 0,
-      comentario: '',
+      comentario: "",
       bloqueado: false,
     };
 
     if (await this.insertarTicket(objTicket)) {
       if (await cestas.borrarCesta(idCesta)) {
         if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
-          movimientosInstance.nuevaSalida(objTicket.total, `Deute client: ${objTicket._id}`, 'DEUDA', false, objTicket._id);
+          movimientosInstance.nuevaSalida(
+            objTicket.total,
+            `Deute client: ${objTicket._id}`,
+            "DEUDA",
+            false,
+            objTicket._id
+          );
           return true;
         } else {
-          console.log('Error no se ha podido cambiar el último id ticket');
+          console.log("Error no se ha podido cambiar el último id ticket");
         }
       } else {
-        console.log('Error, no se ha podido borrar la cesta');
+        console.log("Error, no se ha podido borrar la cesta");
       }
     } else {
-      console.log('Error, no se ha podido insertar el ticket');
+      console.log("Error, no se ha podido insertar el ticket");
     }
     return false;
   }
@@ -384,39 +478,44 @@ export class TicketsClase {
     const cesta = await cestas.getCesta(idCesta);
 
     if (cesta == null || cesta.lista.length == 0) {
-      console.log('Error, la cesta es null o está vacía');
+      console.log("Error, la cesta es null o está vacía");
       return false;
     }
     for (const key in cesta.lista) {
-      const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[key]._id);
-      const gramos = cesta.lista[key].subtotal/(infoArticulo.precioConIva );
-      if ( infoArticulo.esSumable == false && !cesta.lista[key].suplementosId && cesta.lista[key].unidades == 1 ) {
-        cesta.lista[key].unidades= gramos;
+      const infoArticulo = await articulosInstance.getInfoArticulo(
+        cesta.lista[key]._id
+      );
+      const gramos = cesta.lista[key].subtotal / infoArticulo.precioConIva;
+      if (
+        infoArticulo.esSumable == false &&
+        !cesta.lista[key].suplementosId &&
+        cesta.lista[key].unidades == 1
+      ) {
+        cesta.lista[key].unidades = gramos;
       }
     }
-
 
     const objTicket: TicketsInterface = {
       _id: nuevoIdTicket,
       timestamp: Date.now(),
       total: 0,
       lista: cesta.lista,
-      tipoPago: 'CONSUMO_PERSONAL',
+      tipoPago: "CONSUMO_PERSONAL",
       idTrabajador: infoTrabajador._id,
       tiposIva: cesta.tiposIva,
       cliente: null,
       infoClienteVip: {
         esVip: false,
-        nif: '',
-        nombre: '',
-        cp: '',
-        direccion: '',
-        ciudad: '',
+        nif: "",
+        nombre: "",
+        cp: "",
+        direccion: "",
+        ciudad: "",
       },
       enTransito: false,
       enviado: false,
       intentos: 0,
-      comentario: '',
+      comentario: "",
       bloqueado: false,
     };
 
@@ -425,13 +524,13 @@ export class TicketsClase {
         if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
           return true;
         } else {
-          console.log('Error no se ha podido cambiar el último id ticket');
+          console.log("Error no se ha podido cambiar el último id ticket");
         }
       } else {
-        console.log('Error, no se ha podido borrar la cesta');
+        console.log("Error, no se ha podido borrar la cesta");
       }
     } else {
-      console.log('Error, no se ha podido insertar el ticket');
+      console.log("Error, no se ha podido insertar el ticket");
     }
     return false;
   }
@@ -444,21 +543,27 @@ export class TicketsClase {
   }
 
   actualizarEstadoTicket(ticket: TicketsInterface) {
-    return schTickets.actualizarEstadoTicket(ticket).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+    return schTickets
+      .actualizarEstadoTicket(ticket)
+      .then((res) => {
+        return res.acknowledged;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
   }
 
   actualizarComentario(ticket: TicketsInterface) {
-    return schTickets.actualizarComentario(ticket).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+    return schTickets
+      .actualizarComentario(ticket)
+      .then((res) => {
+        return res.acknowledged;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
   }
 
   desbloquearTicket(idTicket: number) {
@@ -468,11 +573,8 @@ export class TicketsClase {
     });
   }
 
-  borrarTicket(idTicket: number) {
-    return schTickets.borrarTicket(idTicket).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  borrarTicket(idTicket: number): Promise<boolean> {
+    return schTickets.borrarTicket(idTicket);
   }
 }
 

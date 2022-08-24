@@ -53,7 +53,11 @@ export class Clientes {
   }
 
   setEstadoClienteVIP(nuevoEstado: boolean) {
-    this.clienteVip = nuevoEstado;
+    try {
+      this.clienteVip = nuevoEstado;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   getEstadoClienteVIP() {

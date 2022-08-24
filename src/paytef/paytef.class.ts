@@ -80,9 +80,8 @@ class PaytefClass {
   async cerrarTicket(nuevoTicket: TicketsInterface): Promise<boolean> {
     try {
       if (await ticketsInstance.insertarTicket(nuevoTicket)) {
-        if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
-          return true;
-        }
+        if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) return true;
+        
         this.anularOperacion(nuevoTicket._id, "cerrarTicket()");
         return false;
       }
@@ -100,24 +99,13 @@ class PaytefClass {
   }
 
   /* Anula el ticket creado (por algún error). NO detiene el ciclo (sin respuesta al cliente) */
-  anularOperacion(idTicket: number, msj = "") {
-    ticketsInstance
-      .borrarTicket(idTicket)
-      .then((resAnulacion) => {
-        if (resAnulacion == false) {
-          LogsClass.newLog(
-            "Error nuevo grave",
-            `Ticket debía ser borrado pero no se ha podido: idTicket: ${idTicket} tiemstamp: ${Date.now()} y viene de ${msj}`
-          );
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        LogsClass.newLog(
-          "Traza paytef",
-          `anularOperacion(${idTicket}, client, msj) entra en su catch. timestamp ${Date.now()} y otra vez el idTicket: ${idTicket}`
-        );
-      });
+  async anularOperacion(idTicket: number, msj = ""): Promise<void> {
+    if (!await ticketsInstance.borrarTicket(idTicket)) {
+      LogsClass.newLog(
+        "Error nuevo grave",
+        `Ticket debía ser borrado pero no se ha podido: idTicket: ${idTicket} tiemstamp: ${Date.now()} y viene de ${msj}`
+      );
+    }
   }
 
   async iniciarDatafono(
