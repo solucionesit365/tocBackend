@@ -411,7 +411,10 @@ export class CestaClase {
         if (infoArticulo.esSumable == false && !cesta.lista[i].suplementosId && cesta.lista[i].unidades == 1 ) {
           const precioAplicado = infoArticulo.precioConIva * gramos;
           cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva, {precioAplicado: precioAplicado});
+        } else if (cesta.lista[i].subtotal > 0) {
+          cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
         } else {
+          infoArticulo.precioConIva = 0;
           cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
         }
         trabajadoresInstance.getCurrentTrabajador().then((data) => {

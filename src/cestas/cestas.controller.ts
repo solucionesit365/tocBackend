@@ -262,15 +262,19 @@ export class CestasController {
           if (cesta != null) {
             cesta.lista[params.index].subtotal = 0;
             cesta['regalo'] = true;
-            return cestas.setCesta(cesta).then((res) => {
-              if (res) {
-                return {error: false, cesta: cesta};
-              }
-              return {error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta'};
-            }).catch((err) => {
-              console.log(err);
-              return {error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta CATCH'};
+
+            return cestas.recalcularIvas(cesta).then((cestaOK) => {
+              return cestas.setCesta(cestaOK).then((res) => {
+                if (res) {
+                  return {error: false, cesta: cestaOK};
+                }
+                return {error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta'};
+              }).catch((err) => {
+                console.log(err);
+                return {error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta CATCH'};
+              });
             });
+
           } else {
             return {error: true, mensaje: 'Backend: Error, cesta vacía'};
           }
