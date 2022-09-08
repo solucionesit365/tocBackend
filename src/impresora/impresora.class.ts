@@ -653,6 +653,7 @@ export class Impresora {
     const parametros = parametrosInstance.getParametros();
     try {
       if (os.platform() === 'linux') {
+        console.log('abrir cajon linux')
         permisosImpresora();
         // if(parametros.tipoImpresora === 'USB')
         // {
