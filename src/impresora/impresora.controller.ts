@@ -21,7 +21,6 @@ export class ImpresoraController {
 
     @Post('despedida')
     despedircliente() {
-      impresoraInstance.abrirCajon();
       impresoraInstance.despedircliente();
     }
     @Post('bienvenida')
