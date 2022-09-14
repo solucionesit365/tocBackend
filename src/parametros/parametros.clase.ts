@@ -56,7 +56,7 @@ export class ParametrosClase {
     return this.parametros;
   }
 
-  getEspecialParametros(): Promise <ParametrosInterface | null> {
+  getEspecialParametros(): Promise<ParametrosInterface> {
     return schParametros.getParametros().then((infoParams: ParametrosInterface) => {
       return infoParams;
     }).catch((err) => {

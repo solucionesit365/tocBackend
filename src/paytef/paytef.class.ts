@@ -39,6 +39,7 @@ class PaytefClass {
     idCliente: string,
     idCesta: number
   ): Promise<void> {
+    const numeroTicket = (await ticketsInstance.getUltimoTicket()) + 1;
     try {
       const idTrabajadorActivo =
         await trabajadoresInstance.getCurrentIdTrabajador();
@@ -48,7 +49,7 @@ class PaytefClass {
           const total = this.getTotal(cesta);
           if (cesta.lista.length > 0 && total > 0) {
             const nuevoTicket = ticketsInstance.generarObjetoTicket(
-              (await ticketsInstance.getUltimoTicket()) + 1,
+              numeroTicket,
               total,
               cesta,
               "TARJETA",
@@ -72,7 +73,7 @@ class PaytefClass {
         throw Error("No existe el trabajador activo");
       }
     } catch (err) {
-      this.cancelarOperacion();
+      this.cancelarOperacion(numeroTicket);
       client.emit("consultaPaytef", { error: true, mensaje: err.message });
     }
   }
@@ -93,9 +94,21 @@ class PaytefClass {
   }
 
   /* Cancela la operación en el propio datáfono */
-  cancelarOperacion() {
+  cancelarOperacion(idTicket: number) {
     const params = parametrosInstance.getParametros();
-    axios.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { pinpad: "*" });
+    axios.post(`http://${params.ipTefpay}:8887/pinpad/cancel`, { pinpad: "*" }).then((resCancelar: any) => {
+      if (resCancelar.data.info.success) {
+        ticketsInstance.borrarTicket(idTicket);
+      } else {
+        ticketsInstance.borrarTicket(idTicket);
+        LogsClass.newLog(
+          "Error nuevo grave 2 (importante funcionamiento de paytef)",
+          `Ticket debía ser borrado pero no se ha podido: idTicket: ${idTicket} tiemstamp: ${Date.now()}`
+        );
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
   }
 
   /* Anula el ticket creado (por algún error). NO detiene el ciclo (sin respuesta al cliente) */
@@ -144,7 +157,7 @@ class PaytefClass {
       }
     } catch (err) {
       console.log(err);
-      this.cancelarOperacion();
+      this.cancelarOperacion(idTicket);
       this.anularOperacion(idTicket, "Backend: " + err.message);
       client.emit("consultaPaytef", {
         error: false,
@@ -193,7 +206,7 @@ class PaytefClass {
         this.consultarEstadoOperacion(client, idTicket, total, idCesta);
       }
     } catch (err) {
-      this.cancelarOperacion();
+      this.cancelarOperacion(idTicket);
       this.anularOperacion(idTicket, err.message);
       LogsClass.newLog(idTicket, err.message);
       client.emit("consultaPaytef", {

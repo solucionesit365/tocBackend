@@ -214,10 +214,16 @@ export async function borrarTicket(idTicket: number): Promise<boolean> {
     const database = (await conexion).db("tocgame");
     const tickets = database.collection("tickets");
     const resultado = await tickets.deleteOne({ _id: idTicket });
-    const resSetUltimoTicket = await parametrosInstance.setUltimoTicket(
-      idTicket - 1 < 0 ? 0 : idTicket - 1
-    );
-    return resultado.acknowledged && resSetUltimoTicket;
+    
+    if (resultado.deletedCount > 0 && resultado.acknowledged) {
+      const resSetUltimoTicket = await parametrosInstance.setUltimoTicket(
+        idTicket - 1 < 0 ? 0 : idTicket - 1
+      );
+      return resSetUltimoTicket;
+    }
+
+    throw Error("No se ha podido eliminar el ticket > tickets.mongodb > borrarTicket()");
+
   } catch (err) {
     console.log(err);
     return false;
