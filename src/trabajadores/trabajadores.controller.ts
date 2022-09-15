@@ -59,6 +59,20 @@ export class TrabajadoresController {
         return {error: true};
       });
     }
+
+    @Post('getTrabajadorByID')
+    getTrabajadorByID(@Body() params) {
+      return trabajadoresInstance.getTrabajador(params.id).then((res) => {
+        if (res != null) {
+          return {error: false, trabajador: res};
+        } else {
+          return {error: true};
+        }
+      }).catch((err) => {
+        console.log(err);
+        return {error: true};
+      });
+    }
     @Get('getCurrentTrabajadorNueva')
     getCurrentTrabajadorr() {
       return trabajadoresInstance.getCurrentTrabajador().then((res) => {

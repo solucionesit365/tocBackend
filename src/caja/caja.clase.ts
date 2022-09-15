@@ -124,7 +124,20 @@ export class CajaClase {
 
   getDatosUltimoCierre() {
     return schCajas.getDatosUltimoCierre().then((res) => {
-      console.log(res)
+      if (res != null) {
+        return res;
+      } else {
+        return null;
+      }
+    }).catch((err) => {
+      console.log(err);
+      return null;
+    });
+  }
+
+  getDatosMoviments() {
+    return schCajas.getDatosMoviments().then((res) => {
+   
       if (res != null) {
         return res;
       } else {

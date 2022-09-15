@@ -32,7 +32,15 @@ export async function getMonedas(tipo: 'APERTURA' | 'CLAUSURA') {
 export async function getDatosUltimoCierre() {
   const database = (await conexion).db('tocgame');
   const caja = database.collection('sincro-cajas');
-  const resultado = await caja.findOne();
+  const resultado = await caja.find().sort({ _id: -1 }).limit(1).toArray();
+
+  return resultado;
+}
+
+export async function getDatosMoviments() {
+  const database = (await conexion).db('tocgame');
+  const caja = database.collection('movimientos');
+  const resultado = await caja.find().toArray();
   return resultado;
 }
 

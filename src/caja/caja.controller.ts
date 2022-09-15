@@ -91,4 +91,14 @@ export class CajaController {
       });
     }
 
+    @Post('getDatosMoviments')
+    getDatosMoviments() { // No probado! Se le pasa solo el array de monedas
+      return cajaInstance.getDatosMoviments().then((res) => {
+        return {error: false, info: res};
+      }).catch((err) => {
+        console.log(err);
+        return {error: true, mensaje: 'Backend: Error en caja/getDatosMoviments > CATCH'};
+      });
+    }
+
 }
