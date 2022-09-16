@@ -708,8 +708,7 @@ export class Impresora {
       const total = data.total + eur;
       const espacio= ' ';
       const size = 20-(dependienta.length + total.length);
-
-      const espacios = ['', ' ', '  ', '   ', '    ', '      ', '       ', '        ', '        ', '         ', '         ', '           ', '            ', '            ', '              '];
+      const espacios = ['', ' ', '  ', '   ', '    ', '     ', '      ', '        ', '        ', '         ', '         ', '           ', '            ', '            ', '              '];
       datosExtra = dependienta +espacios[size] + total;
     }
     if (datosExtra.length <= 2) {
