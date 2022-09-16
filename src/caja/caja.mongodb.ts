@@ -37,10 +37,10 @@ export async function getDatosUltimoCierre() {
   return resultado;
 }
 
-export async function getDatosMoviments() {
+export async function getDatosMoviments(inicioTime, finalTime) {
   const database = (await conexion).db('tocgame');
   const caja = database.collection('movimientos');
-  const resultado = await caja.find().toArray();
+  const resultado = await caja.find({ $and: [ {_id: {$gte:inicioTime}}, {_id:{$lte:finalTime} } ] }).toArray();
   return resultado;
 }
 

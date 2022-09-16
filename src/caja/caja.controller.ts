@@ -92,8 +92,8 @@ export class CajaController {
     }
 
     @Post('getDatosMoviments')
-    getDatosMoviments() { // No probado! Se le pasa solo el array de monedas
-      return cajaInstance.getDatosMoviments().then((res) => {
+    getDatosMoviments(@Body() params) { // No probado! Se le pasa solo el array de monedas
+      return cajaInstance.getDatosMoviments(params.fechaInicio, params.fechaFinal).then((res) => {
         return {error: false, info: res};
       }).catch((err) => {
         console.log(err);

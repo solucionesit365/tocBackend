@@ -135,8 +135,8 @@ export class CajaClase {
     });
   }
 
-  getDatosMoviments() {
-    return schCajas.getDatosMoviments().then((res) => {
+  getDatosMoviments(inicioTime:any, finalTime:any) {
+    return schCajas.getDatosMoviments(inicioTime, finalTime ).then((res) => {
    
       if (res != null) {
         return res;
