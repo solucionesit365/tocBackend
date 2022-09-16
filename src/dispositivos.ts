@@ -30,8 +30,10 @@ export class Dispositivos {
         return null;
       }
     } else if (os.platform() === 'win32') {
+ 
       try {
         if (parametros.tipoImpresora == 'USB') {
+        
           // const device: number = new escpos.USB();
           console.log('OBSERVÁ: ', parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
           const device: number = new escpos.USB(parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
