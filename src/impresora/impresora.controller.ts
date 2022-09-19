@@ -19,14 +19,12 @@ export class ImpresoraController {
       return impresoraInstance.imprimirEntregas();
     }
 
-    @Post('imprimircaja')
-    imprimircaja(@Body() params) {
-      console.log( params.caja)
+    @Post('imprimirCaja')
+    imprimirCaja(@Body() params) {
+      console.log(params.caja)
       return impresoraInstance.imprimirCaja(params.caja.calaixFetZ,params.caja.idDependienta, params.caja.descuadre, params.caja.nClientes,  params.caja.recaudados, params.caja.movimientos, 'T-000', params.caja.inicioTime, params.caja.finalTime, params.caja.infoExtra.cambioInicial, params.caja.infoExtra.cambioFinal, null)
-
     }
     
-
     @Post('despedida')
     despedircliente() {
       impresoraInstance.despedircliente();
