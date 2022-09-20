@@ -563,7 +563,6 @@ export class Impresora {
 
   async imprimirCaja(calaixFet, nombreTrabajador, descuadre, nClientes, recaudado, arrayMovimientos: any[], nombreTienda, fI, fF, cInicioCaja, cFinalCaja, tipoImpresora) {
     try {
-      console.log('imprimir caja')
       const fechaInicio = new Date(fI);
       const fechaFinal = new Date(fF);
       let sumaTarjetas = 0;
@@ -573,6 +572,7 @@ export class Impresora {
         if (arrayMovimientos[i].tipo === TIPO_SALIDA_DINERO) {
           if (arrayMovimientos[i].concepto == 'Targeta' || arrayMovimientos[i].concepto == 'Targeta 3G') {
             sumaTarjetas += arrayMovimientos[i].valor;
+           
           } else {
             textoMovimientos += `${i + 1}: Salida:\n           Cantidad: -${arrayMovimientos[i].valor.toFixed(2)}\n           Fecha: ${auxFecha.getDate()}/${auxFecha.getMonth()}/${auxFecha.getFullYear()}  ${auxFecha.getHours()}:${auxFecha.getMinutes()}\n           Concepto: ${arrayMovimientos[i].concepto}\n`;
           }
