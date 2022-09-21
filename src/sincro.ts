@@ -49,11 +49,11 @@ function sincronizarCajas() {
       if (parametros != null) {
         cajaInstance
           .getCajaMasAntigua()
-          .then((res) => {
-            if (res.length > 0) {
+          .then((resCaja) => {
+            if (resCaja) {
               emitSocket("sincroCajas", {
                 parametros,
-                infoCaja: res[0],
+                infoCaja: resCaja,
               });
             }
           })

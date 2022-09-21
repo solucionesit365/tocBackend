@@ -10,10 +10,11 @@ import {parametrosInstance} from '../parametros/parametros.clase';
 import {movimientosInstance} from '../movimientos/movimientos.clase';
 import {impresoraInstance} from '../impresora/impresora.class';
 
-const TIPO_ENTRADA = 'ENTRADA';
-const TIPO_SALIDA = 'SALIDA';
+const TIPO_ENTRADA = "ENTRADA";
+const TIPO_SALIDA = "SALIDA";
+
 const cajaVacia: CajaInterface = {
-  _id: 'CAJA',
+  _id: "CAJA",
   inicioTime: null,
   finalTime: null,
   idDependienta: null,
@@ -146,7 +147,7 @@ export class CajaClase {
     return schCajas.nuevoItemSincroCajas(cajaInsertar);
   }
 
-  async cerrarCaja(total: number, detalleCierre, guardarInfoMonedas, totalDatafono3G: number) {
+  async cerrarCaja(total: number, detalleCierre, guardarInfoMonedas, totalDatafono3G: number, idTrabajador: number) {
     try {
       const estaAbierta = await this.cajaAbierta();
 
@@ -155,40 +156,31 @@ export class CajaClase {
         cajaActual.totalCierre = total;
         cajaActual.detalleCierre = detalleCierre;
         cajaActual.finalTime = Date.now();
-        cajaActual.idDependienta = await trabajadoresInstance.getCurrentIdTrabajador(); // this.getCurrentTrabajador()._id;
+        cajaActual.idDependienta = idTrabajador; // this.getCurrentTrabajador()._id;
         cajaActual.totalDatafono3G = totalDatafono3G;
         cajaActual.totalClearOne = 0;
         cajaActual = await this.calcularDatosCaja(cajaActual);
-    
+
         const res = await this.nuevoItemSincroCajas(cajaActual);
+
         if (res.acknowledged) {
-          // ipcRenderer.send('enviar-email', objEmail);
           const res2 = await schMonedas.setMonedas({
             _id: 'INFO_MONEDAS',
             infoDinero: guardarInfoMonedas,
           });
           if (res2.acknowledged) {
-            if (await this.borrarCaja()) {
-              return true;
-            } else {
-              return false;
-            }
-          } else {
-            return false;
+            if (await this.borrarCaja()) return true;
           }
-        } else {
-          return false;
-        }
-      } else {
-        return false;
+        } 
       }
+      return false;
     } catch (err) {
       console.log("Backend: ", err);
       return false;
     }
   }
 
-  borrarCaja() {
+  async borrarCaja(): Promise<boolean> {
     return schCajas.borrarCaja().then((result) => {
       if (result) {
         return true;

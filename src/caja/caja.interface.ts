@@ -104,3 +104,71 @@ export const cajaVacia: CajaInterface = {
   totalDatafono3G: null,
   totalClearOne: null,
 };
+
+export type tiposInfoMoneda = "CLAUSURA" | "APERTURA";
+
+export interface MonedasInterface {
+    _id: tiposInfoMoneda,
+    array: [
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        },
+        {
+        valor: number,
+        style: string
+        }
+    ]
+}
