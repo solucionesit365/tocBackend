@@ -31,9 +31,7 @@ export interface CajaInterface {
         unidades: number
     }[],
     enviado: boolean,
-    enTransito: boolean,
     totalDatafono3G: number,
-    totalClearOne: number,
     comentario?: string
 }
 
@@ -70,9 +68,7 @@ export interface CajaForSincroInterface {
         unidades: number
     }[],
     enviado: boolean,
-    enTransito: boolean,
     totalDatafono3G: number,
-    totalClearOne: number
 }
 
 export const cajaVacia: CajaInterface = {
@@ -100,9 +96,7 @@ export const cajaVacia: CajaInterface = {
   detalleApertura: [],
   detalleCierre: [],
   enviado: false,
-  enTransito: false,
   totalDatafono3G: null,
-  totalClearOne: null,
 };
 
 export type tiposInfoMoneda = "CLAUSURA" | "APERTURA";
