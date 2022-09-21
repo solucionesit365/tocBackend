@@ -1,10 +1,9 @@
 export interface MovimientosInterface {
     _id: number,
-    tipo: string,
+    tipo: TiposMovientos,
     valor: number,
     concepto: string,
     idTrabajador: number,
-    tipoExtra: string,
     codigoBarras: string,
     idTicket: number,
     enviado: boolean,
@@ -12,3 +11,5 @@ export interface MovimientosInterface {
     comentario: string,
     intentos: number
 }
+
+export type TiposMovientos = "EFECTIVO" | "TARJETA" | "TKRS_CON_EXCESO" | "TKRS_SIN_EXCESO" | "DEUDA" | "CONSUMO_PERSONAL";

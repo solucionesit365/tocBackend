@@ -149,7 +149,7 @@ export class CajaClase {
 
       return false;
     } catch (err) {
-      console.log("Backend: ", err);
+      console.log(err);
       return false;
     }
   }
@@ -171,6 +171,7 @@ export class CajaClase {
     return schCajas.getUltimoCierre();
   }
 
+  /*  */
   async getDatosCierre(caja: CajaInterface): Promise<CajaInterface> {
     const arrayTicketsCaja: TicketsInterface[] = await schTickets.getTicketsIntervalo(caja.inicioTime, caja.finalTime);
     const arrayMovimientos: MovimientosInterface[] = await movimientosInstance.getMovimientosIntervalo(caja.inicioTime, caja.finalTime);
@@ -196,14 +197,14 @@ export class CajaClase {
     let totalDeuda = 0;
 
     for (let i = 0; i < arrayMovimientos.length; i++) {
-      if (arrayMovimientos[i].tipo === TIPO_SALIDA) {
-        if (arrayMovimientos[i].tipoExtra != "CONSUMO_PERSONAL") {
-          if (arrayMovimientos[i].tipoExtra != "TKRS_CON_EXCESO") {
-            totalSalidas += arrayMovimientos[i].valor;
-          }
-        }
-      } else if (arrayMovimientos[i].tipo === TIPO_ENTRADA) {
-        totalEntradas += arrayMovimientos[i].valor;
+      switch(arrayMovimientos[i].tipo) {
+        case "EFECTIVO": totalEntradas += arrayMovimientos[i].valor; break;
+        case "TARJETA": totalSalidas += arrayMovimientos[i].valor; break;
+        case "TKRS_CON_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
+        case "TKRS_SIN_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
+        case "CONSUMO_PERSONAL": totalSalidas += arrayMovimientos[i].valor; break;
+        case "DEUDA": totalSalidas += arrayMovimientos[i].valor; break;
+        default: console.log("Error, tipo de movimiento desconocido");
       }
     }
 
