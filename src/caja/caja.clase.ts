@@ -208,6 +208,7 @@ export class CajaClase {
       }
     }
 
+    // ESTO SERÁ PARA CALCULAR EL DESCUADRE
     for (let i = 0; i < arrayTicketsCaja.length; i++) {
       if (arrayTicketsCaja[i].total >= 0) nClientes++;
 
