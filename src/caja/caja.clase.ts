@@ -1,57 +1,29 @@
 // 100%
-import {CajaForSincroInterface, CajaInterface, MonedasInterface, tiposInfoMoneda} from './caja.interface';
+import { CajaSincro, CajaAbiertaInterface, CajaCerradaInterface, MonedasInterface, TiposInfoMoneda, cajaAbiertaVacia, cajaCerradaVacia } from './caja.interface';
 import * as schCajas from './caja.mongodb';
 import * as schTickets from '../tickets/tickets.mongodb';
 import * as schMonedas from '../monedas/monedas.mongodb';
-import {TicketsInterface} from '../tickets/tickets.interface';
-import {MovimientosInterface} from '../movimientos/movimientos.interface';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
-import {parametrosInstance} from '../parametros/parametros.clase';
-import {movimientosInstance} from '../movimientos/movimientos.clase';
-import {impresoraInstance} from '../impresora/impresora.class';
+import { TicketsInterface } from '../tickets/tickets.interface';
+import { MovimientosInterface } from '../movimientos/movimientos.interface';
+import { trabajadoresInstance } from '../trabajadores/trabajadores.clase';
+import { parametrosInstance } from '../parametros/parametros.clase';
+import { movimientosInstance } from '../movimientos/movimientos.clase';
+import { impresoraInstance } from '../impresora/impresora.class';
+import { ObjectId } from 'mongodb';
 
 const TIPO_ENTRADA = "ENTRADA";
 const TIPO_SALIDA = "SALIDA";
 
-const cajaVacia: CajaInterface = {
-  _id: "CAJA",
-  inicioTime: null,
-  finalTime: null,
-  idDependienta: null,
-  totalApertura: null,
-  totalCierre: null,
-  calaixFetZ: null,
-  descuadre: null,
-  infoExtra: {
-    cambioInicial: null,
-    cambioFinal: null,
-    totalSalidas: null,
-    totalEntradas: null,
-    totalEnEfectivo: null,
-    totalTarjeta: null,
-    totalDeuda: null,
-  },
-  primerTicket: null,
-  ultimoTicket: null,
-  recaudado: null,
-  nClientes: null,
-  detalleApertura: [],
-  detalleCierre: [],
-  enviado: false,
-  enTransito: false,
-  totalDatafono3G: null,
-};
-
 export class CajaClase {
 
   /* Eze v23 */
-  getInfoCaja() {
-    return schCajas.getInfoCaja();
+  getInfoCajaAbierta() {
+    return schCajas.getInfoCajaAbierta();
   }
 
   /* Eze v23 */
   async cajaAbierta(): Promise<boolean> {
-    const infoCaja = await this.getInfoCaja();
+    const infoCaja = await this.getInfoCajaAbierta();
     if (infoCaja) {
       if (infoCaja.inicioTime) return true;
     }
@@ -59,28 +31,24 @@ export class CajaClase {
   }
 
   /* Eze v23 */
-  confirmarCajaEnviada(caja: CajaInterface) {
+  confirmarCajaEnviada(caja: CajaSincro) {
     return schCajas.confirmarCajaEnviada(caja);
   }
 
   /* Eze v23 */
-  getCajaMasAntigua() {
-    return schCajas.getCajaMasAntigua();
+  getCajaSincroMasAntigua() {
+    return schCajas.getCajaSincroMasAntigua();
   }
 
   /* Eze v23 */
-  confirmarCajaHabiaLlegado(caja: CajaInterface) {
-    return schCajas.confirmarCajaHabiaLlegado(caja);
-  }
-
-  /* Eze v23 */
-  async abrirCaja(detalleApertura: CajaInterface["detalleApertura"], totalApertura: CajaInterface["totalApertura"]): Promise<boolean> {
+  async abrirCaja(detalleApertura: CajaAbiertaInterface["detalleApertura"], totalApertura: CajaAbiertaInterface["totalApertura"], idDependienta: CajaAbiertaInterface["idDependientaApertura"]): Promise<boolean> {
     if (detalleApertura && totalApertura) {
-      const cajaNueva = cajaVacia;
-      cajaNueva.inicioTime = Date.now();
-      cajaNueva.detalleApertura = detalleApertura;
-      cajaNueva.totalApertura = totalApertura;
-  
+      const cajaNueva: CajaAbiertaInterface = {
+        inicioTime: Date.now(),
+        detalleApertura: detalleApertura,
+        totalApertura: totalApertura,
+        idDependientaApertura: idDependienta
+      };  
       return await schCajas.setInfoCaja(cajaNueva);
     }
     console.log("Error precondiciones abrirCaja > caja.clase.ts");
@@ -88,64 +56,37 @@ export class CajaClase {
   }
 
   /* Eze v23 */
-  guardarMonedas(arrayMonedas: MonedasInterface["array"], tipo: tiposInfoMoneda) {
+  guardarMonedas(arrayMonedas: MonedasInterface["array"], tipo: TiposInfoMoneda) {
     return schCajas.guardarMonedas(arrayMonedas, tipo);
   }
 
   /* Eze v23 */
-  getMonedas(tipo: tiposInfoMoneda) {
+  getMonedas(tipo: TiposInfoMoneda) {
     return schCajas.getMonedas(tipo);
   }
 
   /* Eze v23 */
-  nuevoItemSincroCajas(caja: CajaInterface) {
-    const cajaInsertar: CajaForSincroInterface = {
-      _id: Date.now(),
-      inicioTime: caja.inicioTime,
-      finalTime: caja.finalTime,
-      detalleCierre: caja.detalleCierre,
-      idDependienta: caja.idDependienta,
-      totalApertura: caja.totalApertura,
-      totalCierre: caja.totalCierre,
-      descuadre: caja.descuadre,
-      recaudado: caja.recaudado,
-      nClientes: caja.nClientes,
-      primerTicket: caja.primerTicket,
-      infoExtra: caja.infoExtra,
-      ultimoTicket: caja.ultimoTicket,
-      calaixFetZ: caja.calaixFetZ,
-      detalleApertura: caja.detalleApertura,
-      enviado: caja.enviado,
-      totalDatafono3G: caja.totalDatafono3G
+  nuevoItemSincroCajas(cajaAbierta: CajaAbiertaInterface, cajaCerrada: CajaCerradaInterface) {
+    const cajaInsertar: CajaSincro = {
+      _id: new ObjectId(),
+      ...cajaAbierta,
+      ...cajaCerrada,
+      enviado: false
+
     };
     return schCajas.nuevoItemSincroCajas(cajaInsertar);
   }
 
-  /*  */
-  async cerrarCaja(total: number, detalleCierre: CajaInterface["detalleCierre"], guardarInfoMonedas: MonedasInterface["array"], totalDatafono3G: number, idTrabajador: number) {
+  /* Eze v23 */
+  async cerrarCaja(totalCierre: CajaCerradaInterface["totalCierre"], detalleCierre: CajaCerradaInterface["detalleCierre"], guardarInfoMonedas: MonedasInterface["array"], totalDatafono3G: CajaCerradaInterface["totalDatafono3G"], idDependientaCierre: CajaCerradaInterface["idDependientaCierre"]) {
     try {
       if (!await this.cajaAbierta()) throw Error("Error al cerrar caja: La caja ya está cerrada");
 
-        const cajaActual = await this.getInfoCaja();
-        cajaActual.totalCierre = total;
-        cajaActual.detalleCierre = detalleCierre;
-        cajaActual.finalTime = Date.now();
-        cajaActual.idDependienta = idTrabajador;
-        cajaActual.totalDatafono3G = totalDatafono3G;
+      const finalTime = Date.now();
+      const cajaAbiertaActual = await this.getInfoCajaAbierta();
+      const cajaCerradaActual = await this.getDatosCierre(cajaAbiertaActual, totalCierre, detalleCierre, idDependientaCierre, totalDatafono3G, finalTime);
 
-        cajaActual = await this.getDatosCierre(cajaActual);
-
-        const res = await this.nuevoItemSincroCajas(cajaActual);
-
-        if (res.acknowledged) {
-          const res2 = await schMonedas.setMonedas({
-            _id: 'INFO_MONEDAS',
-            infoDinero: guardarInfoMonedas,
-          });
-          if (res2.acknowledged) {
-            if (await this.borrarCaja()) return true;
-          }
-        }
+      if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual)) return await schMonedas.setMonedas(guardarInfoMonedas);
 
       return false;
     } catch (err) {
@@ -154,139 +95,80 @@ export class CajaClase {
     }
   }
 
-  async borrarCaja(): Promise<boolean> {
-    return schCajas.borrarCaja().then((result) => {
-      if (result) {
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze v23  */
+  async borrarCaja() {
+    return schCajas.borrarCaja();
   }
 
+  /* Eze v23 */
   getUltimoCierre() {
     return schCajas.getUltimoCierre();
   }
 
   /*  */
-  async getDatosCierre(caja: CajaInterface): Promise<CajaInterface> {
-    const arrayTicketsCaja: TicketsInterface[] = await schTickets.getTicketsIntervalo(caja.inicioTime, caja.finalTime);
-    const arrayMovimientos: MovimientosInterface[] = await movimientosInstance.getMovimientosIntervalo(caja.inicioTime, caja.finalTime);
-    const params = await parametrosInstance.getParametros();
-    const nombreTrabajador = (await trabajadoresInstance.getTrabajadorById(caja.idDependienta)).nombre;
-
-    let totalTickets = 0;
-    let descuadre = 0;
-    let nClientes = 0;
-
-    caja.enviado = false;
-
-    if (arrayTicketsCaja.length > 0) {
-      caja.primerTicket = arrayTicketsCaja[0]._id;
-      caja.ultimoTicket = arrayTicketsCaja[arrayTicketsCaja.length-1]._id;
-    }
-
-    let totalTarjeta = 0;
-    let totalEnEfectivo = 0;
-    let totalSalidas = 0;
-    let totalEntradas = 0;
-    let recaudado = 0;
-    let totalDeuda = 0;
-
-    for (let i = 0; i < arrayMovimientos.length; i++) {
-      switch(arrayMovimientos[i].tipo) {
-        case "EFECTIVO": totalEntradas += arrayMovimientos[i].valor; break;
-        case "TARJETA": totalSalidas += arrayMovimientos[i].valor; break;
-        case "TKRS_CON_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
-        case "TKRS_SIN_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
-        case "CONSUMO_PERSONAL": totalSalidas += arrayMovimientos[i].valor; break;
-        case "DEUDA": totalSalidas += arrayMovimientos[i].valor; break;
-        default: console.log("Error, tipo de movimiento desconocido");
-      }
-    }
-
-    // ESTO SERÁ PARA CALCULAR EL DESCUADRE
-    for (let i = 0; i < arrayTicketsCaja.length; i++) {
-      if (arrayTicketsCaja[i].total >= 0) nClientes++;
-
-      totalTickets += arrayTicketsCaja[i].total;
-
-      switch (arrayTicketsCaja[i].tipoPago) {
-        case 'TARJETA': totalTarjeta += arrayTicketsCaja[i].total; break;
-        case 'EFECTIVO':
-          recaudado += arrayTicketsCaja[i].total;
-          totalEnEfectivo += arrayTicketsCaja[i].total;
-          break;
-        case 'DEUDA': totalDeuda += arrayTicketsCaja[i].total; break;
-        case 'TICKET_RESTAURANT':
-          recaudado += arrayTicketsCaja[i].total;
-          totalEnEfectivo += arrayTicketsCaja[i].total;
-          break;
-      }
-    }
-
-    datosCaja['calaixFetZ'] = totalTickets;
-    datosCaja.infoExtra['cambioFinal'] = cambioFinal;
-    datosCaja.infoExtra['cambioInicial'] = cambioInicial;
-    datosCaja.infoExtra['totalSalidas'] = totalSalidas;
-    datosCaja.infoExtra['totalEntradas'] = totalEntradas;
-    datosCaja.infoExtra['totalEnEfectivo'] = totalEnEfectivo-caja.totalDatafono3G;
-    datosCaja.infoExtra['totalTarjeta'] = totalTarjeta;
-    datosCaja.infoExtra['totalDeuda'] = totalDeuda;
-    descuadre = Math.round((cambioFinal-cambioInicial+totalSalidas-totalEntradas-totalTickets+caja.totalDatafono3G)*100)/100;
-    recaudado = totalTickets + descuadre - totalTarjeta - totalDeuda;
-
-    const objImpresion = {
-      calaixFet: totalTickets,
-      nombreTrabajador: nombreTrabajador,
-      nombreTienda: params.nombreTienda,
-      descuadre: descuadre,
-      nClientes: nClientes,
-      recaudado: recaudado,
-      arrayMovimientos: arrayMovimientos,
-      fechaInicio: fechaInicio,
-      fechaFinal: datosCaja.finalTime,
-      totalSalidas: totalSalidas,
-      totalEntradas: totalEntradas,
-      cInicioCaja: cambioInicial,
-      cFinalCaja: cambioFinal,
-      impresora: params.tipoImpresora,
-      totalTarjeta: totalTarjeta,
-    };
-
-    // vuePantallaCierre.setVariables(objImpresion); ESTO ENVÍA EL DETALLE DEL CIERRE AL FRONTEND
-
+  async getDatosCierre(cajaAbiertaActual: CajaAbiertaInterface, totalCierre: CajaCerradaInterface["totalCierre"], detalleCierre: CajaCerradaInterface["detalleCierre"], idDependientaCierre: CajaCerradaInterface["idDependientaCierre"], totalDatafono3G: CajaCerradaInterface["totalDatafono3G"], finalTime: CajaCerradaInterface["finalTime"]): Promise<CajaCerradaInterface> {
     try {
-      impresoraInstance.imprimirCaja(
-          objImpresion.calaixFet,
-          objImpresion.nombreTrabajador,
-          objImpresion.descuadre,
-          objImpresion.nClientes,
-          objImpresion.recaudado,
-          objImpresion.arrayMovimientos,
-          objImpresion.nombreTienda,
-          objImpresion.fechaInicio,
-          objImpresion.fechaFinal,
-          objImpresion.cInicioCaja,
-          objImpresion.cFinalCaja,
-          objImpresion.impresora,
-      );
-    } catch (err) {
-      // vueToast.abrir('error', 'Impresora no detectada');
-      console.log(err);
-    }
+      const arrayTicketsCaja: TicketsInterface[] = await schTickets.getTicketsIntervalo(cajaAbiertaActual.inicioTime, finalTime);
+      const arrayMovimientos: MovimientosInterface[] = await movimientosInstance.getMovimientosIntervalo(cajaAbiertaActual.inicioTime, finalTime);
+    
+      let totalTickets = 0;
+      let nClientes = 0;
+  
+      if (arrayTicketsCaja.length <= 0) throw Error("No hay tickets en esta caja");
+  
+      let totalTarjeta = 0;
+      let totalEfectivo = 0;
+      let totalSalidas = 0;
+      let totalEntradas = 0;
+      let recaudado = 0;
+      let totalDeuda = 0;
+      let totalTkrsConExceso = 0;
+      let totalTkrsSinExceso = 0;
+  
+      for (let i = 0; i < arrayMovimientos.length; i++) {
+        switch(arrayMovimientos[i].tipo) {
+          case "EFECTIVO": totalEntradas += arrayMovimientos[i].valor; totalEfectivo += arrayMovimientos[i].valor; break;
+          case "TARJETA": totalSalidas += arrayMovimientos[i].valor; break;
+          case "TKRS_CON_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
+          case "TKRS_SIN_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
+          case "CONSUMO_PERSONAL": totalSalidas += arrayMovimientos[i].valor; break;
+          case "DEUDA": totalSalidas += arrayMovimientos[i].valor; break;
+          default: console.log("Error, tipo de movimiento desconocido");
+        }
+      }
 
-    caja.descuadre = descuadre;
-    caja.nClientes = nClientes;
-    caja.recaudado = recaudado;
-    caja.primerTicket = datosCaja.primerTicket;
-    caja.ultimoTicket = datosCaja.ultimoTicket;
-    caja.infoExtra = datosCaja.infoExtra;
-    caja.calaixFetZ = datosCaja.calaixFetZ;
-    return caja;
+      totalEfectivo -= restar lo que no es efectivo
+  
+      // ESTO SERÁ PARA CALCULAR EL DESCUADRE
+      for (let i = 0; i < arrayTicketsCaja.length; i++) {
+        nClientes++;
+        totalTickets += arrayTicketsCaja[i].total;
+      }
+  
+      return {
+        calaixFetZ: totalTickets,
+        primerTicket: arrayTicketsCaja[0]._id,
+        ultimoTicket: arrayTicketsCaja[arrayTicketsCaja.length-1]._id,
+        descuadre: Math.round((totalCierre - cajaAbiertaActual.totalApertura + totalSalidas - totalEntradas - totalTickets + totalDatafono3G)*100)/100,
+        detalleCierre: detalleCierre,
+        finalTime: finalTime,
+        idDependientaCierre: idDependientaCierre,
+        nClientes: nClientes,
+        recaudado: recaudado,
+        totalCierre: totalCierre,
+        totalDatafono3G: totalDatafono3G,
+        totalDeuda: totalDeuda,
+        totalEfectivo: totalEfectivo,
+        totalEntradas: totalEntradas,
+        totalSalidas: totalSalidas,
+        totalTarjeta: totalTarjeta,
+        totalTkrsConExceso: totalTkrsConExceso,
+        totalTkrsSinExceso: totalTkrsSinExceso
+      }
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 }
 

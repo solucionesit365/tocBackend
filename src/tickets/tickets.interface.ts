@@ -5,12 +5,11 @@ export interface TicketsInterface {
     timestamp: number,
     total: number,
     lista: ItemLista[],
-    tipoPago: TiposPago,
     idTrabajador: number,
     objIva: Iva,
     enviado: boolean,
-    cliente?: string,
-    infoClienteVip?: {
+    cliente: string,
+    infoClienteVip: {
         esVip: boolean,
         nif: string,
         nombre: string,
@@ -18,13 +17,12 @@ export interface TicketsInterface {
         direccion: string,
         ciudad: string
     },
-    cantidadTkrs?: number,
-    regalo?: boolean,
-    recibo?: string,
-    bloqueado: boolean
+    // cantidadTkrs?: number,
+    regalo: boolean,
+    recibo: string,
 }
 
-export type TiposPago = "EFECTIVO" | "TARJETA" | "TKRS" | "DEUDA" | "CONSUMO_PERSONAL";
+// export type TiposPago = "EFECTIVO" | "TARJETA" | "TKRS" | "DEUDA" | "CONSUMO_PERSONAL";
 export type Iva = {
     base1: number,
     base2: number,

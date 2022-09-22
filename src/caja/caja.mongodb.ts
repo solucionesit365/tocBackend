@@ -1,24 +1,26 @@
 import { UtilesModule } from "../utiles/utiles.module";
 import { conexion } from "../conexion/mongodb";
 import {
-  CajaForSincroInterface,
-  CajaInterface,
+  CajaAbiertaInterface,
+  CajaSincro,
   MonedasInterface,
-  tiposInfoMoneda,
+  TiposInfoMoneda,
 } from "./caja.interface";
+import { ObjectId, ObjectID } from "bson";
 
 /* Eze v23 */
-export async function getInfoCaja(): Promise<CajaInterface> {
+export async function getInfoCajaAbierta(): Promise<CajaAbiertaInterface> {
   try {
     const database = (await conexion).db("tocgame");
-    const caja = database.collection<CajaInterface>("cajas");
-    return await caja.findOne({ _id: "CAJA" });
+    const caja = database.collection<CajaAbiertaInterface>("caja");
+    return await caja.findOne();
   } catch (err) {
     console.log(err);
     return null;
   }
 }
 
+/* Eze v23 */
 export async function limpiezaCajas(): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
@@ -38,7 +40,7 @@ export async function limpiezaCajas(): Promise<boolean> {
 /* Eze v23 */
 export async function guardarMonedas(
   arrayMonedas: MonedasInterface["array"],
-  tipo: tiposInfoMoneda
+  tipo: TiposInfoMoneda
 ): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
@@ -56,11 +58,11 @@ export async function guardarMonedas(
 }
 
 /* Eze v23 */
-export async function getUltimoCierre(): Promise<CajaForSincroInterface> {
+export async function getUltimoCierre(): Promise<CajaSincro> {
   try {
     const database = (await conexion).db("tocgame");
     const sincroCajas =
-      database.collection<CajaForSincroInterface>("sincro-cajas");
+      database.collection<CajaSincro>("sincro-cajas");
     return await sincroCajas.findOne({ enviado: false }, { sort: { _id: 1 } });
   } catch (err) {
     console.log(err);
@@ -70,7 +72,7 @@ export async function getUltimoCierre(): Promise<CajaForSincroInterface> {
 
 /* Eze v23 */
 export async function getMonedas(
-  tipo: tiposInfoMoneda
+  tipo: TiposInfoMoneda
 ): Promise<MonedasInterface> {
   try {
     const database = (await conexion).db("tocgame");
@@ -83,15 +85,12 @@ export async function getMonedas(
 }
 
 /* Eze v23 */
-export async function setInfoCaja(data: CajaInterface) {
+export async function setInfoCaja(data: CajaAbiertaInterface) {
   try {
-    // Si el id no es "CAJA" dará error
     const database = (await conexion).db("tocgame");
-    const caja = database.collection<CajaInterface>("cajas");
-    const resultado = await caja.updateOne(
-      {
-        _id: "CAJA",
-      },
+    const caja = database.collection<CajaAbiertaInterface>("caja");
+    const resultado = await caja.updateMany(
+      {},
       { $set: data }
     );
 
@@ -106,7 +105,7 @@ export async function setInfoCaja(data: CajaInterface) {
 export async function borrarCaja(): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const caja = database.collection("cajas");
+    const caja = database.collection("caja");
     return await caja.drop();
   } catch (err) {
     console.log(err);
@@ -115,11 +114,11 @@ export async function borrarCaja(): Promise<boolean> {
 }
 
 /* Eze v23 */
-export async function nuevoItemSincroCajas(unaCaja): Promise<boolean> {
+export async function nuevoItemSincroCajas(caja: CajaSincro): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
     const sincroCajas = database.collection("sincro-cajas");
-    return (await sincroCajas.insertOne(unaCaja)).acknowledged;
+    return (await sincroCajas.insertOne(caja)).acknowledged;
   } catch (err) {
     console.log(err);
     return false;
@@ -128,16 +127,16 @@ export async function nuevoItemSincroCajas(unaCaja): Promise<boolean> {
 
 /* Eze v23 */
 export async function confirmarCajaEnviada(
-  unaCaja: CajaInterface
+  caja: CajaSincro
 ): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
     const sincroCajas = database.collection("sincro-cajas");
     const resultado = await sincroCajas.updateOne(
-      { _id: unaCaja._id },
+      { _id: caja._id },
       {
         $set: {
-          enviado: unaCaja.enviado,
+          enviado: caja.enviado,
         },
       }
     );
@@ -149,35 +148,12 @@ export async function confirmarCajaEnviada(
 }
 
 /* Eze v23 */
-export async function confirmarCajaHabiaLlegado(
-  unaCaja: CajaInterface
-): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const sincroCajas = database.collection("sincro-cajas");
-    const resultado = await sincroCajas.updateOne(
-      { _id: unaCaja._id },
-      {
-        $set: {
-          enviado: unaCaja.enviado,
-          comentario: unaCaja.comentario,
-        },
-      }
-    );
-    return resultado.acknowledged && resultado.modifiedCount > 0;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-}
-
-/* Eze v23 */
-export async function getCajaMasAntigua(): Promise<CajaForSincroInterface> {
+export async function getCajaSincroMasAntigua(): Promise<CajaSincro> {
   try {
     const database = (await conexion).db("tocgame");
     const sincroCajas =
-      database.collection<CajaForSincroInterface>("sincro-cajas");
-    return await sincroCajas.findOne({ enviado: false }, { sort: { _id: 1 } });
+      database.collection<CajaSincro>("sincro-cajas");
+    return await sincroCajas.findOne({ enviado: false }, { sort: { finalTime: 1 } });
   } catch (err) {
     console.log(err);
     return null;

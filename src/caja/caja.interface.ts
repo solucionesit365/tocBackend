@@ -1,108 +1,92 @@
-export interface CajaInterface {
-    _id: string, // siempre es 'CAJA'
+import { ObjectId } from "mongodb";
+
+export interface CajaAbiertaInterface {
     inicioTime: number,
-    finalTime: number,
-    idDependienta: number,
+    idDependientaApertura: number,
     totalApertura: number,
+    detalleApertura: DetalleMonedas,
+}
+
+export interface CajaCerradaInterface {
+    finalTime: number,
+    idDependientaCierre: number,
     totalCierre: number,
     descuadre: number,
     recaudado: number,
     nClientes: number,
     primerTicket: number,
-    infoExtra: {
-        cambioInicial: number,
-        cambioFinal: number,
-        totalSalidas: number,
-        totalEntradas: number,
-        totalEnEfectivo: number,
-        totalTarjeta: number,
-        totalDeuda: number
-    },
+    totalSalidas: number,
+    totalEntradas: number,
+    totalEfectivo: number,
+    totalTarjeta: number,
+    totalDatafono3G: number,
+    totalDeuda: number,
+    totalTkrsSinExceso: number,
+    totalTkrsConExceso: number,
     ultimoTicket: number,
     calaixFetZ: number,
-    detalleApertura: {
-        _id: string,
-        valor: number,
-        unidades: number
-    }[],
-    detalleCierre: {
-        _id: string,
-        valor: number,
-        unidades: number
-    }[],
-    enviado: boolean,
-    totalDatafono3G: number,
-    comentario?: string
+    detalleCierre: DetalleMonedas
 }
 
-export interface CajaForSincroInterface {
-    _id: number,
+export interface CajaSincro {
+    _id: ObjectId,
     inicioTime: number,
-    finalTime: number,
-    idDependienta: number,
+    idDependientaApertura: number,
     totalApertura: number,
+    detalleApertura: DetalleMonedas,
+    finalTime: number,
+    idDependientaCierre: number,
     totalCierre: number,
     descuadre: number,
     recaudado: number,
     nClientes: number,
     primerTicket: number,
-    infoExtra: {
-        cambioInicial: number,
-        cambioFinal: number,
-        totalSalidas: number,
-        totalEntradas: number,
-        totalEnEfectivo: number,
-        totalTarjeta: number,
-        totalDeuda: number
-    },
+    totalSalidas: number,
+    totalEntradas: number,
+    totalEfectivo: number,
+    totalTarjeta: number,
+    totalDatafono3G: number,
+    totalDeuda: number,
+    totalTkrsSinExceso: number,
+    totalTkrsConExceso: number,
     ultimoTicket: number,
     calaixFetZ: number,
-    detalleApertura: {
-        _id: string,
-        valor: number,
-        unidades: number
-    }[],
-    detalleCierre: {
-        _id: string,
-        valor: number,
-        unidades: number
-    }[],
-    enviado: boolean,
-    totalDatafono3G: number,
+    detalleCierre: DetalleMonedas,
+    enviado: boolean
 }
 
-export const cajaVacia: CajaInterface = {
-  _id: 'CAJA',
+export const cajaAbiertaVacia: CajaAbiertaInterface = {
   inicioTime: null,
-  finalTime: null,
-  idDependienta: null,
   totalApertura: null,
-  totalCierre: null,
-  calaixFetZ: null,
-  descuadre: null,
-  infoExtra: {
-    cambioInicial: null,
-    cambioFinal: null,
-    totalSalidas: null,
-    totalEntradas: null,
-    totalEnEfectivo: null,
-    totalTarjeta: null,
-    totalDeuda: null,
-  },
-  primerTicket: null,
-  ultimoTicket: null,
-  recaudado: null,
-  nClientes: null,
   detalleApertura: [],
-  detalleCierre: [],
-  enviado: false,
-  totalDatafono3G: null,
+  idDependientaApertura: null,
 };
 
-export type tiposInfoMoneda = "CLAUSURA" | "APERTURA";
+export const cajaCerradaVacia: CajaCerradaInterface = {
+    finalTime: null,
+    idDependientaCierre: null,
+    totalCierre: null,
+    descuadre: null,
+    recaudado: null,
+    nClientes: null,
+    primerTicket: null,
+    totalSalidas: null,
+    totalEntradas: null,
+    totalEfectivo: null,
+    totalTarjeta: null,
+    totalDatafono3G: null,
+    totalDeuda: null,
+    totalTkrsSinExceso: null,
+    totalTkrsConExceso: null,
+    ultimoTicket: null,
+    calaixFetZ: null,
+    detalleCierre: null
+}
+
+export type TiposInfoMoneda = "CLAUSURA" | "APERTURA";
 
 export interface MonedasInterface {
-    _id: tiposInfoMoneda,
+    _id: TiposInfoMoneda,
     array: [
         {
         valor: number,
@@ -166,3 +150,9 @@ export interface MonedasInterface {
         }
     ]
 }
+
+export type DetalleMonedas = {
+    _id: string,
+    valor: number,
+    unidades: number
+}[]
