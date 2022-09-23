@@ -105,7 +105,7 @@ export class CajaClase {
     return schCajas.getUltimoCierre();
   }
 
-  /*  */
+  /* Eze v23 (Faltan tests) */
   async getDatosCierre(cajaAbiertaActual: CajaAbiertaInterface, totalCierre: CajaCerradaInterface["totalCierre"], detalleCierre: CajaCerradaInterface["detalleCierre"], idDependientaCierre: CajaCerradaInterface["idDependientaCierre"], totalDatafono3G: CajaCerradaInterface["totalDatafono3G"], finalTime: CajaCerradaInterface["finalTime"]): Promise<CajaCerradaInterface> {
     try {
       const arrayTicketsCaja: TicketsInterface[] = await schTickets.getTicketsIntervalo(cajaAbiertaActual.inicioTime, finalTime);
@@ -124,32 +124,39 @@ export class CajaClase {
       let totalDeuda = 0;
       let totalTkrsConExceso = 0;
       let totalTkrsSinExceso = 0;
-  
+      let totalEntregaDiaria = 0;
+      let totalEntradaDinero = 0;
+      let totalConsumoPersonal = 0;
+
+      /* RECUERDA QUE SE DEBE HACER UN MOVIMIENTO DE SALIDA PARA LA CANTIDAD 3G ANTES DE CERRAR LA CAJA, EN ESTE MOMENTO NO SE HACE */
       for (let i = 0; i < arrayMovimientos.length; i++) {
         switch(arrayMovimientos[i].tipo) {
           case "EFECTIVO": totalEntradas += arrayMovimientos[i].valor; totalEfectivo += arrayMovimientos[i].valor; break;
-          case "TARJETA": totalSalidas += arrayMovimientos[i].valor; break;
-          case "TKRS_CON_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
-          case "TKRS_SIN_EXCESO": totalSalidas += arrayMovimientos[i].valor; break;
-          case "CONSUMO_PERSONAL": totalSalidas += arrayMovimientos[i].valor; break;
-          case "DEUDA": totalSalidas += arrayMovimientos[i].valor; break;
+          case "TARJETA": totalSalidas += arrayMovimientos[i].valor; totalTarjeta += arrayMovimientos[i].valor; break;
+          case "TKRS_CON_EXCESO": totalSalidas += arrayMovimientos[i].valor; totalTkrsConExceso += arrayMovimientos[i].valor; break;
+          case "TKRS_SIN_EXCESO": totalSalidas += arrayMovimientos[i].valor; totalTkrsSinExceso += arrayMovimientos[i].valor; break;
+          case "CONSUMO_PERSONAL": totalSalidas += arrayMovimientos[i].valor; totalConsumoPersonal += arrayMovimientos[i].valor; break;
+          case "DEUDA": totalSalidas += arrayMovimientos[i].valor; totalDeuda += arrayMovimientos[i].valor; break;
+          case "ENTREGA_DIARIA": totalSalidas += arrayMovimientos[i].valor; totalEntregaDiaria += arrayMovimientos[i].valor; break;
+          case "ENTRADA_DINERO": totalEntradas += arrayMovimientos[i].valor; totalEntradaDinero += arrayMovimientos[i].valor; break;
+          case "DATAFONO_3G": totalSalidas += arrayMovimientos[i].valor; break;
           default: console.log("Error, tipo de movimiento desconocido");
         }
       }
 
-      totalEfectivo -= restar lo que no es efectivo
-  
+      totalEfectivo -= totalDatafono3G;
+
       // ESTO SERÁ PARA CALCULAR EL DESCUADRE
       for (let i = 0; i < arrayTicketsCaja.length; i++) {
         nClientes++;
         totalTickets += arrayTicketsCaja[i].total;
       }
-  
+
       return {
         calaixFetZ: totalTickets,
         primerTicket: arrayTicketsCaja[0]._id,
         ultimoTicket: arrayTicketsCaja[arrayTicketsCaja.length-1]._id,
-        descuadre: Math.round((totalCierre - cajaAbiertaActual.totalApertura + totalSalidas - totalEntradas - totalTickets + totalDatafono3G)*100)/100,
+        descuadre: Math.round(((totalCierre - cajaAbiertaActual.totalApertura) + totalSalidas - totalEntradaDinero - totalTickets)*100)/100,
         detalleCierre: detalleCierre,
         finalTime: finalTime,
         idDependientaCierre: idDependientaCierre,
@@ -163,7 +170,8 @@ export class CajaClase {
         totalSalidas: totalSalidas,
         totalTarjeta: totalTarjeta,
         totalTkrsConExceso: totalTkrsConExceso,
-        totalTkrsSinExceso: totalTkrsSinExceso
+        totalTkrsSinExceso: totalTkrsSinExceso,
+        mediaTickets: totalTickets / nClientes,
       }
     } catch (err) {
       console.log(err);

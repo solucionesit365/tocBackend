@@ -12,4 +12,4 @@ export interface MovimientosInterface {
     intentos: number
 }
 
-export type TiposMovientos = "EFECTIVO" | "TARJETA" | "TKRS_CON_EXCESO" | "TKRS_SIN_EXCESO" | "DEUDA" | "CONSUMO_PERSONAL";
+export type TiposMovientos = "EFECTIVO" | "TARJETA" | "TKRS_CON_EXCESO" | "TKRS_SIN_EXCESO" | "DEUDA" | "CONSUMO_PERSONAL" | "ENTREGA_DIARIA" | "ENTRADA_DINERO" | "DATAFONO_3G";

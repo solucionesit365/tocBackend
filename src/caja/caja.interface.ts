@@ -25,7 +25,8 @@ export interface CajaCerradaInterface {
     totalTkrsConExceso: number,
     ultimoTicket: number,
     calaixFetZ: number,
-    detalleCierre: DetalleMonedas
+    detalleCierre: DetalleMonedas,
+    mediaTickets: number,
 }
 
 export interface CajaSincro {
@@ -52,6 +53,7 @@ export interface CajaSincro {
     ultimoTicket: number,
     calaixFetZ: number,
     detalleCierre: DetalleMonedas,
+    mediaTickets: number,
     enviado: boolean
 }
 
@@ -80,7 +82,8 @@ export const cajaCerradaVacia: CajaCerradaInterface = {
     totalTkrsConExceso: null,
     ultimoTicket: null,
     calaixFetZ: null,
-    detalleCierre: null
+    detalleCierre: null,
+    mediaTickets: null
 }
 
 export type TiposInfoMoneda = "CLAUSURA" | "APERTURA";
