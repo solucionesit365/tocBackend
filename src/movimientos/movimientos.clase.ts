@@ -3,6 +3,7 @@ import { MovimientosInterface } from "./movimientos.interface";
 import * as schMovimientos from "./movimientos.mongodb";
 import { impresoraInstance } from "../impresora/impresora.class";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+
 const moment = require("moment");
 const Ean13Utils = require("ean13-lib").Ean13Utils;
 const TIPO_ENTRADA = "ENTRADA";
@@ -23,123 +24,35 @@ function getNumeroTresDigitos(x: number) {
 }
 
 export class MovimientosClase {
-  /* Devuelve un array de movimientos entre dos instantes de tiempo */
+  /* Eze v23 */
   getMovimientosIntervalo(
     inicioTime: number,
     finalTime: number
-  ): Promise<MovimientosInterface[]> {
+  ) {
     return schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
   }
 
-  public async nuevoMovimiento(cantidad: MovimientosInterface["valor"], concepto: MovimientosInterface["concepto"], tipo: MovimientosInterface["tipo"], idTicket: MovimientosInterface["idTicket"], idTrabajador: MovimientosInterface["idTrabajador"]) {
-    const parametros = await parametrosInstance.getParametros();
+  /* Eze v23 */
+  public async nuevoMovimiento(valor: MovimientosInterface["valor"], concepto: MovimientosInterface["concepto"], tipo: MovimientosInterface["tipo"], idTicket: MovimientosInterface["idTicket"], idTrabajador: MovimientosInterface["idTrabajador"]) {
     let codigoBarras = "";
 
-    switch (tipo) {
-      case "ENTREGA_DIARIA": 
-    }
-  }
-
-  /*
-      Inserta una nueva salida de dinero en BBDD. Si el idTicket no se establece, es una salida manual.
-      En caso contrario, se trata de una salida provocada por un pago con tarjeta (por ejemplo).
-     */
-  public async nuevaSalida(
-    cantidad: number,
-    concepto: string,
-    tipo: string,
-    imprimir: boolean,
-    idTicket: number,
-    idTrabajador: number,
-  ) {
-    const parametros = await parametrosInstance.getParametros();
-    let codigoBarras = "";
-    try {
-      if (
-        tipoExtra != "TARJETA" &&
-        tipoExtra != "TKRS" &&
-        tipoExtra != "TKRS_SIN_EXCESO" &&
-        tipoExtra != "TKRS_CON_EXCESO" &&
-        tipoExtra != "DEUDA"
-      ) {
-        codigoBarras = await this.generarCodigoBarrasSalida();
-        codigoBarras = String(Ean13Utils.generate(codigoBarras));
-      }
-    } catch (err) {
-      console.log(err);
+    if (tipo === "ENTREGA_DIARIA") {
+      codigoBarras = await this.generarCodigoBarrasSalida();
+      codigoBarras = String(Ean13Utils.generate(codigoBarras));
     }
 
-    const objSalida: MovimientosInterface = {
+    const nuevoMovimiento: MovimientosInterface = {
       _id: Date.now(),
-      tipo: TIPO_SALIDA,
-      valor: Number(cantidad),
-      concepto: concepto,
-      idTrabajador: idTrabajador,
-      codigoBarras: codigoBarras,
-      idTicket: idTicket,
+      codigoBarras,
+      concepto,
       enviado: false,
-      enTransito: false,
-      intentos: 0,
-      comentario: "",
+      idTicket,
+      idTrabajador,
+      tipo,
+      valor
     };
-    const resNuevaSalida = await schMovimientos.nuevaSalida(objSalida);
 
-    if (resNuevaSalida.acknowledged) {
-      if (imprimir) {
-        impresoraInstance.imprimirSalida(
-          objSalida.valor,
-          objSalida._id,
-          (await trabajadoresInstance.getTrabajadorById(idTrabajador)).nombre,
-          parametros.nombreTienda,
-          objSalida.concepto,
-          parametros.tipoImpresora,
-          codigoBarras
-        );
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /*
-        Inserta una nueva entrada de dinero en BBDD.
-        Se imprime por defecto.
-     */
-  public async nuevaEntrada(
-    cantidad: number,
-    concepto: string,
-    imprimir: boolean,
-    idTrabajador: number
-  ) {
-    const objSalida: MovimientosInterface = {
-      _id: Date.now(),
-      tipo: TIPO_ENTRADA,
-      valor: Number(cantidad),
-      concepto: concepto,
-      idTrabajador: idTrabajador,
-      codigoBarras: "",
-      tipoExtra: TIPO_ENTRADA,
-      idTicket: -100,
-      enviado: false,
-      enTransito: false,
-      intentos: 0,
-      comentario: "",
-    };
-    const resNuevaSalida = await schMovimientos.nuevaSalida(objSalida);
-
-    if (resNuevaSalida.acknowledged) {
-      if (imprimir) {
-        impresoraInstance.imprimirEntrada(
-          objSalida.valor,
-          objSalida._id,
-          (await trabajadoresInstance.getTrabajadorById(idTrabajador)).nombre
-        );
-      }
-      return true;
-    } else {
-      return false;
-    }
+    return await schMovimientos.nuevoMovimiento(nuevoMovimiento);
   }
 
   private async generarCodigoBarrasSalida() {

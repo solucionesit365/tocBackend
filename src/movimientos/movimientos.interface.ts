@@ -7,9 +7,11 @@ export interface MovimientosInterface {
     codigoBarras: string,
     idTicket: number,
     enviado: boolean,
-    enTransito: boolean,
-    comentario: string,
-    intentos: number
 }
 
 export type TiposMovientos = "EFECTIVO" | "TARJETA" | "TKRS_CON_EXCESO" | "TKRS_SIN_EXCESO" | "DEUDA" | "CONSUMO_PERSONAL" | "ENTREGA_DIARIA" | "ENTRADA_DINERO" | "DATAFONO_3G";
+
+export interface CuentaCodigoBarras {
+    _id: "CUENTA",
+    ultimo: number
+}

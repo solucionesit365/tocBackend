@@ -86,7 +86,7 @@ export class CajaClase {
       const cajaAbiertaActual = await this.getInfoCajaAbierta();
       const cajaCerradaActual = await this.getDatosCierre(cajaAbiertaActual, totalCierre, detalleCierre, idDependientaCierre, totalDatafono3G, finalTime);
       
-      if (await movimientosInstance.nuevoMovimiento(totalDatafono3G, "", "DATAFONO_3G", null, idDependientaCierre)) throw Error("No se ha podido crear el movimiento 3G");
+      if (!await movimientosInstance.nuevoMovimiento(totalDatafono3G, "", "DATAFONO_3G", null, idDependientaCierre)) throw Error("No se ha podido crear el movimiento 3G");
       if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual)) return await schMonedas.setMonedas(guardarInfoMonedas);
 
       return false;
