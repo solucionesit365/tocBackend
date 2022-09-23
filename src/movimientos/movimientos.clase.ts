@@ -32,12 +32,17 @@ export class MovimientosClase {
   }
 
   public async nuevoMovimiento(cantidad: MovimientosInterface["valor"], concepto: MovimientosInterface["concepto"], tipo: MovimientosInterface["tipo"], idTicket: MovimientosInterface["idTicket"], idTrabajador: MovimientosInterface["idTrabajador"]) {
-    return true;
+    const parametros = await parametrosInstance.getParametros();
+    let codigoBarras = "";
+
+    switch (tipo) {
+      case "ENTREGA_DIARIA": 
+    }
   }
 
   /*
-        Inserta una nueva salida de dinero en BBDD. Si el idTicket no se establece, es una salida manual.
-        En caso contrario, se trata de una salida provocada por un pago con tarjeta (por ejemplo).
+      Inserta una nueva salida de dinero en BBDD. Si el idTicket no se establece, es una salida manual.
+      En caso contrario, se trata de una salida provocada por un pago con tarjeta (por ejemplo).
      */
   public async nuevaSalida(
     cantidad: number,
