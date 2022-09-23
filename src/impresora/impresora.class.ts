@@ -564,6 +564,7 @@ export class Impresora {
   async imprimirCaja(calaixFet, nombreTrabajador, descuadre, nClientes, recaudado, arrayMovimientos: any[], nombreTienda, fI, fF, cInicioCaja, cFinalCaja, tipoImpresora) {
     try {
       console.log('imprimir caja')
+
       const fechaInicio = new Date(fI);
       const fechaFinal = new Date(fF);
       let sumaTarjetas = 0;
