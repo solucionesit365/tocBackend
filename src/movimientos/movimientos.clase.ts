@@ -31,6 +31,10 @@ export class MovimientosClase {
     return schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
   }
 
+  public async nuevoMovimiento(cantidad: MovimientosInterface["valor"], concepto: MovimientosInterface["concepto"], tipo: MovimientosInterface["tipo"], idTicket: MovimientosInterface["idTicket"], idTrabajador: MovimientosInterface["idTrabajador"]) {
+    return true;
+  }
+
   /*
         Inserta una nueva salida de dinero en BBDD. Si el idTicket no se establece, es una salida manual.
         En caso contrario, se trata de una salida provocada por un pago con tarjeta (por ejemplo).
@@ -38,7 +42,7 @@ export class MovimientosClase {
   public async nuevaSalida(
     cantidad: number,
     concepto: string,
-    tipoExtra: string,
+    tipo: string,
     imprimir: boolean,
     idTicket: number,
     idTrabajador: number,
@@ -67,7 +71,6 @@ export class MovimientosClase {
       concepto: concepto,
       idTrabajador: idTrabajador,
       codigoBarras: codigoBarras,
-      tipoExtra: tipoExtra,
       idTicket: idTicket,
       enviado: false,
       enTransito: false,
