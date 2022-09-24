@@ -77,17 +77,14 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
   }
 }
 
-/* Eze v23 */
-export async function createCesta(cesta: CestasInterface): Promise<number> {
+/* Eze 4.0 */
+export async function createCesta(cesta: CestasInterface): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
     const cestasColeccion = database.collection<CestasInterface>("cestas");
-    const resultado = await cestasColeccion.insertOne(cesta);
-    if (resultado.acknowledged) return resultado.insertedId;
-
-    return null;
+    return (await cestasColeccion.insertOne(cesta)).acknowledged;
   } catch (err) {
     console.log(err);
-    return null;
+    return false;
   }
 }

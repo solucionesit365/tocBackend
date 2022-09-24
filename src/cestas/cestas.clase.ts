@@ -1,38 +1,46 @@
-// 100%
 import * as schCestas from "./cestas.mongodb";
 import { CestasInterface } from "./cestas.interface";
-import { construirObjetoIvas, crearCestaVacia } from "../funciones/funciones";
+import { construirObjetoIvas } from "../funciones/funciones";
 import { articulosInstance } from "../articulos/articulos.clase";
 import { ofertas } from "../promociones/promociones.clase";
 import { cajaInstance } from "../caja/caja.clase";
 import { impresoraInstance } from "../impresora/impresora.class";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
-import { parametrosInstance } from "../parametros/parametros.clase";
 
 /* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
-  private cesta: CestasInterface;
-  private udsAplicar: number;
+  /* Eze 4.0 */
+  getCestaById = (idCesta: CestasInterface["_id"]) => schCestas.getCestaByID(idCesta);
 
-  /* Eze v23 */
-  getCesta(idCesta: number): Promise<CestasInterface> {
-    return schCestas.getCestaByID(idCesta);
-  }
-
-  /* Eze v23 */
-  async resetCesta(idCesta: number): Promise<boolean> {
-    const cesta = this.generarObjetoCesta();
-    cesta._id = idCesta;
-    if (cesta) return schCestas.updateCesta(cesta);
-    
+  /* Eze 4.0 */
+  async resetCesta(idCesta: CestasInterface["_id"]): Promise<boolean> {
+    let cesta = await this.getCestaById(idCesta);
+    if (cesta) {
+      cesta = {
+        _id: cesta._id,
+        detalleIva: {
+          base1: 0,
+          base2: 0,
+          base3: 0,
+          importe1: 0,
+          importe2: 0,
+          importe3: 0,
+          valorIva1: 0,
+          valorIva2: 0,
+          valorIva3: 0
+        },
+        lista: []
+      }
+      return schCestas.updateCesta(cesta);
+    }
     return false;
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   generarObjetoCesta(): CestasInterface {
-    const nuevaCesta: CestasInterface = {
+    return {
       _id: Date.now(),
-      tiposIva: {
+      detalleIva: {
         base1: 0,
         base2: 0,
         base3: 0,
@@ -45,31 +53,20 @@ export class CestaClase {
       },
       lista: [],
     };
-    return nuevaCesta;
   }
 
-  /* Eze v23 */
-  getAllCestas(): Promise<CestasInterface[]> {
-    return schCestas.getAllCestas();
-  }
+  /* Eze 4.0 */
+  getAllCestas = () => schCestas.getAllCestas();
 
-  /* Eze v23 */
-  deleteCesta(idCesta: number): Promise<boolean> {
-    return schCestas.deleteCesta(idCesta);
-  }
+  /* Eze 4.0 */
+  deleteCesta = (idCesta: CestasInterface["_id"]) => schCestas.deleteCesta(idCesta);
 
-  /* Eze v23 */
-  borrarCestaDelTrabajador(idTrabajador) {
-    return schCestas.borrarCestaDelTrabajador(idTrabajador).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  /* Eze v23 */
-  async createCesta(): Promise<number> {
+  /* Eze 4.0 */
+  async crearCesta() {
     const nuevaCesta = this.generarObjetoCesta();
-    return schCestas.createCesta(nuevaCesta);
+    if (await schCestas.createCesta(nuevaCesta)) return nuevaCesta._id;
+    
+    return false;
   }
 
   /* Obtiene la cesta, borra el  item y devuelve la cesta final */
@@ -568,7 +565,7 @@ export class CestaClase {
       });
   }
 
-  getCestaByID(idCesta: number): Promise<CestasInterface> {
+  getCestaByID(idCesta: CestasInterface["_id"]): Promise<CestasInterface> {
     return schCestas
       .getCestaByID(idCesta)
       .then((res) => {
@@ -580,8 +577,75 @@ export class CestaClase {
         return null;
       });
   }
+
+  hayRegalos(cesta: CestasInterface) {
+    return false;
+  }
+
+  // async calcularIvaTicket(cesta: CestasInterface) {
+  //   let objetoIva: Iva = this.generarObjetoIva();
+
+  //   for (let i = 0; i < cesta.lista.length; i++) {
+  //     if (!cesta.lista[i].seRegala) {
+  //       if (cesta.lista[i].esPromo) {
+  //         if (cesta.lista[i].promocion.tipoPromo === "COMBO") {
+  //           const articuloPrincipal = await articulosInstance.getInfoArticulo(
+  //             cesta.lista[i].promocion.idPrincipal
+  //           );
+  //           const articuloSecundario = await articulosInstance.getInfoArticulo(
+  //             cesta.lista[i].promocion.idSecundario
+  //           );
+  //           objetoIva = construirObjetoIvas(
+  //             cesta.lista[i].promocion.precioRealPrincipal,
+  //             articuloPrincipal.tipoIva,
+  //             cesta.lista[i].promocion.cantidadPrincipal *
+  //               cesta.lista[i].unidades,
+  //             objetoIva
+  //           );
+  //           objetoIva = construirObjetoIvas(
+  //             cesta.lista[i].promocion.precioRealSecundario,
+  //             articuloSecundario.tipoIva,
+  //             cesta.lista[i].promocion.cantidadSecundario *
+  //               cesta.lista[i].unidades,
+  //             objetoIva
+  //           );
+  //         } else if (cesta.lista[i].promocion.tipoPromo === "INDIVIDUAL") {
+  //           const articuloIndividual = await articulosInstance.getInfoArticulo(
+  //             cesta.lista[i].promocion.idPrincipal
+  //           );
+  //           objetoIva = construirObjetoIvas(
+  //             cesta.lista[i].promocion.precioRealPrincipal,
+  //             articuloIndividual.tipoIva,
+  //             cesta.lista[i].unidades,
+  //             objetoIva
+  //           );
+  //         } else {
+  //           throw Error("Error: El tipo de oferta no es correcto");
+  //         }
+  //       } else {
+  //         const infoArticulo = cesta.lista[i].infoArticulo;
+  //         if (cesta.lista[i].infoArticulo.precioPesaje) {
+  //           // Significa que es a peso
+  //           objetoIva = construirObjetoIvas(
+  //             infoArticulo.precioConIva,
+  //             infoArticulo.tipoIva,
+  //             cesta.lista[i].unidades,
+  //             objetoIva,
+  //             infoArticulo.precioPesaje
+  //           );
+  //         } else {
+  //           objetoIva = construirObjetoIvas(
+  //             infoArticulo.precioConIva,
+  //             infoArticulo.tipoIva,
+  //             cesta.lista[i].unidades,
+  //             objetoIva
+  //           );
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
 
-const cestas = new CestaClase();
+export const cestasInstance = new CestaClase();
 
-export { cestas };

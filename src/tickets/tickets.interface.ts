@@ -1,14 +1,13 @@
-import { ItemLista } from "../cestas/cestas.interface";
+import { CestasInterface } from "../cestas/cestas.interface";
 
 export interface TicketsInterface {
     _id: number,
     timestamp: number,
     total: number,
-    lista: ItemLista[],
+    cesta: CestasInterface,
     idTrabajador: number,
-    objIva: Iva,
-    cliente: string,
-    infoClienteVip: {
+    cliente: {
+        id: string,
         esVip: boolean,
         nif: string,
         nombre: string,
@@ -16,18 +15,5 @@ export interface TicketsInterface {
         direccion: string,
         ciudad: string
     },
-    regalo: boolean,
     enviado: boolean,
-}
-
-export type Iva = {
-    base1: number,
-    base2: number,
-    base3: number,
-    valorIva1: number,
-    valorIva2: number,
-    valorIva3: number,
-    importe1: number,
-    importe2: number,
-    importe3: number
 }

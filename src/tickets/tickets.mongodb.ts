@@ -21,7 +21,7 @@ export async function getTicketByID(idTicket: number): Promise<TicketsInterface>
   try {
     const database = (await conexion).db("tocgame");
     const tickets = database.collection<TicketsInterface>("tickets");
-    return await tickets.findOne({_id: idTicket}) as TicketsInterface;
+    return await tickets.findOne({_id: idTicket});
   } catch (err) {
     console.log(err);
     return null;
@@ -33,7 +33,7 @@ export async function getTicketsIntervalo(inicioTime: number, finalTime: number)
   try {
     const database = (await conexion).db("tocgame");
     const tickets = database.collection<TicketsInterface>("tickets");
-    return await tickets.find({timestamp: {$lte: finalTime, $gte: inicioTime}}).toArray() as TicketsInterface[];
+    return await tickets.find({timestamp: {$lte: finalTime, $gte: inicioTime}}).toArray();
   } catch (err) {
     console.log(err);
     return [];
@@ -105,12 +105,12 @@ export async function getTicketMasAntiguo(): Promise<TicketsInterface> {
   }
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function getUltimoTicket(): Promise<TicketsInterface> {
   try {
     const database = (await conexion).db("tocgame");
     const tickets = database.collection<TicketsInterface>("tickets");
-    return await tickets.findOne({}, {sort: {_id: -1}}) as TicketsInterface;
+    return await tickets.findOne({}, { sort: { _id: -1 } });
   } catch (err) {
     console.log(err);
     return null;
