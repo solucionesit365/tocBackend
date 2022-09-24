@@ -25,15 +25,17 @@ function getNumeroTresDigitos(x: number) {
 
 export class MovimientosClase {
   /* Eze v23 */
-  getMovimientosIntervalo(
-    inicioTime: number,
-    finalTime: number
-  ) {
-    return schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
-  }
+  getMovimientosIntervalo = (inicioTime: number, finalTime: number) =>
+    schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
 
   /* Eze v23 */
-  public async nuevoMovimiento(valor: MovimientosInterface["valor"], concepto: MovimientosInterface["concepto"], tipo: MovimientosInterface["tipo"], idTicket: MovimientosInterface["idTicket"], idTrabajador: MovimientosInterface["idTrabajador"]) {
+  public async nuevoMovimiento(
+    valor: MovimientosInterface["valor"],
+    concepto: MovimientosInterface["concepto"],
+    tipo: MovimientosInterface["tipo"],
+    idTicket: MovimientosInterface["idTicket"],
+    idTrabajador: MovimientosInterface["idTrabajador"]
+  ) {
     let codigoBarras = "";
 
     if (tipo === "ENTREGA_DIARIA") {
@@ -49,66 +51,55 @@ export class MovimientosClase {
       idTicket,
       idTrabajador,
       tipo,
-      valor
+      valor,
     };
 
     return await schMovimientos.nuevoMovimiento(nuevoMovimiento);
   }
 
-  private async generarCodigoBarrasSalida() {
-    const parametros = await parametrosInstance.getParametros();
-    const ultimoCodigoDeBarras = await schMovimientos.getUltimoCodigoBarras();
-    if (ultimoCodigoDeBarras == null) {
-      if (
-        (await schMovimientos.resetContadorCodigoBarras()).acknowledged == false
-      ) {
-        throw "Error en inicializar contador de codigo de barras";
-      }
-    }
+  /* Eze v23 */
+  private async generarCodigoBarrasSalida(): Promise<string> {
+    try {
+      const parametros = await parametrosInstance.getParametros();
+      const ultimoCodigoDeBarras = await schMovimientos.getUltimoCodigoBarras();
 
-    let objCodigoBarras = (await schMovimientos.getUltimoCodigoBarras()).ultimo;
-    if (objCodigoBarras == 999) {
-      const resResetContador = await schMovimientos.resetContadorCodigoBarras();
-      if (!resResetContador.acknowledged) {
-        throw "Error en resetContadorCodigoBarras";
-      }
-    } else {
-      const resActualizarContador =
-        await schMovimientos.actualizarCodigoBarras();
-      if (!resActualizarContador.acknowledged) {
+      if (!ultimoCodigoDeBarras)
+        if (!(await schMovimientos.resetContadorCodigoBarras()))
+          throw "Error en inicializar contador de codigo de barras";
+
+      let ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
+
+      if (ultimoNumero == 999) {
+        if (!(await schMovimientos.resetContadorCodigoBarras()))
+          throw "Error en resetContadorCodigoBarras";
+      } else if (!(await schMovimientos.actualizarCodigoBarras())) {
         throw "Error en actualizarCodigoBarras";
       }
+
+      ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
+
+      const codigoLicenciaStr = getNumeroTresDigitos(parametros.licencia);
+      const strNumeroCodigosDeBarras: string =
+        getNumeroTresDigitos(ultimoNumero);
+      let codigoFinal = "";
+      const digitYear = new Date().getFullYear().toString()[3];
+
+      codigoFinal = `98${codigoLicenciaStr}${digitYear}${getNumeroTresDigitos(
+        moment().dayOfYear()
+      )}${strNumeroCodigosDeBarras}`;
+      return codigoFinal;
+    } catch (err) {
+      console.log(err);
+      return null;
     }
-
-    objCodigoBarras = (await schMovimientos.getUltimoCodigoBarras()).ultimo;
-
-    const codigoLicenciaStr: string = getNumeroTresDigitos(parametros.licencia);
-    const strNumeroCodigosDeBarras: string =
-      getNumeroTresDigitos(objCodigoBarras);
-    let codigoFinal: string = "";
-    const digitYear = new Date().getFullYear().toString()[3];
-
-    codigoFinal = `98${codigoLicenciaStr}${digitYear}${getNumeroTresDigitos(
-      moment().dayOfYear()
-    )}${strNumeroCodigosDeBarras}`;
-    return codigoFinal;
   }
 
-  getMovimientoMasAntiguo() {
-    return schMovimientos.getMovimientoMasAntiguo();
-  }
+  /* Eze v23 */
+  getMovimientoMasAntiguo = () => schMovimientos.getMovimientoMasAntiguo();
 
-  actualizarEstadoMovimiento(movimiento: MovimientosInterface) {
-    return schMovimientos
-      .actualizarEstadoMovimiento(movimiento)
-      .then((res) => {
-        return res.acknowledged;
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
-  }
+  /* Eze v23 */
+  actualizarEstadoMovimiento = (movimiento: MovimientosInterface) =>
+    schMovimientos.actualizarEstadoMovimiento(movimiento);
 }
 
 export const movimientosInstance = new MovimientosClase();

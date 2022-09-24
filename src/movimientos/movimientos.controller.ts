@@ -3,41 +3,25 @@ import { UtilesModule } from "../utiles/utiles.module";
 import { movimientosInstance } from "./movimientos.clase";
 @Controller("movimientos")
 export class MovimientosController {
-
-  /* Eze v23 - Solo salidas normales, sin ticket relacionado */
-  @Post("nuevaSalida")
+  /* Eze v23 */
+  @Post("nuevoMovimiento") // Solo para entradas o salidas manuales (idTicket = null)
   nuevaSalida(@Body() params) {
     if (
       params.cantidad != undefined &&
-      UtilesModule.checkVariable(params.concepto, params.idTrabajador)
+      UtilesModule.checkVariable(
+        params.concepto,
+        params.idTrabajador,
+        params.tipo
+      )
     ) {
-      return movimientosInstance.nuevaSalida(
+      return movimientosInstance.nuevoMovimiento(
         params.cantidad,
         params.concepto,
-        "SALIDA",
-        true,
+        params.tipo,
         null,
         params.idTrabajador
       );
-    } else {
-      return { error: true, mensaje: "Error, faltan datos" };
     }
-  }
-
-  /* Eze v23 - Solo entradas normales, sin ticket relacionado */
-  @Post("nuevaEntrada")
-  nuevaEntrada(@Body() params) {
-    if (
-      params.cantidad != undefined &&
-      UtilesModule.checkVariable(params.concepto, params.idTrabajador)
-    )
-      return movimientosInstance.nuevaEntrada(
-        params.cantidad,
-        params.concepto,
-        true,
-        params.idTrabajador
-      );
-
     return false;
   }
 }
