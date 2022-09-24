@@ -8,7 +8,7 @@ import { parametrosInstance } from '../parametros/parametros.clase';
 export async function limpiezaTickets(): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.deleteMany({enviado: true, timestamp: {$lte: UtilesModule.restarDiasTimestamp(Date.now())}})).acknowledged;
   } catch (err) {
     console.log(err);
@@ -20,7 +20,7 @@ export async function limpiezaTickets(): Promise<boolean> {
 export async function getTicketByID(idTicket: number): Promise<TicketsInterface> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.findOne({_id: idTicket}) as TicketsInterface;
   } catch (err) {
     console.log(err);
@@ -32,7 +32,7 @@ export async function getTicketByID(idTicket: number): Promise<TicketsInterface>
 export async function getTicketsIntervalo(inicioTime: number, finalTime: number): Promise<TicketsInterface[]> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.find({timestamp: {$lte: finalTime, $gte: inicioTime}}).toArray() as TicketsInterface[];
   } catch (err) {
     console.log(err);
@@ -44,7 +44,7 @@ export async function getTicketsIntervalo(inicioTime: number, finalTime: number)
 export async function getDedudaGlovo(inicioTime: number, finalTime: number): Promise<number> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     const resultado = await tickets.find({
       $and: [
         {cliente: "CliBoti_000_{A83B364B-252F-464B-B0C3-AA89DA258F64}"},
@@ -69,7 +69,7 @@ export async function getDedudaGlovo(inicioTime: number, finalTime: number): Pro
 export async function getTotalTkrs(inicioTime: number, finalTime: number): Promise<number> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     const resultado = await tickets.find({
       $and: [
         {tipoPago: "TICKET_RESTAURANT"},
@@ -97,7 +97,7 @@ export async function getTotalTkrs(inicioTime: number, finalTime: number): Promi
 export async function getTicketMasAntiguo(): Promise<TicketsInterface> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.findOne({enviado: false}, {sort: {_id: 1}}) as TicketsInterface;
   } catch (err) {
     console.log(err);
@@ -109,7 +109,7 @@ export async function getTicketMasAntiguo(): Promise<TicketsInterface> {
 export async function getUltimoTicket(): Promise<TicketsInterface> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.findOne({}, {sort: {_id: -1}}) as TicketsInterface;
   } catch (err) {
     console.log(err);
@@ -118,10 +118,10 @@ export async function getUltimoTicket(): Promise<TicketsInterface> {
 }
 
 /* Eze v23 */
-export async function nuevoTicket(ticket: any): Promise<boolean> {
+export async function nuevoTicket(ticket: TicketsInterface): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.insertOne(ticket)).acknowledged;
   } catch (err) {
     console.log(err);
@@ -133,7 +133,7 @@ export async function nuevoTicket(ticket: any): Promise<boolean> {
 export async function desbloquearTicket(idTicket: number) {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.updateOne({ _id: idTicket }, {$set: { "bloqueado": false }}, { upsert: true })).acknowledged;
   } catch (err) {
     console.log(err);
@@ -145,7 +145,7 @@ export async function desbloquearTicket(idTicket: number) {
 export async function actualizarEstadoTicket(ticket: TicketsInterface): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.updateOne({_id: ticket._id}, {$set: {
       "enviado": ticket.enviado,
     }})).acknowledged;
@@ -159,7 +159,7 @@ export async function actualizarEstadoTicket(ticket: TicketsInterface): Promise<
 export async function borrarTicket(idTicket: number): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
-    const tickets = database.collection("tickets");
+    const tickets = database.collection<TicketsInterface>("tickets");
     const resultado = await tickets.deleteOne({ _id: idTicket });
     const resSetUltimoTicket = await parametrosInstance.setUltimoTicket((idTicket-1 < 0) ? (0) : (idTicket-1));
     return (resultado.acknowledged && resSetUltimoTicket);
@@ -177,8 +177,6 @@ export async function anularTicket(idTicket: number): Promise<boolean> {
       const resultado = await ticketsAnulados.findOne({ idTicketAnulado: idTicket });
       if (resultado === null) {
         let ticket = await getTicketByID(idTicket);
-        if (ticket.tipoPago == "TARJETA")
-          throw Error("Por el momento no es posible anular un ticket pagado con tarjeta");
         
         if (ticket.total > 0) {
           const id = await ticketsInstance.getUltimoTicket() + 1;

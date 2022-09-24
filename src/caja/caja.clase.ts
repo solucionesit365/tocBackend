@@ -1,21 +1,19 @@
-// 100%
-import { CajaSincro, CajaAbiertaInterface, CajaCerradaInterface, MonedasInterface, TiposInfoMoneda, cajaAbiertaVacia, cajaCerradaVacia } from './caja.interface';
-import * as schCajas from './caja.mongodb';
-import * as schTickets from '../tickets/tickets.mongodb';
-import * as schMonedas from '../monedas/monedas.mongodb';
-import { TicketsInterface } from '../tickets/tickets.interface';
-import { MovimientosInterface } from '../movimientos/movimientos.interface';
-import { trabajadoresInstance } from '../trabajadores/trabajadores.clase';
-import { parametrosInstance } from '../parametros/parametros.clase';
-import { movimientosInstance } from '../movimientos/movimientos.clase';
-import { impresoraInstance } from '../impresora/impresora.class';
-import { ObjectId } from 'mongodb';
-
-const TIPO_ENTRADA = "ENTRADA";
-const TIPO_SALIDA = "SALIDA";
+import {
+  CajaSincro,
+  CajaAbiertaInterface,
+  CajaCerradaInterface,
+  MonedasInterface,
+  TiposInfoMoneda,
+} from "./caja.interface";
+import * as schCajas from "./caja.mongodb";
+import * as schTickets from "../tickets/tickets.mongodb";
+import * as schMonedas from "../monedas/monedas.mongodb";
+import { TicketsInterface } from "../tickets/tickets.interface";
+import { MovimientosInterface } from "../movimientos/movimientos.interface";
+import { movimientosInstance } from "../movimientos/movimientos.clase";
+import { ObjectId } from "mongodb";
 
 export class CajaClase {
-
   /* Eze v23 */
   getInfoCajaAbierta() {
     return schCajas.getInfoCajaAbierta();
@@ -41,14 +39,18 @@ export class CajaClase {
   }
 
   /* Eze v23 */
-  async abrirCaja(detalleApertura: CajaAbiertaInterface["detalleApertura"], totalApertura: CajaAbiertaInterface["totalApertura"], idDependienta: CajaAbiertaInterface["idDependientaApertura"]): Promise<boolean> {
+  async abrirCaja(
+    detalleApertura: CajaAbiertaInterface["detalleApertura"],
+    totalApertura: CajaAbiertaInterface["totalApertura"],
+    idDependienta: CajaAbiertaInterface["idDependientaApertura"]
+  ): Promise<boolean> {
     if (detalleApertura && totalApertura) {
       const cajaNueva: CajaAbiertaInterface = {
         inicioTime: Date.now(),
         detalleApertura: detalleApertura,
         totalApertura: totalApertura,
-        idDependientaApertura: idDependienta
-      };  
+        idDependientaApertura: idDependienta,
+      };
       return await schCajas.setInfoCaja(cajaNueva);
     }
     console.log("Error precondiciones abrirCaja > caja.clase.ts");
@@ -56,7 +58,10 @@ export class CajaClase {
   }
 
   /* Eze v23 */
-  guardarMonedas(arrayMonedas: MonedasInterface["array"], tipo: TiposInfoMoneda) {
+  guardarMonedas(
+    arrayMonedas: MonedasInterface["array"],
+    tipo: TiposInfoMoneda
+  ) {
     return schCajas.guardarMonedas(arrayMonedas, tipo);
   }
 
@@ -66,28 +71,54 @@ export class CajaClase {
   }
 
   /* Eze v23 */
-  nuevoItemSincroCajas(cajaAbierta: CajaAbiertaInterface, cajaCerrada: CajaCerradaInterface) {
+  nuevoItemSincroCajas(
+    cajaAbierta: CajaAbiertaInterface,
+    cajaCerrada: CajaCerradaInterface
+  ) {
     const cajaInsertar: CajaSincro = {
       _id: new ObjectId(),
       ...cajaAbierta,
       ...cajaCerrada,
-      enviado: false
-
+      enviado: false,
     };
     return schCajas.nuevoItemSincroCajas(cajaInsertar);
   }
 
   /* Eze v23 */
-  async cerrarCaja(totalCierre: CajaCerradaInterface["totalCierre"], detalleCierre: CajaCerradaInterface["detalleCierre"], guardarInfoMonedas: MonedasInterface["array"], totalDatafono3G: CajaCerradaInterface["totalDatafono3G"], idDependientaCierre: CajaCerradaInterface["idDependientaCierre"]) {
+  async cerrarCaja(
+    totalCierre: CajaCerradaInterface["totalCierre"],
+    detalleCierre: CajaCerradaInterface["detalleCierre"],
+    guardarInfoMonedas: MonedasInterface["array"],
+    totalDatafono3G: CajaCerradaInterface["totalDatafono3G"],
+    idDependientaCierre: CajaCerradaInterface["idDependientaCierre"]
+  ) {
     try {
-      if (!await this.cajaAbierta()) throw Error("Error al cerrar caja: La caja ya está cerrada");
+      if (!(await this.cajaAbierta()))
+        throw Error("Error al cerrar caja: La caja ya está cerrada");
 
       const finalTime = Date.now();
       const cajaAbiertaActual = await this.getInfoCajaAbierta();
-      const cajaCerradaActual = await this.getDatosCierre(cajaAbiertaActual, totalCierre, detalleCierre, idDependientaCierre, totalDatafono3G, finalTime);
-      
-      if (!await movimientosInstance.nuevoMovimiento(totalDatafono3G, "", "DATAFONO_3G", null, idDependientaCierre)) throw Error("No se ha podido crear el movimiento 3G");
-      if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual)) return await schMonedas.setMonedas(guardarInfoMonedas);
+      const cajaCerradaActual = await this.getDatosCierre(
+        cajaAbiertaActual,
+        totalCierre,
+        detalleCierre,
+        idDependientaCierre,
+        totalDatafono3G,
+        finalTime
+      );
+
+      if (
+        !(await movimientosInstance.nuevoMovimiento(
+          totalDatafono3G,
+          "",
+          "DATAFONO_3G",
+          null,
+          idDependientaCierre
+        ))
+      )
+        throw Error("No se ha podido crear el movimiento 3G");
+      if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual))
+        return await schMonedas.setMonedas(guardarInfoMonedas);
 
       return false;
     } catch (err) {
@@ -107,16 +138,32 @@ export class CajaClase {
   }
 
   /* Eze v23 (Faltan tests) */
-  async getDatosCierre(cajaAbiertaActual: CajaAbiertaInterface, totalCierre: CajaCerradaInterface["totalCierre"], detalleCierre: CajaCerradaInterface["detalleCierre"], idDependientaCierre: CajaCerradaInterface["idDependientaCierre"], totalDatafono3G: CajaCerradaInterface["totalDatafono3G"], finalTime: CajaCerradaInterface["finalTime"]): Promise<CajaCerradaInterface> {
+  async getDatosCierre(
+    cajaAbiertaActual: CajaAbiertaInterface,
+    totalCierre: CajaCerradaInterface["totalCierre"],
+    detalleCierre: CajaCerradaInterface["detalleCierre"],
+    idDependientaCierre: CajaCerradaInterface["idDependientaCierre"],
+    totalDatafono3G: CajaCerradaInterface["totalDatafono3G"],
+    finalTime: CajaCerradaInterface["finalTime"]
+  ): Promise<CajaCerradaInterface> {
     try {
-      const arrayTicketsCaja: TicketsInterface[] = await schTickets.getTicketsIntervalo(cajaAbiertaActual.inicioTime, finalTime);
-      const arrayMovimientos: MovimientosInterface[] = await movimientosInstance.getMovimientosIntervalo(cajaAbiertaActual.inicioTime, finalTime);
-    
+      const arrayTicketsCaja: TicketsInterface[] =
+        await schTickets.getTicketsIntervalo(
+          cajaAbiertaActual.inicioTime,
+          finalTime
+        );
+      const arrayMovimientos: MovimientosInterface[] =
+        await movimientosInstance.getMovimientosIntervalo(
+          cajaAbiertaActual.inicioTime,
+          finalTime
+        );
+
       let totalTickets = 0;
       let nClientes = 0;
-  
-      if (arrayTicketsCaja.length <= 0) throw Error("No hay tickets en esta caja");
-  
+
+      if (arrayTicketsCaja.length <= 0)
+        throw Error("No hay tickets en esta caja");
+
       let totalTarjeta = 0;
       let totalEfectivo = 0;
       let totalSalidas = 0;
@@ -131,17 +178,44 @@ export class CajaClase {
 
       /* RECUERDA QUE SE DEBE HACER UN MOVIMIENTO DE SALIDA PARA LA CANTIDAD 3G ANTES DE CERRAR LA CAJA, EN ESTE MOMENTO NO SE HACE */
       for (let i = 0; i < arrayMovimientos.length; i++) {
-        switch(arrayMovimientos[i].tipo) {
-          case "EFECTIVO": totalEntradas += arrayMovimientos[i].valor; totalEfectivo += arrayMovimientos[i].valor; break;
-          case "TARJETA": totalSalidas += arrayMovimientos[i].valor; totalTarjeta += arrayMovimientos[i].valor; break;
-          case "TKRS_CON_EXCESO": totalSalidas += arrayMovimientos[i].valor; totalTkrsConExceso += arrayMovimientos[i].valor; break;
-          case "TKRS_SIN_EXCESO": totalSalidas += arrayMovimientos[i].valor; totalTkrsSinExceso += arrayMovimientos[i].valor; break;
-          case "CONSUMO_PERSONAL": totalSalidas += arrayMovimientos[i].valor; totalConsumoPersonal += arrayMovimientos[i].valor; break;
-          case "DEUDA": totalSalidas += arrayMovimientos[i].valor; totalDeuda += arrayMovimientos[i].valor; break;
-          case "ENTREGA_DIARIA": totalSalidas += arrayMovimientos[i].valor; totalEntregaDiaria += arrayMovimientos[i].valor; break;
-          case "ENTRADA_DINERO": totalEntradas += arrayMovimientos[i].valor; totalEntradaDinero += arrayMovimientos[i].valor; break;
-          case "DATAFONO_3G": totalSalidas += arrayMovimientos[i].valor; break;
-          default: console.log("Error, tipo de movimiento desconocido");
+        switch (arrayMovimientos[i].tipo) {
+          case "EFECTIVO":
+            totalEntradas += arrayMovimientos[i].valor;
+            totalEfectivo += arrayMovimientos[i].valor;
+            break;
+          case "TARJETA":
+            totalSalidas += arrayMovimientos[i].valor;
+            totalTarjeta += arrayMovimientos[i].valor;
+            break;
+          case "TKRS_CON_EXCESO":
+            totalSalidas += arrayMovimientos[i].valor;
+            totalTkrsConExceso += arrayMovimientos[i].valor;
+            break;
+          case "TKRS_SIN_EXCESO":
+            totalSalidas += arrayMovimientos[i].valor;
+            totalTkrsSinExceso += arrayMovimientos[i].valor;
+            break;
+          case "CONSUMO_PERSONAL":
+            totalSalidas += arrayMovimientos[i].valor;
+            totalConsumoPersonal += arrayMovimientos[i].valor;
+            break;
+          case "DEUDA":
+            totalSalidas += arrayMovimientos[i].valor;
+            totalDeuda += arrayMovimientos[i].valor;
+            break;
+          case "ENTREGA_DIARIA":
+            totalSalidas += arrayMovimientos[i].valor;
+            totalEntregaDiaria += arrayMovimientos[i].valor;
+            break;
+          case "ENTRADA_DINERO":
+            totalEntradas += arrayMovimientos[i].valor;
+            totalEntradaDinero += arrayMovimientos[i].valor;
+            break;
+          case "DATAFONO_3G":
+            totalSalidas += arrayMovimientos[i].valor;
+            break;
+          default:
+            console.log("Error, tipo de movimiento desconocido");
         }
       }
 
@@ -156,8 +230,16 @@ export class CajaClase {
       return {
         calaixFetZ: totalTickets,
         primerTicket: arrayTicketsCaja[0]._id,
-        ultimoTicket: arrayTicketsCaja[arrayTicketsCaja.length-1]._id,
-        descuadre: Math.round(((totalCierre - cajaAbiertaActual.totalApertura) + totalSalidas - totalEntradaDinero - totalTickets)*100)/100,
+        ultimoTicket: arrayTicketsCaja[arrayTicketsCaja.length - 1]._id,
+        descuadre:
+          Math.round(
+            (totalCierre -
+              cajaAbiertaActual.totalApertura +
+              totalSalidas -
+              totalEntradaDinero -
+              totalTickets) *
+              100
+          ) / 100,
         detalleCierre: detalleCierre,
         finalTime: finalTime,
         idDependientaCierre: idDependientaCierre,
@@ -172,8 +254,9 @@ export class CajaClase {
         totalTarjeta: totalTarjeta,
         totalTkrsConExceso: totalTkrsConExceso,
         totalTkrsSinExceso: totalTkrsSinExceso,
+        totalConsumoPersonal: totalConsumoPersonal,
         mediaTickets: totalTickets / nClientes,
-      }
+      };
     } catch (err) {
       console.log(err);
       return null;

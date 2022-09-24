@@ -23,6 +23,7 @@ export interface CajaCerradaInterface {
     totalDeuda: number,
     totalTkrsSinExceso: number,
     totalTkrsConExceso: number,
+    totalConsumoPersonal: number,
     ultimoTicket: number,
     calaixFetZ: number,
     detalleCierre: DetalleMonedas,
@@ -50,6 +51,7 @@ export interface CajaSincro {
     totalDeuda: number,
     totalTkrsSinExceso: number,
     totalTkrsConExceso: number,
+    totalConsumoPersonal: number,
     ultimoTicket: number,
     calaixFetZ: number,
     detalleCierre: DetalleMonedas,
@@ -57,34 +59,35 @@ export interface CajaSincro {
     enviado: boolean
 }
 
-export const cajaAbiertaVacia: CajaAbiertaInterface = {
-  inicioTime: null,
-  totalApertura: null,
-  detalleApertura: [],
-  idDependientaApertura: null,
-};
+// export const cajaAbiertaVacia: CajaAbiertaInterface = {
+//   inicioTime: null,
+//   totalApertura: null,
+//   detalleApertura: [],
+//   idDependientaApertura: null,
+// };
 
-export const cajaCerradaVacia: CajaCerradaInterface = {
-    finalTime: null,
-    idDependientaCierre: null,
-    totalCierre: null,
-    descuadre: null,
-    recaudado: null,
-    nClientes: null,
-    primerTicket: null,
-    totalSalidas: null,
-    totalEntradas: null,
-    totalEfectivo: null,
-    totalTarjeta: null,
-    totalDatafono3G: null,
-    totalDeuda: null,
-    totalTkrsSinExceso: null,
-    totalTkrsConExceso: null,
-    ultimoTicket: null,
-    calaixFetZ: null,
-    detalleCierre: null,
-    mediaTickets: null
-}
+// export const cajaCerradaVacia: CajaCerradaInterface = {
+//     finalTime: null,
+//     idDependientaCierre: null,
+//     totalCierre: null,
+//     descuadre: null,
+//     recaudado: null,
+//     nClientes: null,
+//     primerTicket: null,
+//     totalSalidas: null,
+//     totalEntradas: null,
+//     totalEfectivo: null,
+//     totalTarjeta: null,
+//     totalDatafono3G: null,
+//     totalDeuda: null,
+//     totalTkrsSinExceso: null,
+//     totalTkrsConExceso: null,
+//     totalConsumoPersonal: null,
+//     ultimoTicket: null,
+//     calaixFetZ: null,
+//     detalleCierre: null,
+//     mediaTickets: null
+// }
 
 export type TiposInfoMoneda = "CLAUSURA" | "APERTURA";
 

@@ -1,4 +1,4 @@
-import { Iva, TicketsInterface, TiposPago } from "./tickets.interface";
+import { Iva, TicketsInterface } from "./tickets.interface";
 import * as schTickets from "./tickets.mongodb";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { CestaClase, cestas } from "../cestas/cestas.clase";
@@ -16,7 +16,6 @@ export class TicketsClase {
     idTicket: number,
     total: number,
     cesta: CestasInterface,
-    tipoPago: TiposPago,
     idCurrentTrabajador: number,
     idCliente: string,
     infoVip: any = null
@@ -26,15 +25,12 @@ export class TicketsClase {
       timestamp: Date.now(),
       total: total,
       lista: cesta.lista,
-      tipoPago: tipoPago,
       idTrabajador: idCurrentTrabajador,
       objIva: cesta.tiposIva,
       cliente: idCliente,
       infoClienteVip: infoVip,
       enviado: false,
       regalo: cesta.regalo,
-      recibo: "",
-      bloqueado: false,
     };
     return nuevoTicket;
   }
@@ -137,7 +133,6 @@ export class TicketsClase {
         nuevoIdTicket,
         total,
         cesta,
-        "EFECTIVO",
         idTrabajador,
         idCliente
       );
@@ -187,7 +182,6 @@ export class TicketsClase {
         nuevoIdTicket,
         total,
         cesta,
-        "TARJETA",
         idTrabajador,
         idCliente
       );
@@ -195,11 +189,10 @@ export class TicketsClase {
       if (await this.insertarTicket(objTicket)) {
         if (await cestas.deleteCesta(idCesta)) {
           if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
-            return await movimientosInstance.nuevaSalida(
+            return await movimientosInstance.nuevoMovimiento(
               objTicket.total,
               "Targeta 3G",
               "TARJETA",
-              false,
               objTicket._id,
               idTrabajador
             );
@@ -248,7 +241,6 @@ export class TicketsClase {
         nuevoIdTicket,
         total,
         cesta,
-        "TKRS",
         idTrabajador,
         idCliente
       );
@@ -259,30 +251,28 @@ export class TicketsClase {
             objTicket["cantidadTkrs"] = totalTkrs;
             const diferencia = total - totalTkrs;
             if (diferencia >= 0) {
-              return await movimientosInstance.nuevaSalida(
+              return await movimientosInstance.nuevoMovimiento(
                 objTicket.total,
                 `Pagat TkRs (TkRs): ${objTicket._id}`,
                 "TKRS_SIN_EXCESO",
-                false,
                 objTicket._id,
                 idTrabajador
               );
             } else {
               // Aquí hace dos salidas
-              const salida1 = await movimientosInstance.nuevaSalida(
+              const salida1 = await movimientosInstance.nuevoMovimiento(
                 Number((diferencia * -1).toFixed(2)),
                 `Pagat TkRs (TkRs): ${objTicket._id}`,
                 "TKRS_CON_EXCESO",
-                false,
                 objTicket._id,
                 idTrabajador
               );
+
               if (salida1) {
-                return await movimientosInstance.nuevaSalida(
+                return await movimientosInstance.nuevoMovimiento(
                   objTicket.total,
                   `Pagat TkRs (TkRs): ${objTicket._id}`,
                   "TKRS_SIN_EXCESO",
-                  false,
                   objTicket._id,
                   idTrabajador
                 );
@@ -342,7 +332,6 @@ export class TicketsClase {
         nuevoIdTicket,
         total,
         cesta,
-        "DEUDA",
         idTrabajador,
         idCliente,
         infoVip
@@ -351,11 +340,10 @@ export class TicketsClase {
       if (await this.insertarTicket(objTicket)) {
         if (await cestas.deleteCesta(idCesta)) {
           if (await parametrosInstance.setUltimoTicket(objTicket._id)) {
-            return await movimientosInstance.nuevaSalida(
+            return await movimientosInstance.nuevoMovimiento(
               objTicket.total,
               `Deute client: ${objTicket._id}`,
               "DEUDA",
-              false,
               objTicket._id,
               idTrabajador
             );
@@ -406,7 +394,6 @@ export class TicketsClase {
         nuevoIdTicket,
         0,
         cesta,
-        "CONSUMO_PERSONAL",
         idTrabajador,
         null
       );

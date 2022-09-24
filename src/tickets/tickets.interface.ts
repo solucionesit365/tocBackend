@@ -7,7 +7,6 @@ export interface TicketsInterface {
     lista: ItemLista[],
     idTrabajador: number,
     objIva: Iva,
-    enviado: boolean,
     cliente: string,
     infoClienteVip: {
         esVip: boolean,
@@ -17,12 +16,10 @@ export interface TicketsInterface {
         direccion: string,
         ciudad: string
     },
-    // cantidadTkrs?: number,
     regalo: boolean,
-    recibo: string,
+    enviado: boolean,
 }
 
-// export type TiposPago = "EFECTIVO" | "TARJETA" | "TKRS" | "DEUDA" | "CONSUMO_PERSONAL";
 export type Iva = {
     base1: number,
     base2: number,
