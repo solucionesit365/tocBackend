@@ -11,7 +11,7 @@ export type ItemLista = {
   nombre: string;
   unidades: number;
   subtotal: number;
-  suplementosId?: number[];
+  arraySuplementos: number[];
   promocion: {
     idPromocion: string;
     idArticuloPrincipal: number;
@@ -23,11 +23,10 @@ export type ItemLista = {
     unidadesOferta: number;
     tipoPromo: TiposPromociones;
   };
-  infoArticulo?: {
-    tipoIva: TiposIva;
-    precioConIva: number;
-    precioPesaje: number;
-  };
+  tipoIva: TiposIva;
+  precioConIva: number;
+  precioPesaje: number;
+  gramos: number,
   regalo: boolean;
 };
 

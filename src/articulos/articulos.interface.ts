@@ -6,7 +6,7 @@ export interface ArticulosInterface {
     nombre: string,
     familia: string,
     esSumable: boolean,
-    suplementos?: [],
+    suplementos: [],
 }
 
 export type TiposIva = 1 | 2 | 3;

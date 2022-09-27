@@ -47,7 +47,15 @@ export async function getDedudaGlovo(inicioTime: number, finalTime: number): Pro
     const tickets = database.collection<TicketsInterface>("tickets");
     const resultado = await tickets.find({
       $and: [
-        {cliente: "CliBoti_000_{A83B364B-252F-464B-B0C3-AA89DA258F64}"},
+        {cliente: {
+          id: "CliBoti_000_{A83B364B-252F-464B-B0C3-AA89DA258F64}",
+          ciudad: null,
+          cp: null,
+          direccion: null,
+          esVip: true,
+          nif: null,
+          nombre: "GLOVOAPP23, S.L."
+        }},
         {timestamp: {$gte: inicioTime}},
         {timestamp: {$lte: finalTime}},
       ],
@@ -179,12 +187,12 @@ export async function anularTicket(idTicket: number): Promise<boolean> {
         let ticket = await getTicketByID(idTicket);
         
         if (ticket.total > 0) {
-          const id = await ticketsInstance.getUltimoTicket() + 1;
+          const id = await ticketsInstance.getProximoId();
           ticket.enviado = false;
           ticket._id = id;
           ticket.timestamp = Date.now();
           ticket.total = ( ticket.total *-1);
-          ticket.lista.forEach((element) => {
+          ticket.cesta.lista.forEach((element) => {
             element.subtotal = (element.subtotal * -1);
           });
           const tickets = database.collection<TicketsInterface>("tickets");

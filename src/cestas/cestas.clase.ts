@@ -1,11 +1,13 @@
 import * as schCestas from "./cestas.mongodb";
-import { CestasInterface } from "./cestas.interface";
+import { CestasInterface, ItemLista } from "./cestas.interface";
 import { construirObjetoIvas } from "../funciones/funciones";
 import { articulosInstance } from "../articulos/articulos.clase";
 import { ofertas } from "../promociones/promociones.clase";
 import { cajaInstance } from "../caja/caja.clase";
 import { impresoraInstance } from "../impresora/impresora.class";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+import { ArticulosInterface } from "../articulos/articulos.interface";
+import { ClientesInterface } from "../clientes/clientes.interface";
 
 /* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
@@ -69,42 +71,25 @@ export class CestaClase {
     return false;
   }
 
-  /* Obtiene la cesta, borra el  item y devuelve la cesta final */
-  borrarItemCesta(idCesta: number, idArticulo: number) {
-    return this.getCesta(idCesta)
-      .then((cesta) => {
-        for (let i = 0; i < cesta.lista.length; i++) {
-          if (cesta.lista[i]._id == idArticulo) {
-            cesta.lista.splice(i, 1);
-            break;
-          }
+  /* Eze 4.0 */
+  async borrarItemAndDevolverCesta(idCesta: number, idArticulo: number): Promise<CestasInterface> {
+    try {
+      let cesta = await this.getCestaById(idCesta);
+
+      for (let i = 0; i < cesta.lista.length; i++) {
+        if (cesta.lista[i].idArticulo == idArticulo) {
+          cesta.lista.splice(i, 1);
+          break;
         }
-        return this.recalcularIvas(cesta)
-          .then((cestaRecalculada) => {
-            return this.setCesta(cestaRecalculada)
-              .then((result) => {
-                if (result) {
-                  return cestaRecalculada;
-                } else {
-                  return false;
-                }
-              })
-              .catch((err) => {
-                console.log(err);
-                return false;
-              });
-          })
-          .catch((err) => {
-            console.log(err);
-            return false;
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
+      }
+      return await this.recalcularIvas(cesta);
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
+  /* Eze: este nombre no vale, hace otra cosa */
   async limpiarCesta(
     unaCesta: CestasInterface,
     posicionPrincipal: number,
@@ -117,7 +102,7 @@ export class CestaClase {
     if (pideDelA != -1) {
       if (sobraCantidadPrincipal > 0) {
         const datosArticulo = await articulosInstance.getInfoArticulo(
-          unaCesta.lista[posicionPrincipal]._id
+          unaCesta.lista[posicionPrincipal].idArticulo
         );
         unaCesta.lista[posicionPrincipal].unidades = sobraCantidadPrincipal;
         unaCesta.lista[posicionPrincipal].subtotal =
@@ -130,7 +115,7 @@ export class CestaClase {
     if (pideDelB != -1) {
       if (sobraCantidadSecundario > 0) {
         const datosArticulo = await articulosInstance.getInfoArticulo(
-          unaCesta.lista[posicionSecundario]._id
+          unaCesta.lista[posicionSecundario].idArticulo
         );
         unaCesta.lista[posicionSecundario].unidades = sobraCantidadSecundario;
         unaCesta.lista[posicionSecundario].subtotal =
@@ -145,110 +130,40 @@ export class CestaClase {
     }
     return unaCesta;
   }
-  async insertarArticuloCesta(
-    infoArticulo,
+
+
+  /* Eze 4.0 => la información del artículo "articulo" debe estar masticada (tarifas especiales) */
+  async insertarArticulo(
+    articulo: ArticulosInterface,
     unidades: number,
-    idCesta: number,
-    infoAPeso = null
-  ) {
-    const miCesta = await this.getCesta(idCesta);
-    if (miCesta.lista.length > 0) {
-      let encontrado = false;
-      if (!infoArticulo.suplementos) {
-        for (let i = 0; i < miCesta.lista.length; i++) {
-          if (miCesta.lista[i]._id === infoArticulo._id) {
-            var viejoIva = miCesta.tiposIva;
-            if (infoAPeso == null) {
-              miCesta.lista[i].unidades += unidades;
-              miCesta.lista[i].subtotal += unidades * infoArticulo.precioConIva;
-              miCesta.tiposIva = construirObjetoIvas(
-                infoArticulo,
-                unidades,
-                viejoIva
-              );
-            } else {
-              miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
-              miCesta.tiposIva = construirObjetoIvas(
-                infoArticulo,
-                unidades,
-                viejoIva,
-                infoAPeso
-              );
-            }
+    idCesta: CestasInterface["_id"],
+    arraySuplementos: ItemLista["arraySuplementos"], // Los suplentos no deben tener tarifa especial para simplificar.
+    gramos: ItemLista["gramos"]
+  ): Promise<CestasInterface> {
+    const cesta = await this.getCestaById(idCesta);
+    
+    cesta.lista.push({
+      idArticulo: articulo._id,
+      nombre: articulo.nombre,
+      arraySuplementos: arraySuplementos,
+      promocion: null,
+      regalo: false,
+      subtotal: null,
+      unidades: unidades,
+      precioConIva: null,
+      precioPesaje: null,
+      gramos: gramos,
+      tipoIva: articulo.tipoIva
+    });
 
-            encontrado = true;
-            break;
-          }
-        }
-      }
-      if (!encontrado) {
-        if (infoAPeso == null) {
-          miCesta.lista.push({
-            _id: infoArticulo._id,
-            nombre: infoArticulo.nombre,
-            unidades: unidades,
-            promocion: { esPromo: false, _id: null },
-            subtotal: unidades * infoArticulo.precioConIva,
-          });
-          miCesta.tiposIva = construirObjetoIvas(
-            infoArticulo,
-            unidades,
-            miCesta.tiposIva
-          );
-        } else {
-          miCesta.lista.push({
-            _id: infoArticulo._id,
-            nombre: infoArticulo.nombre,
-            unidades: unidades,
-            promocion: { esPromo: false, _id: null },
-            subtotal: infoAPeso.precioAplicado,
-          });
-          miCesta.tiposIva = construirObjetoIvas(
-            infoArticulo,
-            unidades,
-            miCesta.tiposIva,
-            infoAPeso
-          );
-        }
-      }
-    } else {
-      if (infoAPeso == null) {
-        miCesta.lista.push({
-          _id: infoArticulo._id,
-          nombre: infoArticulo.nombre,
-          unidades: unidades,
-          promocion: { esPromo: false, _id: null },
-          subtotal: unidades * infoArticulo.precioConIva,
-        });
-        miCesta.tiposIva = construirObjetoIvas(
-          infoArticulo,
-          unidades,
-          miCesta.tiposIva
-        );
-      } else {
-        miCesta.lista.push({
-          _id: infoArticulo._id,
-          nombre: infoArticulo.nombre,
-          unidades: unidades,
-          promocion: { esPromo: false, _id: null },
-          subtotal: infoAPeso.precioAplicado,
-        });
-        miCesta.tiposIva = construirObjetoIvas(
-          infoArticulo,
-          unidades,
-          miCesta.tiposIva,
-          infoAPeso
-        );
-      }
-    }
+    if (await schCestas.updateCesta(cesta)) return cesta;
 
-    const temporal = await ofertas.buscarOfertas(miCesta, viejoIva);
-    return temporal; // await ofertas.buscarOfertas(miCesta, viejoIva);
+    throw Error("Error updateCesta() - cesta.clase.ts");
   }
 
+  /*  */
   async addItem(
     idArticulo: number,
-    idBoton: string,
     aPeso: boolean,
     infoAPeso: any,
     idCesta: number,
@@ -264,7 +179,7 @@ export class CestaClase {
           if (infoArticulo) {
             // AQUI PENSAR ALGUNA COMPROBACIÓN CUANDO NO EXISTA O FALLE ESTE GET
             if (infoArticulo.suplementos) {
-              await this.insertarArticuloCesta(infoArticulo, unidades, idCesta);
+              await this.insertarArticulo(infoArticulo, unidades, idCesta);
               return {
                 suplementos: true,
                 data: await articulosInstance.getSuplementos(
@@ -284,7 +199,7 @@ export class CestaClase {
         } else {
           // TIPO PESO
           infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-          cestaRetornar = await this.insertarArticuloCesta(
+          cestaRetornar = await this.insertarArticulo(
             infoArticulo,
             1,
             idCesta,
