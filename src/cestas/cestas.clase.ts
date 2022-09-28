@@ -2,17 +2,18 @@ import * as schCestas from "./cestas.mongodb";
 import { CestasInterface, ItemLista } from "./cestas.interface";
 import { construirObjetoIvas } from "../funciones/funciones";
 import { articulosInstance } from "../articulos/articulos.clase";
-import { ofertas } from "../promociones/promociones.clase";
+
 import { cajaInstance } from "../caja/caja.clase";
 import { impresoraInstance } from "../impresora/impresora.class";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ClientesInterface } from "../clientes/clientes.interface";
 
+
 /* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
   /* Eze 4.0 */
-  getCestaById = (idCesta: CestasInterface["_id"]) => schCestas.getCestaByID(idCesta);
+  getCestaById = (idCesta: CestasInterface["_id"]) => schCestas.getCestaById(idCesta);
 
   /* Eze 4.0 */
   async resetCesta(idCesta: CestasInterface["_id"]): Promise<boolean> {
@@ -162,17 +163,39 @@ export class CestaClase {
   }
 
   /*  */
-  async addItem(
-    idArticulo: number,
-    aPeso: boolean,
-    infoAPeso: any,
+  async clickTeclaArticulo(
+    idArticulo: CestasInterface["_id"],
+    gramos: ItemLista["gramos"],
     idCesta: number,
-    unidades: number = 1
+    unidades: number,
+    idCliente: ClientesInterface["id"],
+    arraySuplementos: ItemLista["arraySuplementos"]
+  ) {
+    if (await cajaInstance.cajaAbierta()) {
+      let articulo = await articulosInstance.getInfoArticulo(idArticulo);
+      if (idCliente) articulo = await articulosInstance.getPrecioConTarifa(articulo, idCliente);
+      
+      if (gramos > 0) {
+        // VOY POR AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+        return await this.insertarArticulo(articulo, gramos / 1000, idCesta, arraySuplementos, gramos);
+      } else {
+        // modo normal
+      }
+    }
+    throw Error("Error, la caja está cerrada. cestas.clase > clickTeclaArticulo()");
+  }
+
+  async clickTeclaArticuloVieja(
+    idArticulo: CestasInterface["_id"],
+    aPeso: boolean,
+    gramos: any,
+    idCesta: number,
+    unidades: number
   ) {
     let cestaRetornar: CestasInterface = null;
     let infoArticulo;
+
     if (cajaInstance.cajaAbierta()) {
-      try {
         if (!aPeso) {
           // TIPO NORMAL
           infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
@@ -230,11 +253,6 @@ export class CestaClase {
             });
           }
         }
-      } catch (err) {
-        console.log(err);
-        // vueToast.abrir('error', 'Error al añadir el articulo');
-        this.udsAplicar = 1;
-      }
     } else {
       console.log(
         "Error: La caja está cerrada, no se puede insertar un articulo en la cesta"

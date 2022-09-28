@@ -10,6 +10,7 @@ import { limpiezaTickets } from "./tickets/tickets.mongodb";
 import { limpiezaFichajes } from "./trabajadores/trabajadores.mongodb";
 import { limpiezaCajas } from "./caja/caja.mongodb";
 import { limpiezaMovimientos } from "./movimientos/movimientos.mongodb";
+import { tarifasInstance } from "./tarifas/tarifas.class";
 
 let enProcesoTickets = false;
 let enProcesoMovimientos = false;
@@ -148,6 +149,14 @@ function sincronizarDevoluciones() {
     });
 }
 
+async function actualizarTarifas() {
+  try {
+    await tarifasInstance.actualizarTarifas();
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 /* Actualiza precios, teclado y promociones (es decir, todo) */
 function actualizarTeclados() {
   tecladoInstance.actualizarTeclado().catch((err) => {
@@ -169,7 +178,9 @@ setInterval(sincronizarMovimientos, 50000);
 setInterval(sincronizarFichajes, 20000);
 setInterval(sincronizarDevoluciones, 60000);
 setInterval(actualizarTeclados, 3600000);
+setInterval(actualizarTarifas, 3600000);
 setInterval(limpiezaProfunda, 60000);
+
 export {
   sincronizarTickets,
   sincronizarCajas,

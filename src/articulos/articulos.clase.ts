@@ -1,50 +1,36 @@
 // 100%
+import { ClientesInterface } from '../clientes/clientes.interface';
 import {ArticulosInterface} from './articulos.interface';
 import * as schArticulos from './articulos.mongodb';
+import { getItemTarifa } from "../tarifas/tarifas.mongodb";
 
 export class Articulos {
-  public estadoTarifaVIP: boolean;
-  constructor() {
-    this.estadoTarifaVIP = false;
+
+  /* Eze 4.0 */
+  async getPrecioConTarifa(articulo: ArticulosInterface, idCliente: ClientesInterface["id"]): Promise<ArticulosInterface> {
+    const infoTarifa = await getItemTarifa(articulo._id, idCliente);
+    if (infoTarifa && typeof infoTarifa.precioConIva == "number")
+      articulo.precioConIva = infoTarifa.precioConIva;
+    return articulo;
   }
 
-  /* Eze v23 */
-  setEstadoTarifaEspecial(payload: boolean) {
-    this.estadoTarifaVIP = payload;
+  /* Eze 4.0 */
+  getInfoArticulo = async (idArticulo: number): Promise<ArticulosInterface> => await schArticulos.getInfoArticulo(idArticulo);
+
+  /* Eze 4.0 */
+  async insertarArticulos(arrayArticulos: ArticulosInterface[]) {
+    return await schArticulos.insertarArticulos(arrayArticulos);
   }
 
-  getEstadoTarifaEspecial() {
-    return this.estadoTarifaVIP;
-  }
+  // async getSuplementos(suplementos) {
+  //   return await schArticulos.getSuplementos(suplementos);
+  // }
 
-  /* Devuelve un articulo */
-  async getInfoArticulo(idArticulo: number): Promise<ArticulosInterface> {
-    if (this.getEstadoTarifaEspecial() != true) {
-      return await schArticulos.getInfoArticulo(idArticulo);
-    } else {
-      return await schArticulos.getInfoArticuloTarifaEspecial(idArticulo);
-    }
-  }
-
-  /* InsertMany de articulos o articulosEspeciales */
-  insertarArticulos(arrayArticulos, esTarifaEspecial = false) {
-    return schArticulos.insertarArticulos(arrayArticulos, esTarifaEspecial).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  async getSuplementos(suplementos) {
-    return await schArticulos.getSuplementos(suplementos);
-  }
-
-  async editarArticulo(id, nombre, precioBase, precioConIva) {
-    const resultado = await schArticulos.editarArticulo(id, nombre, precioBase, precioConIva);
-    // console.log(resultado)
-    return resultado;
-  }
+  // async editarArticulo(id, nombre, precioBase, precioConIva) {
+  //   const resultado = await schArticulos.editarArticulo(id, nombre, precioBase, precioConIva);
+  //   // console.log(resultado)
+  //   return resultado;
+  // }
 }
 const articulosInstance = new Articulos();
 export {articulosInstance};
