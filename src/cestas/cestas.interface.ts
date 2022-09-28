@@ -3,7 +3,8 @@ import { TiposIva } from "../articulos/articulos.interface";
 export interface CestasInterface {
   _id: number;
   detalleIva: DetalleIvaInterface,
-  lista: ItemLista[];
+  lista: ItemLista[],
+  modo: ModoCesta
 }
 
 export type ItemLista = {
@@ -43,3 +44,4 @@ export type DetalleIvaInterface = {
 }
 
 export type TiposPromociones = "COMBO" | "INDIVIDUAL";
+export type ModoCesta = "VENTA" | "CONSUMO_PERSONAL" | "DEVOLUCION";

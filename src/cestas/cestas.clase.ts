@@ -32,7 +32,8 @@ export class CestaClase {
           valorIva2: 0,
           valorIva3: 0
         },
-        lista: []
+        lista: [],
+        modo: "VENTA"
       }
       return schCestas.updateCesta(cesta);
     }
@@ -55,6 +56,7 @@ export class CestaClase {
         importe3: 0,
       },
       lista: [],
+      modo: "VENTA"
     };
   }
 
@@ -149,9 +151,9 @@ export class CestaClase {
       arraySuplementos: arraySuplementos,
       promocion: null,
       regalo: false,
-      subtotal: null,
+      subtotal: unidades*articulo.precioConIva,
       unidades: unidades,
-      precioConIva: null,
+      precioConIva: articulo.precioConIva,
       precioPesaje: null,
       gramos: gramos,
       tipoIva: articulo.tipoIva
@@ -162,7 +164,7 @@ export class CestaClase {
     throw Error("Error updateCesta() - cesta.clase.ts");
   }
 
-  /*  */
+  /* Eze 4.0 */
   async clickTeclaArticulo(
     idArticulo: CestasInterface["_id"],
     gramos: ItemLista["gramos"],
@@ -174,101 +176,19 @@ export class CestaClase {
     if (await cajaInstance.cajaAbierta()) {
       let articulo = await articulosInstance.getInfoArticulo(idArticulo);
       if (idCliente) articulo = await articulosInstance.getPrecioConTarifa(articulo, idCliente);
-      
-      if (gramos > 0) {
-        // VOY POR AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-        return await this.insertarArticulo(articulo, gramos / 1000, idCesta, arraySuplementos, gramos);
-      } else {
-        // modo normal
-      }
+
+      // Va a peso. 1 unidad son 1000 gramos. Los precios son por kilogramo.
+      if (gramos > 0) return await this.insertarArticulo(articulo, gramos / 1000, idCesta, arraySuplementos, gramos);
+  
+      // Modo por unidad
+      return await this.insertarArticulo(articulo, unidades, idCesta, arraySuplementos, null);
     }
     throw Error("Error, la caja está cerrada. cestas.clase > clickTeclaArticulo()");
   }
 
-  async clickTeclaArticuloVieja(
-    idArticulo: CestasInterface["_id"],
-    aPeso: boolean,
-    gramos: any,
-    idCesta: number,
-    unidades: number
-  ) {
-    let cestaRetornar: CestasInterface = null;
-    let infoArticulo;
-
-    if (cajaInstance.cajaAbierta()) {
-        if (!aPeso) {
-          // TIPO NORMAL
-          infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-          if (infoArticulo) {
-            // AQUI PENSAR ALGUNA COMPROBACIÓN CUANDO NO EXISTA O FALLE ESTE GET
-            if (infoArticulo.suplementos) {
-              await this.insertarArticulo(infoArticulo, unidades, idCesta);
-              return {
-                suplementos: true,
-                data: await articulosInstance.getSuplementos(
-                  infoArticulo.suplementos
-                ),
-              };
-            } else {
-              cestaRetornar = await this.insertarArticuloCesta(
-                infoArticulo,
-                unidades,
-                idCesta
-              );
-            }
-          } else {
-            // vueToast.abrir('error', 'Este artículo tiene errores');
-          }
-        } else {
-          // TIPO PESO
-          infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-          cestaRetornar = await this.insertarArticulo(
-            infoArticulo,
-            1,
-            idCesta,
-            infoAPeso
-          );
-        }
-
-        if (cestaRetornar != undefined && cestaRetornar != null) {
-          if (
-            cestaRetornar.tiposIva != undefined &&
-            cestaRetornar.tiposIva != null
-          ) {
-            trabajadoresInstance.getCurrentTrabajador().then((data) => {
-              try {
-                impresoraInstance.mostrarVisor({
-                  dependienta: data.nombre,
-                  total: (
-                    cestaRetornar.tiposIva.importe1 +
-                    cestaRetornar.tiposIva.importe2 +
-                    cestaRetornar.tiposIva.importe3
-                  ).toFixed(2),
-                  precio: infoArticulo.precioConIva.toString(),
-                  texto: infoArticulo.nombre,
-                });
-              } catch (err) {
-                console.log(err);
-              }
-            });
-          }
-        }
-    } else {
-      console.log(
-        "Error: La caja está cerrada, no se puede insertar un articulo en la cesta"
-      );
-      // vueToast.abrir('danger', 'Se requiere una caja abierta para cobrar');
-    }
-    this.udsAplicar = 1;
-
-    return cestaRetornar;
-  }
-  setUnidadesAplicar(unidades: number) {
-    this.udsAplicar = unidades;
-  }
   async recalcularIvas(cesta: CestasInterface) {
     const cestainicial = cesta;
-    cesta.tiposIva = {
+    cesta.detalleIva = {
       base1: 0,
       base2: 0,
       base3: 0,
@@ -279,6 +199,7 @@ export class CestaClase {
       importe2: 0,
       importe3: 0,
     };
+    
     for (let i = 0; i < cesta.lista.length; i++) {
       if (cesta.lista[i].promocion.esPromo === false) {
         if (cesta.lista[i].suplementosId) {
@@ -484,36 +405,6 @@ export class CestaClase {
   //     return false;
   //   });
   // }
-
-  getCestaByTrabajadorID(idTrabajador: number): Promise<CestasInterface> {
-    return schCestas
-      .getCestaByTrabajadorID(idTrabajador)
-      .then((res) => {
-        if (res) return res;
-        return null;
-      })
-      .catch((err) => {
-        console.log(err);
-        return null;
-      });
-  }
-
-  getCestaByID(idCesta: CestasInterface["_id"]): Promise<CestasInterface> {
-    return schCestas
-      .getCestaByID(idCesta)
-      .then((res) => {
-        if (res) return res;
-        return null;
-      })
-      .catch((err) => {
-        console.log(err);
-        return null;
-      });
-  }
-
-  hayRegalos(cesta: CestasInterface) {
-    return false;
-  }
 
   // async calcularIvaTicket(cesta: CestasInterface) {
   //   let objetoIva: Iva = this.generarObjetoIva();
