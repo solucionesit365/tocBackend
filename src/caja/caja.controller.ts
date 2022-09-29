@@ -5,17 +5,22 @@ import { cajaInstance } from "./caja.clase";
 @Controller("caja")
 export class CajaController {
   @Post("cerrarCaja")
-  async cerrarCaja(@Body() params) {
-    if (UtilesModule.checkVariable(params.total, params.detalle, params.infoDinero, params.cantidad3G, params.idDependienta)) {
-      return await cajaInstance.cerrarCaja(
-        params.total,
-        params.detalle,
-        params.infoDinero,
-        params.cantidad3G,
-        params.idDependienta
-      );
+  async cerrarCaja(@Body() { total, detalleMonedas, infoDinero, cantidad3G, idDependienta }) {
+    try {
+      if (UtilesModule.checkVariable(total, detalleMonedas, infoDinero, cantidad3G, idDependienta)) {
+        return await cajaInstance.cerrarCaja(
+          total,
+          detalleMonedas,
+          infoDinero,
+          cantidad3G,
+          idDependienta
+        );
+      }
+      throw Error("Error cerrarCaja > Faltan datos");
+    } catch (err) {
+      console.log(err);
+      return false;
     }
-    return false;
   }
 
   @Post("abrirCaja")
