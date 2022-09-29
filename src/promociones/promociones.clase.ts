@@ -1,45 +1,38 @@
-import {clienteInstance} from '../clientes/clientes.clase';
-import {articulosInstance} from '../articulos/articulos.clase';
-import {cestasInstance} from '../cestas/cestas.clase';
-import {CestasInterface} from '../cestas/cestas.interface';
-import {PromocionesInterface} from './promociones.interface';
-import * as schPromociones from './promociones.mongodb';
+import { clienteInstance } from "../clientes/clientes.clase";
+import { articulosInstance } from "../articulos/articulos.clase";
+import { CestasInterface } from "../cestas/cestas.interface";
+import { PromocionesInterface } from "./promociones.interface";
+import * as schPromociones from "./promociones.mongodb";
 
 export class PromocionesClase {
-  private promociones: PromocionesInterface[];
-  private promocionesActivas = true;
 
+  /*  */
+  deshacerOfertas(cesta: CestasInterface): Promise<CestasInterface> {
+    const cestaAuxiliar = cesta; // Esta cesta no tendrá promos después del primer bucle
+    
+    while () {
+      
+    }
 
-  /* Inicializa las promociones en su variable privada */
-  constructor() {
-    schPromociones.getPromociones().then((arrayPromos: PromocionesInterface[]) => {
-      if (arrayPromos.length > 0) {
-        this.promociones = arrayPromos;
-      } else {
-        this.promociones = [];
-      }
-    });
-  }
-
-  /* Deshacer ofertas de la cesta. Actualmente no hace nada
-    Solo aplicar para DEVOLUCIONES (porque de momento no corrige el IVA de la cesta).
-    No sirve para ofertas con productos a peso */
-  deshacerOfertas(cesta: CestasInterface) {
     for (let i = 0; i < cesta.lista.length; i++) {
-      if (cesta.lista[i].esPromo) {
-        const auxItemLista = cesta.lista[i];
+      if (cesta.lista[i].promocion) {
+        const itemPromocion = cesta.lista[i];
         cesta.lista.splice(i, i); // Elimina la posición concreta del array.
 
-        if (cesta.lista[i].promocion.idPrincipal != 0) {
-          const idPrincipal = cesta.lista[i].promocion.idPrincipal;
-          const unidades = cesta.lista[i].unidades*cesta.lista[i].promocion.cantidadPrincipal;
-          cestas.addItem(idPrincipal, '', false, null, cesta._id, unidades);
+        if (cesta.lista[i].promocion.idArticuloPrincipal) {
+          const idPrincipal = cesta.lista[i].promocion.idArticuloPrincipal;
+          const unidades =
+            cesta.lista[i].unidades *
+            cesta.lista[i].promocion.cantidadArticuloPrincipal;
+          cestas.addItem(idPrincipal, "", false, null, cesta._id, unidades);
         }
 
         if (cesta.lista[i].promocion.idSecundario != 0) {
           const idSecundario = cesta.lista[i].promocion.idSecundario;
-          const unidades = cesta.lista[i].unidades*cesta.lista[i].promocion.cantidadSecundario;
-          cestas.addItem(idSecundario, '', false, null, cesta._id, unidades);
+          const unidades =
+            cesta.lista[i].unidades *
+            cesta.lista[i].promocion.cantidadSecundario;
+          cestas.addItem(idSecundario, "", false, null, cesta._id, unidades);
         }
       }
     }
@@ -47,9 +40,16 @@ export class PromocionesClase {
   }
 
   /* Comprueba si el artículo necesario para la promoción existe en la cesta */
-  existeArticuloParaOfertaEnCesta(cesta: CestasInterface, idArticulo: number, unidadesNecesarias: number) {
+  existeArticuloParaOfertaEnCesta(
+    cesta: CestasInterface,
+    idArticulo: number,
+    unidadesNecesarias: number
+  ) {
     for (let i = 0; i < cesta.lista.length; i++) {
-      if (cesta.lista[i]._id === idArticulo && cesta.lista[i].unidades >= unidadesNecesarias) {
+      if (
+        cesta.lista[i]._id === idArticulo &&
+        cesta.lista[i].unidades >= unidadesNecesarias
+      ) {
         return i;
       }
     }
@@ -65,7 +65,17 @@ export class PromocionesClase {
   }
 
   /* Aplica las promociones en la cesta de todo tipo, tanto individuales como combos */
-  async teLoAplicoTodo(necesariasPrincipal: number, necesariasSecundario: number, cesta: CestasInterface, posicionPrincipal: number, posicionSecundario: number, pideDelA: number, pideDelB: number, precioPromo: number, idPromo: string): Promise<CestasInterface> {
+  async teLoAplicoTodo(
+    necesariasPrincipal: number,
+    necesariasSecundario: number,
+    cesta: CestasInterface,
+    posicionPrincipal: number,
+    posicionSecundario: number,
+    pideDelA: number,
+    pideDelB: number,
+    precioPromo: number,
+    idPromo: string
+  ): Promise<CestasInterface> {
     if (this.getEstadoPromociones()) {
       let numeroPrincipal = 0;
       let numeroSecundario = 0;
@@ -73,34 +83,103 @@ export class PromocionesClase {
       let sobranSecundario = 0;
       let nVeces = 0;
 
-      const idPrincipal = (typeof cesta.lista[posicionPrincipal] !== 'undefined') ? cesta.lista[posicionPrincipal]._id: 0;
-      const idSecundario = (typeof cesta.lista[posicionSecundario] !== 'undefined') ? cesta.lista[posicionSecundario]._id: 0;
+      const idPrincipal =
+        typeof cesta.lista[posicionPrincipal] !== "undefined"
+          ? cesta.lista[posicionPrincipal]._id
+          : 0;
+      const idSecundario =
+        typeof cesta.lista[posicionSecundario] !== "undefined"
+          ? cesta.lista[posicionSecundario]._id
+          : 0;
 
       if (pideDelA !== -1 && pideDelB !== -1) {
-        numeroPrincipal = cesta.lista[posicionPrincipal].unidades/necesariasPrincipal;
-        numeroSecundario = cesta.lista[posicionSecundario].unidades/necesariasSecundario;
+        numeroPrincipal =
+          cesta.lista[posicionPrincipal].unidades / necesariasPrincipal;
+        numeroSecundario =
+          cesta.lista[posicionSecundario].unidades / necesariasSecundario;
         nVeces = Math.trunc(Math.min(numeroPrincipal, numeroSecundario));
-        sobranPrincipal = cesta.lista[posicionPrincipal].unidades-nVeces*necesariasPrincipal;
-        sobranSecundario = cesta.lista[posicionSecundario].unidades-nVeces*necesariasSecundario;
+        sobranPrincipal =
+          cesta.lista[posicionPrincipal].unidades -
+          nVeces * necesariasPrincipal;
+        sobranSecundario =
+          cesta.lista[posicionSecundario].unidades -
+          nVeces * necesariasSecundario;
 
-        cesta = await cestas.limpiarCesta(cesta, posicionPrincipal, posicionSecundario, sobranPrincipal, sobranSecundario, pideDelA, pideDelB);
-        cesta = await this.insertarLineaPromoCestaCombo(cesta, 1, nVeces, precioPromo*nVeces, idPromo, idPrincipal, idSecundario, necesariasPrincipal, necesariasSecundario, precioPromo);
+        cesta = await cestas.limpiarCesta(
+          cesta,
+          posicionPrincipal,
+          posicionSecundario,
+          sobranPrincipal,
+          sobranSecundario,
+          pideDelA,
+          pideDelB
+        );
+        cesta = await this.insertarLineaPromoCestaCombo(
+          cesta,
+          1,
+          nVeces,
+          precioPromo * nVeces,
+          idPromo,
+          idPrincipal,
+          idSecundario,
+          necesariasPrincipal,
+          necesariasSecundario,
+          precioPromo
+        );
       } else {
         if (pideDelA !== -1 && pideDelB === -1) {
-          numeroPrincipal = cesta.lista[posicionPrincipal].unidades/necesariasPrincipal;
+          numeroPrincipal =
+            cesta.lista[posicionPrincipal].unidades / necesariasPrincipal;
           nVeces = Math.trunc(numeroPrincipal);
-          sobranPrincipal = cesta.lista[posicionPrincipal].unidades-nVeces*necesariasPrincipal;
+          sobranPrincipal =
+            cesta.lista[posicionPrincipal].unidades -
+            nVeces * necesariasPrincipal;
 
-          cesta = await cestas.limpiarCesta(cesta, posicionPrincipal, posicionSecundario, sobranPrincipal, sobranSecundario, pideDelA, pideDelB);
-          cesta = await this.insertarLineaPromoCestaIndividual(cesta, 2, nVeces, precioPromo*nVeces*necesariasPrincipal, idPromo, idPrincipal, necesariasPrincipal);
+          cesta = await cestas.limpiarCesta(
+            cesta,
+            posicionPrincipal,
+            posicionSecundario,
+            sobranPrincipal,
+            sobranSecundario,
+            pideDelA,
+            pideDelB
+          );
+          cesta = await this.insertarLineaPromoCestaIndividual(
+            cesta,
+            2,
+            nVeces,
+            precioPromo * nVeces * necesariasPrincipal,
+            idPromo,
+            idPrincipal,
+            necesariasPrincipal
+          );
         } else {
           if (pideDelA === -1 && pideDelB !== -1) {
-            numeroSecundario = cesta.lista[posicionSecundario].unidades/necesariasSecundario;
+            numeroSecundario =
+              cesta.lista[posicionSecundario].unidades / necesariasSecundario;
             nVeces = Math.trunc(numeroSecundario);
-            sobranSecundario = cesta.lista[posicionSecundario].unidades-nVeces*necesariasSecundario;
+            sobranSecundario =
+              cesta.lista[posicionSecundario].unidades -
+              nVeces * necesariasSecundario;
 
-            cesta = await cestas.limpiarCesta(cesta, posicionPrincipal, posicionSecundario, sobranPrincipal, sobranSecundario, pideDelA, pideDelB);
-            cesta = await this.insertarLineaPromoCestaIndividual(cesta, 2, nVeces, precioPromo*nVeces*necesariasSecundario, idPromo, idPrincipal, necesariasPrincipal); // se trata como si fueran principales
+            cesta = await cestas.limpiarCesta(
+              cesta,
+              posicionPrincipal,
+              posicionSecundario,
+              sobranPrincipal,
+              sobranSecundario,
+              pideDelA,
+              pideDelB
+            );
+            cesta = await this.insertarLineaPromoCestaIndividual(
+              cesta,
+              2,
+              nVeces,
+              precioPromo * nVeces * necesariasSecundario,
+              idPromo,
+              idPrincipal,
+              necesariasPrincipal
+            ); // se trata como si fueran principales
           }
         }
       }
@@ -110,7 +189,10 @@ export class PromocionesClase {
   }
 
   /* Busca ofertas que se pueden aplicar en la cesta */
-  async buscarOfertas(unaCesta: CestasInterface, viejoIva): Promise<CestasInterface> {
+  async buscarOfertas(
+    unaCesta: CestasInterface,
+    viejoIva
+  ): Promise<CestasInterface> {
     let hayOferta = false;
     // if (!this.getEstadoPromociones()) {
     //     unaCesta = this.deshacerOfertas(unaCesta);
@@ -119,12 +201,36 @@ export class PromocionesClase {
     if (clienteInstance.getEstadoClienteVIP() == false) {
       for (let i = 0; i < this.promociones.length; i++) {
         for (let j = 0; j < this.promociones[i].principal.length; j++) {
-          const preguntaPrincipal = this.existeArticuloParaOfertaEnCesta(unaCesta, this.promociones[i].principal[j]._id, this.promociones[i].cantidadPrincipal);
-          if (this.promociones[i].principal[j]._id === -1 || preguntaPrincipal >= 0) {
+          const preguntaPrincipal = this.existeArticuloParaOfertaEnCesta(
+            unaCesta,
+            this.promociones[i].principal[j]._id,
+            this.promociones[i].cantidadPrincipal
+          );
+          if (
+            this.promociones[i].principal[j]._id === -1 ||
+            preguntaPrincipal >= 0
+          ) {
             for (let z = 0; z < this.promociones[i].secundario.length; z++) {
-              const preguntaSecundario = this.existeArticuloParaOfertaEnCesta(unaCesta, this.promociones[i].secundario[z]._id, this.promociones[i].cantidadSecundario);
-              if (this.promociones[i].secundario[z]._id === -1 || preguntaSecundario >= 0) {
-                unaCesta = await this.teLoAplicoTodo(this.promociones[i].cantidadPrincipal, this.promociones[i].cantidadSecundario, unaCesta, preguntaPrincipal, preguntaSecundario, this.promociones[i].principal[j]._id, this.promociones[i].secundario[z]._id, this.promociones[i].precioFinal, this.promociones[i]._id);
+              const preguntaSecundario = this.existeArticuloParaOfertaEnCesta(
+                unaCesta,
+                this.promociones[i].secundario[z]._id,
+                this.promociones[i].cantidadSecundario
+              );
+              if (
+                this.promociones[i].secundario[z]._id === -1 ||
+                preguntaSecundario >= 0
+              ) {
+                unaCesta = await this.teLoAplicoTodo(
+                  this.promociones[i].cantidadPrincipal,
+                  this.promociones[i].cantidadSecundario,
+                  unaCesta,
+                  preguntaPrincipal,
+                  preguntaSecundario,
+                  this.promociones[i].principal[j]._id,
+                  this.promociones[i].secundario[z]._id,
+                  this.promociones[i].precioFinal,
+                  this.promociones[i]._id
+                );
                 hayOferta = true;
                 break;
               }
@@ -143,12 +249,33 @@ export class PromocionesClase {
   }
 
   /* Inserta la línea de la oferta combinada en la cesta */
-  async insertarLineaPromoCestaCombo(cesta: CestasInterface, tipoPromo: number, unidades: number, total: number, idPromo: string, idPrincipal: number, idSecundario: number, cantidadPrincipal: number, cantidadSecundario: number, precioPromoGdt: number) {
-    const dtoAplicado = await this.calcularPrecioRealCombo(tipoPromo, idPrincipal, idSecundario, cantidadPrincipal, cantidadSecundario, unidades, total);
+  async insertarLineaPromoCestaCombo(
+    cesta: CestasInterface,
+    tipoPromo: number,
+    unidades: number,
+    total: number,
+    idPromo: string,
+    idPrincipal: number,
+    idSecundario: number,
+    cantidadPrincipal: number,
+    cantidadSecundario: number,
+    precioPromoGdt: number
+  ) {
+    const dtoAplicado = await this.calcularPrecioRealCombo(
+      tipoPromo,
+      idPrincipal,
+      idSecundario,
+      cantidadPrincipal,
+      cantidadSecundario,
+      unidades,
+      total
+    );
 
-    if (tipoPromo === 1) // COMBO
-    {
-      let precioRealPromo = (dtoAplicado.precioRealPrincipal*cantidadPrincipal + dtoAplicado.precioRealSecundario*cantidadSecundario);
+    if (tipoPromo === 1) {
+      // COMBO
+      let precioRealPromo =
+        dtoAplicado.precioRealPrincipal * cantidadPrincipal +
+        dtoAplicado.precioRealSecundario * cantidadSecundario;
       if (precioPromoGdt != precioRealPromo) {
         const diferencia = precioPromoGdt - precioRealPromo;
         precioRealPromo += diferencia;
@@ -170,21 +297,34 @@ export class PromocionesClase {
           precioRealSecundario: dtoAplicado.precioRealSecundario,
           unidadesOferta: unidades,
           tipoPromo: "COMBO",
-          
         },
         esPromo: true,
-        seRegala: false
+        seRegala: false,
       });
     }
     return cesta;
   }
 
   /* Inserta la línea de la oferta individual en la cesta */
-  async insertarLineaPromoCestaIndividual(cesta: CestasInterface, tipoPromo: number, unidades: number, total: number, idPromo: string, idPrincipal: number, cantidadPrincipal: number) {
-    const dtoAplicado = await this.calcularPrecioRealIndividual(tipoPromo, idPrincipal, cantidadPrincipal, unidades, total);
+  async insertarLineaPromoCestaIndividual(
+    cesta: CestasInterface,
+    tipoPromo: number,
+    unidades: number,
+    total: number,
+    idPromo: string,
+    idPrincipal: number,
+    cantidadPrincipal: number
+  ) {
+    const dtoAplicado = await this.calcularPrecioRealIndividual(
+      tipoPromo,
+      idPrincipal,
+      cantidadPrincipal,
+      unidades,
+      total
+    );
 
-    if (tipoPromo === 2) // INDIVIDUAL
-    {
+    if (tipoPromo === 2) {
+      // INDIVIDUAL
       cesta.lista.push({
         _id: -2,
         nombre: "Oferta individual",
@@ -199,10 +339,10 @@ export class PromocionesClase {
           precioRealPrincipal: dtoAplicado.precioRealPrincipal,
           precioRealSecundario: 0,
           unidadesOferta: unidades,
-          tipoPromo: "INDIVIDUAL"
+          tipoPromo: "INDIVIDUAL",
         },
         esPromo: true,
-        seRegala: false
+        seRegala: false,
       });
     }
 
@@ -210,78 +350,151 @@ export class PromocionesClase {
   }
 
   /* Calcula el precio real que tienen los artículos de una promoción tipo combo. Se reparten en porcentaje */
-  async calcularPrecioRealCombo(tipoPromo: number, idPrincipal: number, idSecundario: number, cantidadPrincipal: number, cantidadSecundario: number, unidadesOferta: number, precioTotalOferta: number) {
+  async calcularPrecioRealCombo(
+    tipoPromo: number,
+    idPrincipal: number,
+    idSecundario: number,
+    cantidadPrincipal: number,
+    cantidadSecundario: number,
+    unidadesOferta: number,
+    precioTotalOferta: number
+  ) {
     let precioSinOfertaPrincipal = 0;
     let precioSinOfertaSecundario = 0;
     let precioTotalSinOferta = 0;
 
     if (idPrincipal != 0) {
-      precioSinOfertaPrincipal = (await articulosInstance.getInfoArticulo(idPrincipal)).precioConIva;
+      precioSinOfertaPrincipal = (
+        await articulosInstance.getInfoArticulo(idPrincipal)
+      ).precioConIva;
     }
 
     if (idSecundario != 0) {
-      precioSinOfertaSecundario = (await articulosInstance.getInfoArticulo(idSecundario)).precioConIva;
+      precioSinOfertaSecundario = (
+        await articulosInstance.getInfoArticulo(idSecundario)
+      ).precioConIva;
     }
 
-    if (tipoPromo === 1) // COMBO
-    {
-      precioTotalSinOferta = (precioSinOfertaPrincipal*cantidadPrincipal + precioSinOfertaSecundario*cantidadSecundario)*unidadesOferta;
+    if (tipoPromo === 1) {
+      // COMBO
+      precioTotalSinOferta =
+        (precioSinOfertaPrincipal * cantidadPrincipal +
+          precioSinOfertaSecundario * cantidadSecundario) *
+        unidadesOferta;
     }
 
-    const dto = (precioTotalSinOferta-precioTotalOferta)/precioTotalSinOferta;
+    const dto =
+      (precioTotalSinOferta - precioTotalOferta) / precioTotalSinOferta;
 
-    const precioRealPrincipalDecimales = ((precioSinOfertaPrincipal - (precioSinOfertaPrincipal*dto))*unidadesOferta)%1;
-    const precioRealSecundarioDecimales = ((precioSinOfertaSecundario - (precioSinOfertaSecundario*dto))*unidadesOferta)%1;
+    const precioRealPrincipalDecimales =
+      ((precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
+        unidadesOferta) %
+      1;
+    const precioRealSecundarioDecimales =
+      ((precioSinOfertaSecundario - precioSinOfertaSecundario * dto) *
+        unidadesOferta) %
+      1;
 
-    if (Math.round((precioRealPrincipalDecimales*cantidadPrincipal+precioRealSecundarioDecimales*cantidadSecundario)*100)/100 === 1) {
-      const sumaCentimos = 0.01/cantidadPrincipal;
+    if (
+      Math.round(
+        (precioRealPrincipalDecimales * cantidadPrincipal +
+          precioRealSecundarioDecimales * cantidadSecundario) *
+          100
+      ) /
+        100 ===
+      1
+    ) {
+      const sumaCentimos = 0.01 / cantidadPrincipal;
       return {
-        precioRealPrincipal: (Math.round((precioSinOfertaPrincipal - (precioSinOfertaPrincipal*dto))*unidadesOferta *100)/100)+sumaCentimos,
-        precioRealSecundario: Math.round((precioSinOfertaSecundario - (precioSinOfertaSecundario*dto))*unidadesOferta*100)/100,
+        precioRealPrincipal:
+          Math.round(
+            (precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
+              unidadesOferta *
+              100
+          ) /
+            100 +
+          sumaCentimos,
+        precioRealSecundario:
+          Math.round(
+            (precioSinOfertaSecundario - precioSinOfertaSecundario * dto) *
+              unidadesOferta *
+              100
+          ) / 100,
       };
     }
 
     return {
-      precioRealPrincipal: Math.round((precioSinOfertaPrincipal - (precioSinOfertaPrincipal*dto))*unidadesOferta *100)/100,
-      precioRealSecundario: Math.round((precioSinOfertaSecundario - (precioSinOfertaSecundario*dto))*unidadesOferta*100)/100,
+      precioRealPrincipal:
+        Math.round(
+          (precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
+            unidadesOferta *
+            100
+        ) / 100,
+      precioRealSecundario:
+        Math.round(
+          (precioSinOfertaSecundario - precioSinOfertaSecundario * dto) *
+            unidadesOferta *
+            100
+        ) / 100,
     };
   }
 
   /* Calcula el precio real que tienen los artículos de una promoción tipo individual. Se reparten dividido sus unidades */
-  async calcularPrecioRealIndividual(tipoPromo: number, idPrincipal: number, cantidadPrincipal: number, unidadesOferta: number, precioTotalOferta: number) {
+  async calcularPrecioRealIndividual(
+    tipoPromo: number,
+    idPrincipal: number,
+    cantidadPrincipal: number,
+    unidadesOferta: number,
+    precioTotalOferta: number
+  ) {
     let precioSinOfertaPrincipal = 0;
     let precioTotalSinOferta = 0;
     if (idPrincipal != 0) {
-      precioSinOfertaPrincipal = (await articulosInstance.getInfoArticulo(idPrincipal)).precioConIva;
+      precioSinOfertaPrincipal = (
+        await articulosInstance.getInfoArticulo(idPrincipal)
+      ).precioConIva;
     }
 
-    if (tipoPromo === 2) // INDIVIDUAL
-    {
+    if (tipoPromo === 2) {
+      // INDIVIDUAL
       if (idPrincipal != 0) {
-        precioTotalSinOferta = precioSinOfertaPrincipal*cantidadPrincipal*unidadesOferta;
+        precioTotalSinOferta =
+          precioSinOfertaPrincipal * cantidadPrincipal * unidadesOferta;
       }
     }
 
-    const dto = (precioTotalSinOferta-precioTotalOferta)/precioTotalSinOferta;
+    const dto =
+      (precioTotalSinOferta - precioTotalOferta) / precioTotalSinOferta;
 
     return {
-      precioRealPrincipal: Math.round((precioSinOfertaPrincipal - (precioSinOfertaPrincipal*dto))*unidadesOferta*cantidadPrincipal*100)/100,
+      precioRealPrincipal:
+        Math.round(
+          (precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
+            unidadesOferta *
+            cantidadPrincipal *
+            100
+        ) / 100,
     };
   }
 
   /* Inserta un array de promociones en la base de datos. Se utiliza al instalar una licencia o para actualizar teclado */
   /* También renueva la variable privada de promociones */
-  insertarPromociones(arrayPromociones: PromocionesInterface[]): Promise<boolean> {
+  insertarPromociones(
+    arrayPromociones: PromocionesInterface[]
+  ): Promise<boolean> {
     if (arrayPromociones.length > 0) {
-      return schPromociones.insertarPromociones(arrayPromociones).then((res) => {
-        if (res) {
-          this.promociones = arrayPromociones;
-        }
-        return res.acknowledged;
-      }).catch((err) => {
-        console.log(err);
-        return false;
-      });
+      return schPromociones
+        .insertarPromociones(arrayPromociones)
+        .then((res) => {
+          if (res) {
+            this.promociones = arrayPromociones;
+          }
+          return res.acknowledged;
+        })
+        .catch((err) => {
+          console.log(err);
+          return false;
+        });
     } else {
       return this.devuelveTrue();
     }
@@ -293,23 +506,28 @@ export class PromocionesClase {
 
   /* Petición de descarga de promociones. También renueva la variable privada de promociones (siempre se utiliza esta) */
   descargarPromociones() {
-    return schPromociones.getPromociones().then((arrayPromos: PromocionesInterface[]) => {
-      if (arrayPromos.length > 0) {
-        this.promociones = arrayPromos;
-        return this.insertarPromociones(arrayPromos).then((res) => {
-          return res;
-        }).catch((err) => {
-          console.log(err);
-          return false;
-        });
-      } else {
-        this.promociones = [];
-        return true;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+    return schPromociones
+      .getPromociones()
+      .then((arrayPromos: PromocionesInterface[]) => {
+        if (arrayPromos.length > 0) {
+          this.promociones = arrayPromos;
+          return this.insertarPromociones(arrayPromos)
+            .then((res) => {
+              return res;
+            })
+            .catch((err) => {
+              console.log(err);
+              return false;
+            });
+        } else {
+          this.promociones = [];
+          return true;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
   }
 }
 
