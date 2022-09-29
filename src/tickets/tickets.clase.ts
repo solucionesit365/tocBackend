@@ -46,7 +46,7 @@ export class TicketsClase {
     idTrabajador: TicketsInterface["idTrabajador"]
   ): Promise<TicketsInterface> {
     try {
-      const cesta = await cestasInstance.getCestaByID(idCesta);
+      const cesta = await cestasInstance.getCestaById(idCesta);
       const nuevoTicket: TicketsInterface = {
         _id: await this.getProximoId(),
         timestamp: Date.now(),

@@ -1,13 +1,11 @@
-// 100%
-
 import {clienteInstance} from '../clientes/clientes.clase';
 import {articulosInstance} from '../articulos/articulos.clase';
-import {cestas} from '../cestas/cestas.clase';
+import {cestasInstance} from '../cestas/cestas.clase';
 import {CestasInterface} from '../cestas/cestas.interface';
 import {PromocionesInterface} from './promociones.interface';
 import * as schPromociones from './promociones.mongodb';
 
-export class OfertasClase {
+export class PromocionesClase {
   private promociones: PromocionesInterface[];
   private promocionesActivas = true;
 
@@ -315,6 +313,4 @@ export class OfertasClase {
   }
 }
 
-const ofertas = new OfertasClase();
-
-export {ofertas};
+export const promocionesInstance = new PromocionesClase();

@@ -1,6 +1,6 @@
 import * as schCestas from "./cestas.mongodb";
-import { CestasInterface, ItemLista } from "./cestas.interface";
-import { construirObjetoIvas } from "../funciones/funciones";
+import { CestasInterface, DetalleIvaInterface, ItemLista } from "./cestas.interface";
+import { construirObjetoIvas, fusionarObjetosDetalleIva } from "../funciones/funciones";
 import { articulosInstance } from "../articulos/articulos.clase";
 
 import { cajaInstance } from "../caja/caja.clase";
@@ -8,6 +8,7 @@ import { impresoraInstance } from "../impresora/impresora.class";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ClientesInterface } from "../clientes/clientes.interface";
+import { promocionesInstance } from "src/promociones/promociones.clase";
 
 
 /* Siempre cargar la cesta desde MongoDB */
@@ -186,8 +187,18 @@ export class CestaClase {
     throw Error("Error, la caja está cerrada. cestas.clase > clickTeclaArticulo()");
   }
 
-  async recalcularIvas(cesta: CestasInterface) {
-    const cestainicial = cesta;
+  async getDetalleIvaPromocion(itemPromocion: ItemLista) {
+    if (itemPromocion.promocion.tipoPromo === "INDIVIDUAL") {
+      const ofertaIndividual = promocionesInstance // VOY POR AQUÍ !!!! TENGO QUE COMPLETAR LAS PROMOCIONES ANTES
+    } else if (itemPromocion.promocion.tipoPromo === "COMBO") {
+
+    } else {
+      throw Error("Error cestas.clase > getDetalleIvaPromocion. El tipo de oferta no corresponde con ningún tipo conocido");
+    }
+  }
+
+  /*  */
+  async recalcularIvas(cesta: CestasInterface, idCliente: ClientesInterface["id"]) {
     cesta.detalleIva = {
       base1: 0,
       base2: 0,
@@ -201,23 +212,22 @@ export class CestaClase {
     };
     
     for (let i = 0; i < cesta.lista.length; i++) {
-      if (cesta.lista[i].promocion.esPromo === false) {
-        if (cesta.lista[i].suplementosId) {
-          for (
-            let index = 0;
-            index < cesta.lista[i].suplementosId.length;
-            index++
-          ) {
-            const infoArticulo = await articulosInstance.getInfoArticulo(
-              cesta.lista[i].suplementosId[index]
-            );
-            cesta.tiposIva = construirObjetoIvas(
-              infoArticulo,
-              cesta.lista[i].unidades,
-              cesta.tiposIva
-            );
-          }
+      if (cesta.lista[i].promocion) {
+        if (cesta.lista[i].arraySuplementos.length > 0) {
+          cesta.detalleIva = fusionarObjetosDetalleIva(cesta.detalleIva, await this.getDetalleIvaSuplementos(cesta.lista[i].arraySuplementos, idCliente));
         }
+        
+        if (cesta.lista[i].promocion) {
+          cesta.detalleIva = fusionarObjetosDetalleIva(cesta.detalleIva, await this.getDetalleIvaPromocion());
+        }
+
+
+
+
+
+
+
+        // -------
         const infoArticulo = await articulosInstance.getInfoArticulo(
           cesta.lista[i]._id
         );
@@ -304,6 +314,28 @@ export class CestaClase {
       }
     }
     return await cesta;
+  }
+
+  /* Eze 4.0 */
+  async getDetalleIvaSuplementos(arraySuplementos: ItemLista["arraySuplementos"], idCliente: ClientesInterface["id"]): Promise<DetalleIvaInterface> {
+    let objetoIva: DetalleIvaInterface = {
+      base1: 0,
+      base2: 0,
+      base3: 0,
+      valorIva1: 0,
+      valorIva2: 0,
+      valorIva3: 0,
+      importe1: 0,
+      importe2: 0,
+      importe3: 0,
+    }
+
+    for (let i = 0; i < arraySuplementos.length; i++) {
+      let articulo = await articulosInstance.getInfoArticulo(arraySuplementos[i]);
+      articulo = await articulosInstance.getPrecioConTarifa(articulo, idCliente);
+      objetoIva = construirObjetoIvas(articulo.precioConIva, articulo.tipoIva, 1, objetoIva);
+    }
+    return objetoIva;
   }
 
   async borrarArticulosCesta(idCesta: number) {

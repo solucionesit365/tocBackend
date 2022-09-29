@@ -8,9 +8,11 @@ export class Articulos {
 
   /* Eze 4.0 */
   async getPrecioConTarifa(articulo: ArticulosInterface, idCliente: ClientesInterface["id"]): Promise<ArticulosInterface> {
-    const infoTarifa = await getItemTarifa(articulo._id, idCliente);
-    if (infoTarifa && typeof infoTarifa.precioConIva == "number")
-      articulo.precioConIva = infoTarifa.precioConIva;
+    if (idCliente) {
+      const infoTarifa = await getItemTarifa(articulo._id, idCliente);
+      if (infoTarifa && typeof infoTarifa.precioConIva == "number")
+        articulo.precioConIva = infoTarifa.precioConIva;
+    }
     return articulo;
   }
 
