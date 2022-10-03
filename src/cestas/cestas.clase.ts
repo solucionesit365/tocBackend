@@ -418,6 +418,9 @@ export class CestaClase {
     return res;
   }
 
+  /* Eze 4.0 */
+  updateCesta = async (cesta: CestasInterface) => await schCestas.updateCesta(cesta);
+
   // async enviarACocina(idCesta) {
   //   const cestaActual = await this.getCesta(idCesta);
   //   let articulos = '';

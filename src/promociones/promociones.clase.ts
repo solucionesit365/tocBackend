@@ -3,43 +3,76 @@ import { articulosInstance } from "../articulos/articulos.clase";
 import { CestasInterface } from "../cestas/cestas.interface";
 import { PromocionesInterface } from "./promociones.interface";
 import * as schPromociones from "./promociones.mongodb";
+import { cestasInstance } from "../cestas/cestas.clase";
+import { ClientesInterface } from "../clientes/clientes.interface";
 
 export class PromocionesClase {
-
-  /*  */
-  deshacerOfertas(cesta: CestasInterface): Promise<CestasInterface> {
-    const cestaAuxiliar = cesta; // Esta cesta no tendrá promos después del primer bucle
-    
-    while () {
-      
-    }
+  /* Eze 4.0 */
+  async deshacerOfertas(cesta: CestasInterface): Promise<CestasInterface> {
+    let cestaAux: CestasInterface = {
+      _id: null,
+      detalleIva: null,
+      lista: [],
+      modo: null,
+    }; // Esta cesta no tendrá promos después del primer bucle
 
     for (let i = 0; i < cesta.lista.length; i++) {
       if (cesta.lista[i].promocion) {
-        const itemPromocion = cesta.lista[i];
-        cesta.lista.splice(i, i); // Elimina la posición concreta del array.
-
         if (cesta.lista[i].promocion.idArticuloPrincipal) {
           const idPrincipal = cesta.lista[i].promocion.idArticuloPrincipal;
+          const articulo = await articulosInstance.getInfoArticulo(idPrincipal);
           const unidades =
             cesta.lista[i].unidades *
             cesta.lista[i].promocion.cantidadArticuloPrincipal;
-          cestas.addItem(idPrincipal, "", false, null, cesta._id, unidades);
+          cestaAux.lista.push({
+            idArticulo: idPrincipal,
+            arraySuplementos: [],
+            gramos: null,
+            nombre: articulo.nombre,
+            precioConIva: articulo.precioConIva,
+            precioPesaje: null,
+            promocion: null,
+            regalo: false,
+            subtotal: unidades * articulo.precioConIva,
+            tipoIva: articulo.tipoIva,
+            unidades: unidades,
+          });
         }
 
-        if (cesta.lista[i].promocion.idSecundario != 0) {
-          const idSecundario = cesta.lista[i].promocion.idSecundario;
+        if (cesta.lista[i].promocion.idArticuloSecundario) {
+          const idSecundario = cesta.lista[i].promocion.idArticuloSecundario;
           const unidades =
             cesta.lista[i].unidades *
-            cesta.lista[i].promocion.cantidadSecundario;
-          cestas.addItem(idSecundario, "", false, null, cesta._id, unidades);
+            cesta.lista[i].promocion.cantidadArticuloSecundario;
+
+          const articulo = await articulosInstance.getInfoArticulo(
+            idSecundario
+          );
+          cestaAux.lista.push({
+            idArticulo: idSecundario,
+            arraySuplementos: [],
+            gramos: null,
+            nombre: articulo.nombre,
+            precioConIva: articulo.precioConIva,
+            precioPesaje: null,
+            promocion: null,
+            regalo: false,
+            subtotal: unidades * articulo.precioConIva,
+            tipoIva: articulo.tipoIva,
+            unidades: unidades,
+          });
         }
+      } else {
+        cestaAux.lista.push(cesta.lista[i]);
       }
     }
-    return cesta;
+    cestaAux._id = cesta._id;
+    cestaAux.detalleIva = cesta.detalleIva;
+    cestaAux.modo = cesta.modo;
+    return cestaAux;
   }
 
-  /* Comprueba si el artículo necesario para la promoción existe en la cesta */
+  /* Eze 4.0 */
   existeArticuloParaOfertaEnCesta(
     cesta: CestasInterface,
     idArticulo: number,
@@ -47,21 +80,13 @@ export class PromocionesClase {
   ) {
     for (let i = 0; i < cesta.lista.length; i++) {
       if (
-        cesta.lista[i]._id === idArticulo &&
+        cesta.lista[i].idArticulo === idArticulo &&
         cesta.lista[i].unidades >= unidadesNecesarias
       ) {
         return i;
       }
     }
     return -1; // IMPORTANTE QUE SEA ESTE VALOR SINO HAY SECUNDARIO
-  }
-
-  setEstadoPromociones(x: boolean) {
-    this.promocionesActivas = x;
-  }
-
-  getEstadoPromociones(): boolean {
-    return this.promocionesActivas;
   }
 
   /* Aplica las promociones en la cesta de todo tipo, tanto individuales como combos */
@@ -76,36 +101,66 @@ export class PromocionesClase {
     precioPromo: number,
     idPromo: string
   ): Promise<CestasInterface> {
-    if (this.getEstadoPromociones()) {
-      let numeroPrincipal = 0;
-      let numeroSecundario = 0;
-      let sobranPrincipal = 0;
-      let sobranSecundario = 0;
-      let nVeces = 0;
+    let numeroPrincipal = 0;
+    let numeroSecundario = 0;
+    let sobranPrincipal = 0;
+    let sobranSecundario = 0;
+    let nVeces = 0;
 
-      const idPrincipal =
-        typeof cesta.lista[posicionPrincipal] !== "undefined"
-          ? cesta.lista[posicionPrincipal]._id
-          : 0;
-      const idSecundario =
-        typeof cesta.lista[posicionSecundario] !== "undefined"
-          ? cesta.lista[posicionSecundario]._id
-          : 0;
+    const idPrincipal =
+      typeof cesta.lista[posicionPrincipal] !== "undefined"
+        ? cesta.lista[posicionPrincipal].idArticulo
+        : 0;
+    const idSecundario =
+      typeof cesta.lista[posicionSecundario] !== "undefined"
+        ? cesta.lista[posicionSecundario].idArticulo
+        : 0;
 
-      if (pideDelA !== -1 && pideDelB !== -1) {
+    if (pideDelA !== -1 && pideDelB !== -1) {
+      numeroPrincipal =
+        cesta.lista[posicionPrincipal].unidades / necesariasPrincipal;
+      numeroSecundario =
+        cesta.lista[posicionSecundario].unidades / necesariasSecundario;
+      nVeces = Math.trunc(Math.min(numeroPrincipal, numeroSecundario));
+      sobranPrincipal =
+        cesta.lista[posicionPrincipal].unidades - nVeces * necesariasPrincipal;
+      sobranSecundario =
+        cesta.lista[posicionSecundario].unidades -
+        nVeces * necesariasSecundario;
+
+      cesta = await cestasInstance.limpiarCesta(
+        cesta,
+        posicionPrincipal,
+        posicionSecundario,
+        sobranPrincipal,
+        sobranSecundario,
+        pideDelA,
+        pideDelB
+      );
+
+      cesta = await this.insertarLineaPromoCestaCombo(
+        cesta,
+        1,
+        nVeces,
+        precioPromo * nVeces,
+        idPromo,
+        idPrincipal,
+        idSecundario,
+        necesariasPrincipal,
+        necesariasSecundario,
+        precioPromo
+      );
+
+    } else {
+      if (pideDelA !== -1 && pideDelB === -1) {
         numeroPrincipal =
           cesta.lista[posicionPrincipal].unidades / necesariasPrincipal;
-        numeroSecundario =
-          cesta.lista[posicionSecundario].unidades / necesariasSecundario;
-        nVeces = Math.trunc(Math.min(numeroPrincipal, numeroSecundario));
+        nVeces = Math.trunc(numeroPrincipal);
         sobranPrincipal =
           cesta.lista[posicionPrincipal].unidades -
           nVeces * necesariasPrincipal;
-        sobranSecundario =
-          cesta.lista[posicionSecundario].unidades -
-          nVeces * necesariasSecundario;
 
-        cesta = await cestas.limpiarCesta(
+        cesta = await cestasInstance.limpiarCesta(
           cesta,
           posicionPrincipal,
           posicionSecundario,
@@ -114,28 +169,25 @@ export class PromocionesClase {
           pideDelA,
           pideDelB
         );
-        cesta = await this.insertarLineaPromoCestaCombo(
+        cesta = await this.insertarLineaPromoCestaIndividual(
           cesta,
-          1,
+          2,
           nVeces,
-          precioPromo * nVeces,
+          precioPromo * nVeces * necesariasPrincipal,
           idPromo,
           idPrincipal,
-          idSecundario,
-          necesariasPrincipal,
-          necesariasSecundario,
-          precioPromo
+          necesariasPrincipal
         );
       } else {
-        if (pideDelA !== -1 && pideDelB === -1) {
-          numeroPrincipal =
-            cesta.lista[posicionPrincipal].unidades / necesariasPrincipal;
-          nVeces = Math.trunc(numeroPrincipal);
-          sobranPrincipal =
-            cesta.lista[posicionPrincipal].unidades -
-            nVeces * necesariasPrincipal;
+        if (pideDelA === -1 && pideDelB !== -1) {
+          numeroSecundario =
+            cesta.lista[posicionSecundario].unidades / necesariasSecundario;
+          nVeces = Math.trunc(numeroSecundario);
+          sobranSecundario =
+            cesta.lista[posicionSecundario].unidades -
+            nVeces * necesariasSecundario;
 
-          cesta = await cestas.limpiarCesta(
+          cesta = await cestasInstance.limpiarCesta(
             cesta,
             posicionPrincipal,
             posicionSecundario,
@@ -148,39 +200,11 @@ export class PromocionesClase {
             cesta,
             2,
             nVeces,
-            precioPromo * nVeces * necesariasPrincipal,
+            precioPromo * nVeces * necesariasSecundario,
             idPromo,
             idPrincipal,
             necesariasPrincipal
-          );
-        } else {
-          if (pideDelA === -1 && pideDelB !== -1) {
-            numeroSecundario =
-              cesta.lista[posicionSecundario].unidades / necesariasSecundario;
-            nVeces = Math.trunc(numeroSecundario);
-            sobranSecundario =
-              cesta.lista[posicionSecundario].unidades -
-              nVeces * necesariasSecundario;
-
-            cesta = await cestas.limpiarCesta(
-              cesta,
-              posicionPrincipal,
-              posicionSecundario,
-              sobranPrincipal,
-              sobranSecundario,
-              pideDelA,
-              pideDelB
-            );
-            cesta = await this.insertarLineaPromoCestaIndividual(
-              cesta,
-              2,
-              nVeces,
-              precioPromo * nVeces * necesariasSecundario,
-              idPromo,
-              idPrincipal,
-              necesariasPrincipal
-            ); // se trata como si fueran principales
-          }
+          ); // se trata como si fueran principales
         }
       }
     }
@@ -188,48 +212,46 @@ export class PromocionesClase {
     return cesta;
   }
 
-  /* Busca ofertas que se pueden aplicar en la cesta */
+  /* Eze OK. NO 4.0. Busca ofertas que se pueden aplicar en la cesta */
   async buscarOfertas(
-    unaCesta: CestasInterface,
-    viejoIva
+    cesta: CestasInterface,
+    idCliente: ClientesInterface["id"]
   ): Promise<CestasInterface> {
     let hayOferta = false;
-    // if (!this.getEstadoPromociones()) {
-    //     unaCesta = this.deshacerOfertas(unaCesta);
-    // }
+    const promociones = await schPromociones.getPromociones();
 
     if (clienteInstance.getEstadoClienteVIP() == false) {
-      for (let i = 0; i < this.promociones.length; i++) {
-        for (let j = 0; j < this.promociones[i].principal.length; j++) {
+      for (let i = 0; i < promociones.length; i++) {
+        for (let j = 0; j < promociones[i].principal.length; j++) {
           const preguntaPrincipal = this.existeArticuloParaOfertaEnCesta(
-            unaCesta,
-            this.promociones[i].principal[j]._id,
-            this.promociones[i].cantidadPrincipal
+            cesta,
+            promociones[i].principal[j]._id,
+            promociones[i].cantidadPrincipal
           );
           if (
-            this.promociones[i].principal[j]._id === -1 ||
+            promociones[i].principal[j]._id === -1 ||
             preguntaPrincipal >= 0
           ) {
-            for (let z = 0; z < this.promociones[i].secundario.length; z++) {
+            for (let z = 0; z < promociones[i].secundario.length; z++) {
               const preguntaSecundario = this.existeArticuloParaOfertaEnCesta(
-                unaCesta,
-                this.promociones[i].secundario[z]._id,
-                this.promociones[i].cantidadSecundario
+                cesta,
+                promociones[i].secundario[z]._id,
+                promociones[i].cantidadSecundario
               );
               if (
-                this.promociones[i].secundario[z]._id === -1 ||
+                promociones[i].secundario[z]._id === -1 ||
                 preguntaSecundario >= 0
               ) {
-                unaCesta = await this.teLoAplicoTodo(
-                  this.promociones[i].cantidadPrincipal,
-                  this.promociones[i].cantidadSecundario,
-                  unaCesta,
+                cesta = await this.teLoAplicoTodo(
+                  promociones[i].cantidadPrincipal,
+                  promociones[i].cantidadSecundario,
+                  cesta,
                   preguntaPrincipal,
                   preguntaSecundario,
-                  this.promociones[i].principal[j]._id,
-                  this.promociones[i].secundario[z]._id,
-                  this.promociones[i].precioFinal,
-                  this.promociones[i]._id
+                  promociones[i].principal[j]._id,
+                  promociones[i].secundario[z]._id,
+                  promociones[i].precioFinal,
+                  promociones[i]._id
                 );
                 hayOferta = true;
                 break;
@@ -238,14 +260,11 @@ export class PromocionesClase {
           }
         }
       }
-      if (hayOferta) {
-        unaCesta.tiposIva = viejoIva; // No se suma IVA en la promoción para calcularlo en la siguiente línea.
-        unaCesta = await cestas.recalcularIvas(unaCesta);
-      }
     }
 
-    cestas.setCesta(unaCesta);
-    return unaCesta;
+    if (cestasInstance.updateCesta(cesta)) return cesta;
+
+    throw Error("No se ha podido actualizar la cesta");
   }
 
   /* Inserta la línea de la oferta combinada en la cesta */
@@ -283,23 +302,26 @@ export class PromocionesClase {
       }
 
       cesta.lista.push({
-        _id: -2,
+        idArticulo: -2,
         nombre: "Oferta combo",
         unidades: unidades,
+        arraySuplementos: [],
+        gramos: null,
+        precioConIva: precioPromoGdt,
         subtotal: total,
+        tipoIva: null,
         promocion: {
-          _id: idPromo,
-          idPrincipal: idPrincipal,
-          cantidadPrincipal: cantidadPrincipal,
-          idSecundario: idSecundario,
-          cantidadSecundario: cantidadSecundario,
-          precioRealPrincipal: dtoAplicado.precioRealPrincipal,
-          precioRealSecundario: dtoAplicado.precioRealSecundario,
+          idPromocion: idPromo,
+          idArticuloPrincipal: idPrincipal,
+          cantidadArticuloPrincipal: cantidadPrincipal,
+          idArticuloSecundario: idSecundario,
+          cantidadArticuloSecundario: cantidadSecundario,
+          precioRealArticuloPrincipal: dtoAplicado.precioRealPrincipal,
+          precioRealArticuloSecundario: dtoAplicado.precioRealSecundario,
           unidadesOferta: unidades,
           tipoPromo: "COMBO",
         },
-        esPromo: true,
-        seRegala: false,
+        regalo: false,
       });
     }
     return cesta;

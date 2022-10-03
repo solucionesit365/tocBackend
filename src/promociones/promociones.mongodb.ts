@@ -1,42 +1,31 @@
 import { InsertManyResult } from "mongodb";
 import { conexion } from "../conexion/mongodb";
+import { PromocionesInterface } from "./promociones.interface";
 
-export async function getPromociones(): Promise<any> {
+/* Eze 4.0 */
+export async function getPromociones(): Promise<PromocionesInterface[]> {
   const database = (await conexion).db("tocgame");
-  const promociones = database.collection("promociones");
-  const resultado = await (await promociones.find()).toArray();
-
-  return resultado;
+  const promociones = database.collection<PromocionesInterface>("promociones");
+  return await promociones.find().toArray();
 }
 
-export async function borrarPromociones() {
-  try {
-    const database = (await conexion).db("tocgame");
-    const promociones = database.collection("promociones");
-    const resultado = await promociones.drop();
-    return resultado;
-  } catch (err) {
-    if (err.codeName == "NamespaceNotFound") {
-      return true;
-    } else {
-      return false;
+/* Eze 4.0 */
+export async function borrarPromociones(): Promise<void> {
+  const database = (await conexion).db("tocgame");
+  const collectionList = await database.listCollections().toArray();
+  for (let i = 0; i < collectionList.length; i++) {
+    if (collectionList[i].name === "promociones")  {
+      const promociones = database.collection("promociones");
+      await promociones.drop();
+      break;
     }
   }
 }
 
-export async function insertarPromociones(arrayPromociones) {
-  if (await borrarPromociones()) {
-    const database = (await conexion).db("tocgame");
-    const promociones = database.collection("promociones");
-    const resultado = await promociones.insertMany(arrayPromociones);
-
-    return resultado;
-  } else {
-    const res: InsertManyResult<any> = {
-      acknowledged: false,
-      insertedCount: 0,
-      insertedIds: null,
-    };
-    return res;
-  }
+/* Eze 4.0 */
+export async function insertarPromociones(arrayPromociones): Promise<boolean> {
+  await borrarPromociones()
+  const database = (await conexion).db("tocgame");
+  const promociones = database.collection("promociones");
+  return (await promociones.insertMany(arrayPromociones)).acknowledged;
 }

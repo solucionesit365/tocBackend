@@ -26,7 +26,6 @@ export type ItemLista = {
   };
   tipoIva: TiposIva;
   precioConIva: number;
-  precioPesaje: number;
   gramos: number,
   regalo: boolean;
 };
