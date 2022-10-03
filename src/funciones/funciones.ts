@@ -9,7 +9,6 @@ export function construirObjetoIvas(
   precioConIva: number,
   tipoIva: TiposIva,
   unidades: number,
-  objetoIvaAnterior: DetalleIvaInterface
 ): DetalleIvaInterface {
   let base1 = 0,
     base2 = 0,
@@ -42,15 +41,15 @@ export function construirObjetoIvas(
   }
 
   return {
-    base1: redondearPrecio(base1 + objetoIvaAnterior.base1),
-    base2: redondearPrecio(base2 + objetoIvaAnterior.base2),
-    base3: redondearPrecio(base3 + objetoIvaAnterior.base3),
-    valorIva1: redondearPrecio(valor1 + objetoIvaAnterior.valorIva1),
-    valorIva2: redondearPrecio(valor2 + objetoIvaAnterior.valorIva2),
-    valorIva3: redondearPrecio(valor3 + objetoIvaAnterior.valorIva3),
-    importe1: redondearPrecio(importe1 + objetoIvaAnterior.importe1),
-    importe2: redondearPrecio(importe2 + objetoIvaAnterior.importe2),
-    importe3: redondearPrecio(importe3 + objetoIvaAnterior.importe3),
+    base1: redondearPrecio(base1),
+    base2: redondearPrecio(base2),
+    base3: redondearPrecio(base3),
+    valorIva1: redondearPrecio(valor1),
+    valorIva2: redondearPrecio(valor2),
+    valorIva3: redondearPrecio(valor3),
+    importe1: redondearPrecio(importe1),
+    importe2: redondearPrecio(importe2),
+    importe3: redondearPrecio(importe3),
   };
 }
 

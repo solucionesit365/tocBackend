@@ -30,7 +30,6 @@ export class PromocionesClase {
             gramos: null,
             nombre: articulo.nombre,
             precioConIva: articulo.precioConIva,
-            precioPesaje: null,
             promocion: null,
             regalo: false,
             subtotal: unidades * articulo.precioConIva,
@@ -54,7 +53,6 @@ export class PromocionesClase {
             gramos: null,
             nombre: articulo.nombre,
             precioConIva: articulo.precioConIva,
-            precioPesaje: null,
             promocion: null,
             regalo: false,
             subtotal: unidades * articulo.precioConIva,
@@ -327,7 +325,7 @@ export class PromocionesClase {
     return cesta;
   }
 
-  /* Inserta la línea de la oferta individual en la cesta */
+  /* Eze OK. NO 4.0. Inserta la línea de la oferta individual en la cesta */
   async insertarLineaPromoCestaIndividual(
     cesta: CestasInterface,
     tipoPromo: number,
@@ -348,30 +346,33 @@ export class PromocionesClase {
     if (tipoPromo === 2) {
       // INDIVIDUAL
       cesta.lista.push({
-        _id: -2,
+        idArticulo: -2,
         nombre: "Oferta individual",
         unidades: unidades,
         subtotal: total,
         promocion: {
-          _id: idPromo,
-          idPrincipal: idPrincipal,
-          cantidadPrincipal: cantidadPrincipal,
-          idSecundario: 0,
-          cantidadSecundario: 0,
-          precioRealPrincipal: dtoAplicado.precioRealPrincipal,
-          precioRealSecundario: 0,
+          idPromocion: idPromo,
+          idArticuloPrincipal: idPrincipal,
+          cantidadArticuloPrincipal: cantidadPrincipal,
+          idArticuloSecundario: 0,
+          cantidadArticuloSecundario: 0,
+          precioRealArticuloPrincipal: dtoAplicado.precioRealPrincipal,
+          precioRealArticuloSecundario: 0,
           unidadesOferta: unidades,
           tipoPromo: "INDIVIDUAL",
         },
-        esPromo: true,
-        seRegala: false,
+        regalo: false,
+        arraySuplementos: [],
+        gramos: null,
+        precioConIva: total/unidades,
+        tipoIva: null
       });
     }
 
     return cesta;
   }
 
-  /* Calcula el precio real que tienen los artículos de una promoción tipo combo. Se reparten en porcentaje */
+  /* Eze 4.0 .Calcula el precio real que tienen los artículos de una promoción tipo combo. Se reparten en porcentaje */
   async calcularPrecioRealCombo(
     tipoPromo: number,
     idPrincipal: number,
@@ -461,7 +462,7 @@ export class PromocionesClase {
     };
   }
 
-  /* Calcula el precio real que tienen los artículos de una promoción tipo individual. Se reparten dividido sus unidades */
+  /* Eze 4.0 . Calcula el precio real que tienen los artículos de una promoción tipo individual. Se reparten dividido sus unidades */
   async calcularPrecioRealIndividual(
     tipoPromo: number,
     idPrincipal: number,
@@ -499,58 +500,13 @@ export class PromocionesClase {
     };
   }
 
-  /* Inserta un array de promociones en la base de datos. Se utiliza al instalar una licencia o para actualizar teclado */
-  /* También renueva la variable privada de promociones */
-  insertarPromociones(
+  /* Eze 4.0 */
+  insertarPromociones = async (
     arrayPromociones: PromocionesInterface[]
-  ): Promise<boolean> {
-    if (arrayPromociones.length > 0) {
-      return schPromociones
-        .insertarPromociones(arrayPromociones)
-        .then((res) => {
-          if (res) {
-            this.promociones = arrayPromociones;
-          }
-          return res.acknowledged;
-        })
-        .catch((err) => {
-          console.log(err);
-          return false;
-        });
-    } else {
-      return this.devuelveTrue();
-    }
-  }
+  ) => await schPromociones.insertarPromociones(arrayPromociones);
 
-  async devuelveTrue() {
-    return true;
-  }
-
-  /* Petición de descarga de promociones. También renueva la variable privada de promociones (siempre se utiliza esta) */
-  descargarPromociones() {
-    return schPromociones
-      .getPromociones()
-      .then((arrayPromos: PromocionesInterface[]) => {
-        if (arrayPromos.length > 0) {
-          this.promociones = arrayPromos;
-          return this.insertarPromociones(arrayPromos)
-            .then((res) => {
-              return res;
-            })
-            .catch((err) => {
-              console.log(err);
-              return false;
-            });
-        } else {
-          this.promociones = [];
-          return true;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        return false;
-      });
-  }
+  /* Eze 4.0 */
+  getPromociones = async() => schPromociones.getPromociones();
 }
 
 export const promocionesInstance = new PromocionesClase();

@@ -23,7 +23,6 @@ import { PaytefController } from "./paytef/paytef.controller";
 import { VersionController } from "./version/version.controller";
 import { TestController } from "./test/test.controller";
 import { UtilesModule } from "./utiles/utiles.module";
-import { PromocionesController } from "./promociones/promociones.controller";
 import { DobleMenusController } from "./doble-menus/doble-menus.controller";
 import { TransaccionesController } from "./transacciones/transacciones.controller";
 import { ApagarController } from "./apagar/apagar.controller";
@@ -58,7 +57,6 @@ import { TarifasController } from './tarifas/tarifas.controller';
     PaytefController,
     VersionController,
     TestController,
-    PromocionesController,
     DobleMenusController,
     TransaccionesController,
     DoctorController,
