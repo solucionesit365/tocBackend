@@ -51,13 +51,13 @@ export async function guardarMonedas(
   tipo: TiposInfoMoneda
 ): Promise<boolean> {
   const database = (await conexion).db("tocgame");
-  const caja = database.collection<MonedasInterface>("infoMonedas");
-  const resultado = await caja.updateOne(
+  const infoMonedas = database.collection<MonedasInterface>("infoMonedas");
+  const resultado = await infoMonedas.updateOne(
     { _id: tipo },
     { $set: { array: arrayMonedas } },
     { upsert: true }
   );
-  return resultado.acknowledged && resultado.modifiedCount > 0;
+  return resultado.acknowledged;
 }
 
 /* Eze 4.0 */
@@ -72,8 +72,8 @@ export async function getMonedas(
   tipo: TiposInfoMoneda
 ): Promise<MonedasInterface> {
   const database = (await conexion).db("tocgame");
-  const caja = database.collection<MonedasInterface>("infoMonedas");
-  return await caja.findOne({ _id: tipo });
+  const infoMonedas = database.collection<MonedasInterface>("infoMonedas");
+  return await infoMonedas.findOne({ _id: tipo });
 }
 
 /* Eze 4.0 */

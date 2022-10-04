@@ -29,7 +29,7 @@ export class CajaController {
   async abrirCaja(@Body() { total, detalle, idDependienta }) {
     try {
       if (total != undefined && detalle != undefined)
-        return await cajaInstance.abrirCaja(detalle, total, idDependienta);
+        return await cajaInstance.abrirCaja({ detalleApertura: detalle, idDependientaApertura: idDependienta, inicioTime: Date.now(), totalApertura: total });
       throw Error("Error abrirCaja > Faltan datos o son incorrectos");
     } catch (err) {
       console.log(err);

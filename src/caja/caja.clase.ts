@@ -34,19 +34,9 @@ export class CajaClase {
 
   /* Eze 4.0 */
   async abrirCaja(
-    detalleApertura: CajaAbiertaInterface["detalleApertura"],
-    totalApertura: CajaAbiertaInterface["totalApertura"],
-    idDependienta: CajaAbiertaInterface["idDependientaApertura"]
+    cajaAbierta: CajaAbiertaInterface
   ): Promise<boolean> {
-    if (detalleApertura && totalApertura) {
-      const cajaNueva: CajaAbiertaInterface = {
-        inicioTime: Date.now(),
-        detalleApertura: detalleApertura,
-        totalApertura: totalApertura,
-        idDependientaApertura: idDependienta,
-      };
-      return await schCajas.setInfoCaja(cajaNueva);
-    }
+    if (cajaAbierta.detalleApertura && cajaAbierta.totalApertura) return await schCajas.setInfoCaja(cajaAbierta);
     throw Error("Error precondiciones abrirCaja > caja.clase.ts");
   }
 
@@ -62,10 +52,11 @@ export class CajaClase {
   /* Eze 4.0 */
   nuevoItemSincroCajas(
     cajaAbierta: CajaAbiertaInterface,
-    cajaCerrada: CajaCerradaInterface
+    cajaCerrada: CajaCerradaInterface,
+    nuevoId: ObjectId
   ) {
     const cajaInsertar: CajaSincro = {
-      _id: new ObjectId(),
+      _id: nuevoId,
       ...cajaAbierta,
       ...cajaCerrada,
       enviado: false,
@@ -105,7 +96,7 @@ export class CajaClase {
         ))
       )
         throw Error("No se ha podido crear el movimiento 3G");
-      if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual))
+      if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual, new ObjectId()))
         if (await schMonedas.setMonedas(guardarInfoMonedas))
           return await this.resetCajaAbierta();
 
