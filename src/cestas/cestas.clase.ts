@@ -9,44 +9,17 @@ import {
   fusionarObjetosDetalleIva,
 } from "../funciones/funciones";
 import { articulosInstance } from "../articulos/articulos.clase";
-
 import { cajaInstance } from "../caja/caja.clase";
-import { impresoraInstance } from "../impresora/impresora.class";
-import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ClientesInterface } from "../clientes/clientes.interface";
-import { promocionesInstance } from "src/promociones/promociones.clase";
+import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
+import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 
 /* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
   /* Eze 4.0 */
-  getCestaById = (idCesta: CestasInterface["_id"]) =>
-    schCestas.getCestaById(idCesta);
-
-  /* Eze 4.0 */
-  async resetCesta(idCesta: CestasInterface["_id"]): Promise<boolean> {
-    let cesta = await this.getCestaById(idCesta);
-    if (cesta) {
-      cesta = {
-        _id: cesta._id,
-        detalleIva: {
-          base1: 0,
-          base2: 0,
-          base3: 0,
-          importe1: 0,
-          importe2: 0,
-          importe3: 0,
-          valorIva1: 0,
-          valorIva2: 0,
-          valorIva3: 0,
-        },
-        lista: [],
-        modo: "VENTA",
-      };
-      return schCestas.updateCesta(cesta);
-    }
-    return false;
-  }
+  getCestaById = async (idCesta: CestasInterface["_id"]) =>
+    await schCestas.getCestaById(idCesta);
 
   /* Eze 4.0 */
   generarObjetoCesta(nuevoId: CestasInterface["_id"]): CestasInterface {
@@ -65,43 +38,42 @@ export class CestaClase {
       },
       lista: [],
       modo: "VENTA",
+      idCliente: null,
     };
   }
 
   /* Eze 4.0 */
-  getAllCestas = () => schCestas.getAllCestas();
+  getAllCestas = async () => await schCestas.getAllCestas();
 
   /* Eze 4.0 */
-  deleteCesta = (idCesta: CestasInterface["_id"]) =>
-    schCestas.deleteCesta(idCesta);
+  deleteCesta = async (idCesta: CestasInterface["_id"]) =>
+    await schCestas.deleteCesta(idCesta);
 
   /* Eze 4.0 */
-  async crearCesta() {
+  async crearCesta(idTrabajador: TrabajadoresInterface["_id"]) {
     const nuevaCesta = this.generarObjetoCesta(Date.now());
-    if (await schCestas.createCesta(nuevaCesta)) return nuevaCesta._id;
+    if (await schCestas.createCesta(nuevaCesta))
+      return await trabajadoresInstance.setIdCesta(
+        idTrabajador,
+        nuevaCesta._id
+      );
 
-    return false;
+    throw Error("Error, no se ha podido crear la cesta");
   }
 
   /* Eze 4.0 */
-  async borrarItemAndDevolverCesta(
-    idCesta: number,
-    idArticulo: number,
-    idCliente: ClientesInterface["id"]
-  ): Promise<CestasInterface> {
+  async borrarItemCesta(idCesta: number, index: number): Promise<boolean> {
     try {
       let cesta = await this.getCestaById(idCesta);
 
-      for (let i = 0; i < cesta.lista.length; i++) {
-        if (cesta.lista[i].idArticulo == idArticulo) {
-          cesta.lista.splice(i, 1);
-          break;
-        }
-      }
-      return await this.recalcularIvas(cesta, idCliente);
+      cesta.lista.splice(index, 1);
+
+      // Enviar por socket
+      await this.recalcularIvas(cesta);
+      return true;
     } catch (err) {
       console.log(err);
-      return null;
+      return false;
     }
   }
 
@@ -231,6 +203,7 @@ export class CestaClase {
       importe2: 0,
       importe3: 0,
     };
+
     if (itemPromocion.promocion.tipoPromo === "INDIVIDUAL") {
       const articulo = await articulosInstance.getInfoArticulo(
         itemPromocion.promocion.idArticuloPrincipal
@@ -282,10 +255,7 @@ export class CestaClase {
   }
 
   /* Eze 4.0 */
-  async recalcularIvas(
-    cesta: CestasInterface,
-    idCliente: ClientesInterface["id"]
-  ): Promise<CestasInterface> {
+  async recalcularIvas(cesta: CestasInterface): Promise<CestasInterface> {
     cesta.detalleIva = {
       base1: 0,
       base2: 0,
@@ -305,7 +275,7 @@ export class CestaClase {
             cesta.detalleIva,
             await this.getDetalleIvaSuplementos(
               cesta.lista[i].arraySuplementos,
-              idCliente
+              cesta.idCliente
             )
           );
         }
@@ -322,7 +292,7 @@ export class CestaClase {
           );
           articulo = await articulosInstance.getPrecioConTarifa(
             articulo,
-            idCliente
+            cesta.idCliente
           );
 
           const auxDetalleIva = construirObjetoIvas(
@@ -381,48 +351,25 @@ export class CestaClase {
   }
 
   /* Eze 4.0 */
-  async addSuplemento(
+  async addSuplementos(
     idCesta: CestasInterface["_id"],
-    idArticuloSuplemento: ArticulosInterface["_id"],
+    arraySuplementos: ItemLista["arraySuplementos"],
     indexCesta: number
   ) {
     const cesta = await this.getCestaById(idCesta);
-    cesta.lista[indexCesta].arraySuplementos.push(idArticuloSuplemento);
+    cesta.lista[indexCesta].arraySuplementos = arraySuplementos;
     return await this.updateCesta(cesta);
-  }
-
-  async modificarSuplementos(cestaId, idArticulo, posArticulo) {
-    const cestaActual = await this.getCesta(cestaId);
-    // const indexArticulo = cestaActual.lista.findIndex(i => i._id === idArticulo);
-    cestaActual.lista = cestaActual.lista.reverse();
-    const indexArticulo = posArticulo;
-    const suplementos = cestaActual.lista[indexArticulo].suplementosId;
-    const infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-    const suplementosArticulo = await articulosInstance.getSuplementos(
-      infoArticulo.suplementos
-    );
-    cestaActual.lista[indexArticulo].nombre =
-      cestaActual.lista[indexArticulo].nombre.split("+")[0];
-    cestaActual.lista[indexArticulo].suplementosId = [];
-    for (let i = 0; i < suplementos.length; i++) {
-      const dataArticulo = await articulosInstance.getInfoArticulo(
-        suplementos[i]
-      );
-      cestaActual.lista[indexArticulo].subtotal -= dataArticulo.precioConIva;
-    }
-    cestaActual.lista = cestaActual.lista.reverse();
-    this.setCesta(cestaActual);
-    const res = {
-      suplementos: suplementosArticulo.length > 0 ? true : false,
-      suplementosData: suplementosArticulo,
-      suplementosSeleccionados: suplementos,
-    };
-    return res;
   }
 
   /* Eze 4.0 */
   updateCesta = async (cesta: CestasInterface) =>
     await schCestas.updateCesta(cesta);
+
+  /* */
+  async regalarItem(idCesta: CestasInterface["_id"], index: number) {
+    // El único problema será regalar un ítem que tenga más de una unidad.
+    return true;
+  }
 }
 
 export const cestasInstance = new CestaClase();

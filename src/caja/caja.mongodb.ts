@@ -110,15 +110,15 @@ export async function nuevoItemSincroCajas(caja: CajaSincro): Promise<boolean> {
 
 /* Eze 4.0 */
 export async function confirmarCajaEnviada(
-  caja: CajaSincro
+  idCaja: CajaSincro["_id"]
 ): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const sincroCajas = database.collection("sincro-cajas");
   const resultado = await sincroCajas.updateOne(
-    { _id: caja._id },
+    { _id: idCaja },
     {
       $set: {
-        enviado: caja.enviado,
+        enviado: true,
       },
     }
   );

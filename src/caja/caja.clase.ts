@@ -27,7 +27,7 @@ export class CajaClase {
   }
 
   /* Eze 4.0 */
-  confirmarCajaEnviada = async (caja: CajaSincro) => await schCajas.confirmarCajaEnviada(caja);
+  confirmarCajaEnviada = async (idCaja: CajaSincro["_id"]) => await schCajas.confirmarCajaEnviada(idCaja);
 
   /* Eze 4.0 */
   getCajaSincroMasAntigua = async () => await schCajas.getCajaSincroMasAntigua();

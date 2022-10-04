@@ -1,10 +1,12 @@
-import { TiposIva } from "../articulos/articulos.interface";
+import { ClientesInterface } from "../clientes/clientes.interface";
+import { ArticulosInterface, TiposIva } from "../articulos/articulos.interface";
 
 export interface CestasInterface {
   _id: number;
   detalleIva: DetalleIvaInterface,
   lista: ItemLista[],
-  modo: ModoCesta
+  modo: ModoCesta,
+  idCliente: ClientesInterface["id"]
 }
 
 export type ItemLista = {
@@ -12,7 +14,7 @@ export type ItemLista = {
   nombre: string;
   unidades: number;
   subtotal: number;
-  arraySuplementos: number[];
+  arraySuplementos: ArticulosInterface["_id"][];
   promocion: {
     idPromocion: string;
     idArticuloPrincipal: number;

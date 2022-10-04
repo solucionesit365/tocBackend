@@ -4,250 +4,180 @@ import {
   SincroFichajesInterface,
   TrabajadoresInterface,
 } from "./trabajadores.interface";
+import { CestasInterface } from "../cestas/cestas.interface";
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function limpiezaFichajes(): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const fichajes = database.collection("sincro-fichajes");
-    return (
-      await fichajes.deleteMany({
-        enviado: true,
-        _id: { $lte: UtilesModule.restarDiasTimestamp(Date.now()) },
-      })
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  const database = (await conexion).db("tocgame");
+  const fichajes = database.collection("sincro-fichajes");
+  return (
+    await fichajes.deleteMany({
+      enviado: true,
+      _id: { $lte: UtilesModule.restarDiasTimestamp(Date.now()) },
+    })
+  ).acknowledged;
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function buscar(
   busqueda: string
 ): Promise<TrabajadoresInterface[]> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return (await trabajadores
-      .find(
-        {
-          $or: [
-            { nombre: { $regex: new RegExp(busqueda, "i") } },
-            { nombreCorto: { $regex: new RegExp(busqueda, "i") } },
-          ],
-        },
-        { limit: 4 }
-      )
-      .toArray()) as TrabajadoresInterface[];
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+  return (await trabajadores
+    .find(
+      {
+        $or: [
+          { nombre: { $regex: new RegExp(busqueda, "i") } },
+          { nombreCorto: { $regex: new RegExp(busqueda, "i") } },
+        ],
+      },
+      { limit: 4 }
+    )
+    .toArray());
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function getTrabajador(
   idTrabajador: number
 ): Promise<TrabajadoresInterface> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return (await trabajadores.findOne({
-      _id: idTrabajador,
-    })) as TrabajadoresInterface;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+  return (await trabajadores.findOne({
+    _id: idTrabajador,
+    }));
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function getTrabajadoresFichados(): Promise<
   TrabajadoresInterface[]
 > {
-  try {
     const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
+    const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
     return (await trabajadores
       .find({ fichado: true })
-      .toArray()) as TrabajadoresInterface[];
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
+      .toArray());
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function ficharTrabajador(
   idTrabajador: number,
   idCesta: number
 ): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return (
-      await trabajadores.updateOne(
-        { _id: idTrabajador },
-        { $set: { fichado: true, idCesta } }
-      )
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection("trabajadores");
+  return (
+    await trabajadores.updateOne(
+      { _id: idTrabajador },
+      { $set: { fichado: true, idCesta } }
+    )
+  ).acknowledged;
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function desficharTrabajador(
   idTrabajador: number
 ): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return (
-      await trabajadores.updateOne(
-        { _id: idTrabajador },
-        { $set: { fichado: false } }
-      )
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection("trabajadores");
+  return (
+    await trabajadores.updateOne(
+      { _id: idTrabajador },
+      { $set: { fichado: false } }
+    )
+  ).acknowledged;
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function inicioDescanso(idTrabajador: number): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return (
-      await trabajadores.updateOne(
-        { _id: idTrabajador },
-        { $set: { fichado: false, descansando: true } }
-      )
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection("trabajadores");
+  return (
+    await trabajadores.updateOne(
+      { _id: idTrabajador },
+      { $set: { fichado: false, descansando: true } }
+    )
+  ).acknowledged;
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function finalDescanso(idTrabajador: number): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return (
-      await trabajadores.updateOne(
-        { _id: idTrabajador },
-        { $set: { fichado: true, descansando: false } }
-      )
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection("trabajadores");
+  return (
+    await trabajadores.updateOne(
+      { _id: idTrabajador },
+      { $set: { fichado: true, descansando: false } }
+    )
+  ).acknowledged;
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function insertNuevoFichaje(data): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const sincrofichajes = database.collection("sincro-fichajes");
-    const resultado = (await sincrofichajes.insertOne(data)).acknowledged;
-    return resultado;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  const database = (await conexion).db("tocgame");
+  const sincrofichajes = database.collection("sincro-fichajes");
+  return (await sincrofichajes.insertOne(data)).acknowledged;
 }
 
-/* Eze v23 */
+/* Eze 4.0 */
 export async function buscarTrabajadoresFichados() {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    const resultado = (await (
-      await trabajadores.find({ fichado: true })
-    ).toArray()) as TrabajadoresInterface[];
-
-    return resultado;
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+  return await trabajadores.find({ fichado: true }).toArray();
 }
 
-/* Eze v23 */
-export async function borrarTrabajadores() {
-  try {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection("trabajadores");
-    return await trabajadores.drop();
-  } catch (err) {
-    if (err.codeName == "NamespaceNotFound") return true;
-
-    return false;
-  }
-}
-
-/* Eze v23 */
-export async function insertarTrabajadores(
-  arrayTrabajadores
-): Promise<boolean> {
-  try {
-    if (await borrarTrabajadores()) {
-      const database = (await conexion).db("tocgame");
-      const trabajadores = database.collection("trabajadores");
-      const resultado = (await trabajadores.insertMany(arrayTrabajadores))
-        .acknowledged;
-      return resultado;
-    } else {
-      throw Error("No se ha podido borrar la lista de trabajadores");
+/* Eze 4.0 */
+export async function borrarTrabajadores(): Promise<void> {
+  const database = (await conexion).db("tocgame");
+  const collectionList = await database.listCollections().toArray();
+  for (let i = 0; i < collectionList.length; i++) {
+    if (collectionList[i].name === "trabajadores") {
+      await database.collection("trabajadores").drop();
+      break;
     }
-  } catch (err) {
-    console.log(err);
-    return false;
   }
 }
 
-/* Eze v23 */
-export async function getFichajeMasAntiguo(): Promise<SincroFichajesInterface> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const sincroFichajes = database.collection("sincro-fichajes");
-    const resultado = (await sincroFichajes.findOne(
-      { enviado: false },
-      { sort: { _id: 1 } }
-    )) as SincroFichajesInterface;
-    return resultado;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-}
-
-/* Eze v23 */
-export async function actualizarEstadoFichaje(
-  fichaje: SincroFichajesInterface
+/* Eze 4.0 */
+export async function insertarTrabajadores(
+  arrayTrabajadores: TrabajadoresInterface[]
 ): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const sincroFichajes = database.collection("sincro-fichajes");
-    return (
-      await sincroFichajes.updateOne(
-        { _id: fichaje._id },
-        {
-          $set: {
-            enviado: fichaje.enviado,
-          },
-        }
-      )
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
+  await borrarTrabajadores();
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+  return (await trabajadores.insertMany(arrayTrabajadores)).acknowledged;
+}
+
+/* Eze 4.0 */
+export async function getFichajeMasAntiguo(): Promise<SincroFichajesInterface> {
+  const database = (await conexion).db("tocgame");
+  const sincroFichajes = database.collection<SincroFichajesInterface>("sincro-fichajes");
+  return (await sincroFichajes.findOne(
+    { enviado: false },
+    { sort: { _id: 1 } }
+  ));
+}
+
+/* Eze 4.0 */
+export async function actualizarEstadoFichaje(fichaje: SincroFichajesInterface): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const sincroFichajes = database.collection("sincro-fichajes");
+  return (await sincroFichajes.updateOne(
+      { _id: fichaje._id },
+      {
+        $set: {
+          enviado: fichaje.enviado,
+        },
+      }
+    )
+  ).acknowledged;
+}
+
+/* Eze 4.0 */
+export async function setIdCestaTrabajador(idTrabajador: TrabajadoresInterface["_id"], idCesta: CestasInterface["_id"]): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+  return (await trabajadores.updateOne({ _id: idTrabajador }, { $set: {
+    "idCesta": idCesta
+  } })).acknowledged;
 }

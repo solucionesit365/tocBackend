@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get } from "@nestjs/common";
+import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
 // import { Console } from "console";
 import { UtilesModule } from "../utiles/utiles.module";
 // import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
@@ -6,38 +7,80 @@ import { cestasInstance } from "./cestas.clase";
 
 @Controller("cestas")
 export class CestasController {
+  /* Eze 4.0 */
   @Post("borrarCesta")
-  borrarCesta(@Body() params) {
+  async borrarCesta(@Body() { idCesta }) {
+    try {
+      if (idCesta) return await cestasInstance.borrarArticulosCesta(idCesta);
 
+      throw Error("Error, faltan datos en borrarCesta controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
+  /* Eze 4.0 */
   @Post("borrarItemCesta")
-  borrarItemCesta(@Body() params) {
-
+  async borrarItemCesta(@Body() { idCesta, index }) {
+    try {
+      if (index && idCesta) return await cestasInstance.borrarItemCesta(idCesta, index)
+      throw Error("Error, faltan datos en borrarItemCesta controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
-
+  /* Eze 4.0  (probablemente no se usará porque irá por socket)*/
   @Post("getCestaById")
-  getCestaByID(@Body() params) {
+  async getCestaByID(@Body() { idCesta }) {
+    try {
+      if (idCesta) return await cestasInstance.getCestaById(idCesta);
 
+      throw Error("Error, faltan datos en getCestaById() controller");
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
-
+  /* Eze 4.0 */
   @Post("crearCesta")
-  crearCesta(@Body() params) {
-
+  async crearCesta(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) return await cestasInstance.crearCesta(idTrabajador);
+      throw Error("Error, faltan datos en crearCesta controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
+  /* Eze 4.0 */
   @Post("cambiarCestaTrabajador")
-  cambiarCestaTrabajador(@Body() params) {
-
+  async cambiarCestaTrabajador(@Body() { idTrabajador, idCesta }) {
+    try {
+      if (idCesta && idTrabajador) return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
+      throw Error("Error, faltan datos en cambiarCestaTrabajador controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
+  /* Eze 4.0 => Tampoco creo que se utilice con el método de los sockets */
   @Get("getCestas")
-  getCestas() {
-  
+  async getCestas() {
+    try {
+      return await cestasInstance.getAllCestas();
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
+  /* Eze 4.0 */
   @Post("clickTeclaArticulo")
   async clickTeclaArticulo(@Body() { idArticulo, aPeso, gramos, idCesta, unidades, idCliente, arraySuplementos }) {
     try {
@@ -51,8 +94,15 @@ export class CestasController {
     }
   }
 
+  /* Eze 4.0 */
   @Post("regalarProducto")
-  regalarProducto(@Body() params) {
-
+  async regalarProducto(@Body() { idCesta, index}) {
+    try {
+      if (idCesta && index) return await cestasInstance.regalarItem(idCesta, index);
+      throw Error("Error, faltan datos en regalarProducto controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 }
