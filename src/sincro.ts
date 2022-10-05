@@ -23,13 +23,11 @@ async function sincronizarTickets(continuar: boolean = false) {
       if (parametros != null) {
         const ticket = await ticketsInstance.getTicketMasAntiguo();
         if (ticket) {
-          if (!Boolean(ticket.bloqueado) === true) {
-            emitSocket("sincroTicketsNueva", {
-              parametros,
-              arrayTickets: ticket,
-            });
-            return true;
-          }
+          emitSocket("sincroTicketsNueva", {
+            parametros,
+            arrayTickets: ticket,
+          });
+          return true;
         }
       } else {
         console.log("No hay parámetros definidos en la BBDD");

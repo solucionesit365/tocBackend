@@ -1,3 +1,4 @@
+import { UtilesModule } from "../utiles/utiles.module";
 import { conexion } from "../conexion/mongodb";
 import {
   CajaAbiertaInterface,
@@ -27,22 +28,22 @@ export async function resetCajaAbierta(): Promise<boolean> {
   })).acknowledged;
 }
 
-// /* Eze v23 */
-// export async function limpiezaCajas(): Promise<boolean> {
-//   try {
-//     const database = (await conexion).db("tocgame");
-//     const sincroCajas = database.collection("sincro-cajas");
-//     return (
-//       await sincroCajas.deleteMany({
-//         enviado: true,
-//         _id: { $lte: UtilesModule.restarDiasTimestamp(Date.now()) },
-//       })
-//     ).acknowledged;
-//   } catch (err) {
-//     console.log(err);
-//     return false;
-//   }
-// }
+/* Eze 4.0 - Excepción */
+export async function limpiezaCajas(): Promise<boolean> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const sincroCajas = database.collection("sincro-cajas");
+    return (
+      await sincroCajas.deleteMany({
+        enviado: true,
+        _id: { $lte: UtilesModule.restarDiasTimestamp(Date.now()) },
+      })
+    ).acknowledged;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+}
 
 
 /* Eze 4.0 */
