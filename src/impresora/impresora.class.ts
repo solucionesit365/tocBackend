@@ -9,8 +9,9 @@ import {Dispositivos} from '../dispositivos';
 import {devolucionesInstance} from 'src/devoluciones/devoluciones.clase';
 import axios from 'axios';
 import { cajaInstance } from "../caja/caja.clase";
-import { CajaForSincroInterface } from "../caja/caja.interface";
+import { CajaSincro } from "../caja/caja.interface";
 import { movimientosInstance } from '../movimientos/movimientos.clase';
+import { TicketsInterface } from '../tickets/tickets.interface';
 
 
 const dispositivos = new Dispositivos();
@@ -109,14 +110,15 @@ export class Impresora {
 
   async imprimirUltimoCierre(): Promise<void> {
     try {
-      const ultimoCierre: CajaForSincroInterface = await cajaInstance.getUltimoCierre();
-      const nombreTrabajador = (await trabajadoresInstance.getTrabajadorById(ultimoCierre.idDependienta)).nombreCorto;
+      const ultimoCierre: CajaSincro = await cajaInstance.getUltimoCierre();
+      const nombreTrabajadorApertura = (await trabajadoresInstance.getTrabajadorById(ultimoCierre.idDependientaApertura)).nombreCorto;
+      const nombreTrabajadorCierre = (await trabajadoresInstance.getTrabajadorById(ultimoCierre.idDependientaCierre)).nombreCorto;
       const arrayMovimientos = await movimientosInstance.getMovimientosIntervalo(ultimoCierre.inicioTime, ultimoCierre.finalTime);
       const parametros = await parametrosInstance.getParametros();
 
       this.imprimirCaja(
         ultimoCierre.calaixFetZ,
-        nombreTrabajador,
+        nombreTrabajadorApertura,
         ultimoCierre.descuadre,
         ultimoCierre.nClientes,
         ultimoCierre.recaudado,
@@ -164,14 +166,12 @@ export class Impresora {
       // errorImpresora(err, event);
     }
   }
-  async imprimirTicket(idTicket: number, esDevolucion = false) {
+  async imprimirTicket(idTicket: TicketsInterface["_id"], esDevolucion = false) {
     const paramsTicket = await paramsTicketInstance.getParamsTicket();
     // const infoTicket: TicketsInterface = await ticketsInstance.getTicketByID(idTicket);
     let infoTicket;
     if (!esDevolucion) {
       infoTicket = await ticketsInstance.getTicketByID(idTicket);
-    } else {
-      infoTicket = await devolucionesInstance.getDevolucionByID(idTicket);
     }
     // console.log(infoTicket)
     const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajadorById(infoTicket.idTrabajador);

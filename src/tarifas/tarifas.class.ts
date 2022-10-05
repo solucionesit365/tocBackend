@@ -2,6 +2,7 @@ import { TarifaInterface } from "./tarifas.interface";
 import * as schTarifas from "./tarifas.mongodb";
 import axios from "axios";
 import { parametrosInstance } from "../parametros/parametros.clase";
+import { ClientesInterface } from "../clientes/clientes.interface";
 
 export class TarifasClass {
   /* Eze 4.0 */
@@ -27,6 +28,9 @@ export class TarifasClass {
     const arrayTarifas = await this.descargarTarifasEspeciales();
     return await this.guardarTarifasEspeciales(arrayTarifas);
   }
+
+  /* Eze 4.0 */
+  clienteTieneTarifa = async (idCliente: ClientesInterface["id"]) => await schTarifas.tieneTarifaEspecial(idCliente);
 }
 
 export const tarifasInstance = new TarifasClass();

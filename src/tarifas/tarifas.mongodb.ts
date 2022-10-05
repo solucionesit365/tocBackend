@@ -28,3 +28,10 @@ export async function borrarTarifas(): Promise<void> {
     }
   }
 }
+
+/* Eze 4.0 */
+export async function tieneTarifaEspecial(idCliente: ClientesInterface["id"]): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const tarifas = database.collection<TarifaInterface>("tarifas");
+  return (await tarifas.findOne({ idClienteFinal: idCliente })) ? (true) : (false);
+}

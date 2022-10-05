@@ -4,7 +4,7 @@ import {movimientosInstance} from '../movimientos/movimientos.clase';
 import {parametrosInstance} from 'src/parametros/parametros.clase';
 import {trabajadoresInstance} from 'src/trabajadores/trabajadores.clase';
 import {ticketsInstance} from 'src/tickets/tickets.clase';
-import {cestas} from 'src/cestas/cestas.clase';
+import {cestasInstance} from 'src/cestas/cestas.clase';
 import {TicketsInterface} from 'src/tickets/tickets.interface';
 import {CestasInterface} from 'src/cestas/cestas.interface';
 import {transaccionesInstance} from 'src/transacciones/transacciones.class';
@@ -25,58 +25,13 @@ function limpiarNombreTienda(cadena: string) {
 }
 
 class PaytefClass {
-  getTotal(cesta: CestasInterface): number {
-    let total = 0;
-    cesta.lista.forEach((itemLista) => {
-      total += itemLista.subtotal;
-    });
-    return total;
-  }
-
   /* Parámetros de entrada OK */
-  async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number, idTrabajador: number): Promise<void> {
+  async iniciarTransaccion(client: Socket, idCliente: string, idCesta:number, idTrabajador: number, idTicket: TicketsInterface["_id"], total: number): Promise<void> {
     try {
-      if (idTrabajador != null) {
-        const cesta = await cestas.getCestaByID(idCesta);
-        if (cesta != null) {
-          const total = this.getTotal(cesta);
-          if (cesta.lista.length > 0 && total > 0) {
-            const nuevoTicket = ticketsInstance.generarObjetoTicket((await ticketsInstance.getUltimoTicket())+1, total, cesta, "TARJETA", idTrabajador, idCliente);
-            nuevoTicket.bloqueado = true;
-            const resCierreTicket = await paytefInstance.cerrarTicket(nuevoTicket);
-            if (resCierreTicket.error === false) { // Ticket creado
-              this.iniciarDatafono(resCierreTicket.info, total, client, cesta._id, idTrabajador);
-            } else {
-              throw Error(resCierreTicket.mensaje);
-            }
-          } else {
-            throw Error("Lista vacía o total a 0€");
-          }
-        } else {
-          throw Error("No existe la cesta del trabajador activo");
-        }
-      } else {
-        throw Error("No existe el trabajador activo");
-      }
+      this.iniciarDatafono(idTicket, total, client, cesta._id, idTrabajador);
     } catch (err) {
       this.cancelarOperacion();
       client.emit('consultaPaytef', {error: true, mensaje: err.message});
-    }
-  }
-
-  async cerrarTicket(nuevoTicket: TicketsInterface): Promise<Respuesta> {
-    if (await ticketsInstance.insertarTicket(nuevoTicket)) {
-      if (await cestas.borrarCestaActiva()) { // Repasar esto porque no es la activa, sino una en concreto por id
-        if (await parametrosInstance.setUltimoTicket(nuevoTicket._id)) {
-          return {error: false, info: nuevoTicket._id};
-        } else {
-          return {error: true, mensaje: 'Error no se ha podido cambiar el último id ticket'};
-        }
-      } else {
-        return {error: true, mensaje: 'Error, no se ha podido borrar la cesta'};
-      }
-    } else {
-      return { error: true, mensaje: "Error, no se ha podido insertar el nuevo ticket" };
     }
   }
 
@@ -98,7 +53,7 @@ class PaytefClass {
     });
   }
 
-  async iniciarDatafono(idTicket: number, total: number, client: Socket, idCesta: number, idTrabajador: number) {
+  async iniciarDatafono(idTicket: number, total: number, client: Socket, idTrabajador: number) {
     const params = await parametrosInstance.getParametros();
     if (UtilesModule.checkVariable(params.ipTefpay)) {
       axios.post(`http://${params.ipTefpay}:8887/transaction/start`, {
@@ -116,7 +71,7 @@ class PaytefClass {
       }).then((respuestaPaytef: any) => {
         if (respuestaPaytef.data.info.started) {
           // Arranca el ciclo de comprobaciones
-          this.consultarEstadoOperacion(client, idTicket, total, idCesta, idTrabajador);
+          this.consultarEstadoOperacion(client, idTicket, total, idTrabajador);
         } else {
           throw Error("La operación no ha podido iniciar");
         }
@@ -138,7 +93,7 @@ class PaytefClass {
   }
 
   /* Función recursiva y asíncrona */
-  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number, idCesta: number, idTrabajador: number): Promise<void> {
+  async consultarEstadoOperacion(client: Socket, idTicket: number, total: number, idTrabajador: number): Promise<void> {
     try {
       const ipDatafono = (await parametrosInstance.getParametros()).ipTefpay;
       const resEstadoPaytef: any = await axios.post(`http://${ipDatafono}:8887/transaction/poll`, {
@@ -149,9 +104,9 @@ class PaytefClass {
       if (UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
         if (Number(resEstadoPaytef.data.result.transactionReference) == idTicket) {
           if (resEstadoPaytef.data.result.approved) {
-            ticketsInstance.desbloquearTicket(idTicket);
+            // ticketsInstance.desbloquearTicket(idTicket);
             movimientosInstance.nuevaSalida(total, 'Targeta', 'TARJETA', false, idTicket, idTrabajador);
-            await cestas.borrarCesta(idCesta);
+            // await cestasInstance.borrarCesta(idCesta);
             client.emit('consultaPaytef', { // Operación aprobada. Todo OK
               error: false,
             });

@@ -1,113 +1,68 @@
-import {Controller, Post, Body} from '@nestjs/common';
-import axios from 'axios';
-import {UtilesModule} from 'src/utiles/utiles.module';
-import {articulosInstance} from '../articulos/articulos.clase';
-import {parametrosInstance} from '../parametros/parametros.clase';
-import {clienteInstance} from './clientes.clase';
+import { Controller, Post, Body } from "@nestjs/common";
+import axios from "axios";
+import { parametrosInstance } from "../parametros/parametros.clase";
+import { clienteInstance } from "./clientes.clase";
+import { ClientesInterface } from "./clientes.interface";
 
-@Controller('clientes')
+@Controller("clientes")
 export class ClientesController {
-    @Post('buscar')
-  buscarCliente(@Body() params) {
-    return clienteInstance.buscar(params.busqueda);
+  /* Eze 4.0 */
+  @Post("buscar")
+  async buscarCliente(@Body() { busqueda }) {
+    try {
+      if (busqueda) return await clienteInstance.buscar(busqueda);
+      throw Error("Error, faltan datos en buscarCliente() controller");
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
-    @Post('getClienteByID')
-    getClienteByID(@Body() params) {
-      if (params.idCliente != undefined) {
-        return clienteInstance.getClienteByID(params.idCliente).then((res) => {
-          if (res != null) {
-            return {error: false, infoCliente: res};
-          } else {
-            return {error: true, mensaje: 'Error. Este cliente no existe en la BBDD'};
-          }
-        }).catch((err) => {
-          console.log(err);
-          return {error: true, mensaje: 'Error en getClienteByID'};
-        });
-      } else {
-        return {error: true, mensaje: 'Error, faltan datos'};
-      }
-      return clienteInstance.buscar(params.busqueda);
+  /* Eze 4.0 */
+  @Post("getClienteByID")
+  async getClienteByID(@Body() { idCliente }) {
+    try {
+      if (idCliente) return await clienteInstance.getClienteByID(idCliente);
+      throw Error("Error, faltan datos en getClienteByID");
+    } catch (err) {
+      console.log(err);
+      return null;
     }
+  }
 
-    @Post('comprobarVIP')
-    async comprobarVIP(@Body() params) {
+  /* Eze 4.0 */
+  @Post("descargarClientesFinales")
+  async descargarClientesFinales() {
+    try {
       const parametros = await parametrosInstance.getParametros();
-      return axios.post('clientes/comprobarVIP', {database: parametros.database, idClienteFinal: params.idClienteFinal}).then((res: any) => {
-        if (res.data.error === false) { // No hay error
-          if (res.data.articulosEspeciales != undefined) { // Tiene tarifa especial
-            /* Añadir articulosTarifaEspecial a Mongo */
-            articulosInstance.setEstadoTarifaEspecial(true);
-            clienteInstance.setEstadoClienteVIP(true);
-            return articulosInstance.insertarArticulos(res.data.articulosEspeciales, true).then((resInsertArtEspecial) => {
-              if (resInsertArtEspecial) {
-                return {error: false, info: res.data.info};
-              }
-              return {error: true, mensaje: 'Backend: Error en clientes/comprobarVIP > InsertarArticulos especiales'};
-            }).catch((err) => {
-              console.log(err);
-              return {error: true, mensaje: 'Backend: Error en catch clientes/comprobarVIP > InsertarArticulos (especiales)'};
-            });
-          } else { // No tiene tarifa especial
-            return {error: false, info: res.data.info};
-          }
-        } else {
-          return {error: true, mensaje: res.data.mensaje};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Error en backend comprobarVIP'};
-      });
+      const arrayClientes = (await axios.post("clientes/getClientesFinales", { database: parametros.database })).data as ClientesInterface[];
+      if (arrayClientes) return await clienteInstance.insertarClientes(arrayClientes);
+      throw Error("Error, los clientes descargados de San Pedro son null o undefined");
+    } catch (err) {
+      console.log(err);
+      return false;
     }
+  }
 
-    @Post('descargarClientesFinales')
-    async descargarClientesFinales() {
-      const parametros = await parametrosInstance.getParametros();
-      return axios.post('clientes/getClientesFinales', {database: parametros.database}).then((res: any) => {
-        if (res.data.error == false) {
-          return clienteInstance.insertarClientes(res.data.info).then((operacionResult) => {
-            if (operacionResult) {
-              return {error: false};
-            }
-            return {error: true, mensaje: 'Backend: Error en insertarClientes de clientes/descargarClientesFinales'};
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: Error en insertarClientes de clientes/descargarClientesFinales CATCH'};
-          });
-        }
-        return {error: true, mensaje: res.data.mensaje};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en clientes/descargarClientesFinales CATCH'};
-      });
-    }
-
-    @Post("crearNuevoCliente")
-    async crearNuevoCliente(@Body() params) {
-      if (UtilesModule.checkVariable(params.idTarjetaCliente, params.nombreCliente)) {
-        if (params.idTarjetaCliente.toString().length > 5 && params.nombreCliente.length >= 3) {
+  /* Eze 4.0 */
+  @Post("crearNuevoCliente")
+  async crearNuevoCliente(@Body() { idTarjetaCliente, nombreCliente }) {
+    try {
+      if (idTarjetaCliente && nombreCliente) {
+        if (idTarjetaCliente.toString().length > 5 && nombreCliente.length >= 3) {
           const parametros = await parametrosInstance.getParametros();
-          return axios.post('clientes/crearNuevoCliente', {
-            idTarjetaCliente: params.idTarjetaCliente,
-            nombreCliente: params.nombreCliente,
+          return await axios.post("clientes/crearNuevoCliente", {
+            idTarjetaCliente: idTarjetaCliente,
+            nombreCliente: nombreCliente,
             idCliente: `CliBoti_${parametros.codigoTienda}_${Date.now()}`,
             parametros: parametros,
-          }).then((res: any) => {
-            if (res.data.error == false) {
-              return {error: false};
-            } else {
-              return {error: true, mensaje: res.data.mensaje};
-            }
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Error backend: clientes/crearNuevoCliente CATCH'};
           });
-        } else {
-          return {error: true, mensaje: 'Error, nombre o número de tarjeta incorrectos'};
         }
-      } else {
-        return {error: true, mensaje: 'Error Backend: Faltan datos en clientes/crearNuevoCliente'};
       }
+      throw Error("Error, faltan datos en crearNuevoCliente() controller");
+    } catch (err) {
+      console.log(err);
+      return false;
     }
+  }
 }

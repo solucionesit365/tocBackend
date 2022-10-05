@@ -1,122 +1,60 @@
-import { Controller, Post, Get, Body, Query } from "@nestjs/common";
+import { Controller, Post, Body } from "@nestjs/common";
 import { ticketsInstance } from "./tickets.clase";
-import { cajaInstance } from "../caja/caja.clase";
-import { UtilesModule } from "src/utiles/utiles.module";
+import { movimientosInstance } from "../movimientos/movimientos.clase";
 
 @Controller("tickets")
 export class TicketsController {
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("getTicketsIntervalo")
-  getTicketsIntervalo(@Query() params) {
-    if (UtilesModule.checkVariable(params.inicioTime, params.finalTime)) {
-      return ticketsInstance.getTicketsIntervalo(params.inicioTime, params.finalTime);
+  async getTicketsIntervalo(@Body() { inicioTime, finalTime }) {
+    try {
+      if (inicioTime && finalTime) return await ticketsInstance.getTicketsIntervalo(inicioTime, finalTime);
+      throw Error("Error, faltan datos en getTiketsIntervalo() controller");
+    } catch (err) {
+      console.log(err);
+      return null;
     }
-    return null;
   }
 
-  /* Eze v23 */
-  @Post("getTickets")
-  getTickets(@Body() params) {
-    if (params.ticketID != undefined)
-      return ticketsInstance.getTicketByID(params.ticketID);
-
-    return false;
+  /* Eze 4.0 */
+  @Post("getTicket")
+  async getTickets(@Body() { ticketId }) {
+    try {
+      if (ticketId) await ticketsInstance.getTicketByID(ticketId);
+      throw Error("Error, faltan datos en getTicket() controller"); 
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
-  /* Eze v23 */
-  @Post("crearTicketEfectivo")
-  crearTicketEfectivo(@Body() params) {
-    if (
-      params.total != undefined &&
-      params.idCesta != undefined &&
-      params.idCliente != undefined &&
-      params.idTrabajador
-    )
-      return ticketsInstance.crearTicketEfectivo(
-        params.total,
-        params.idCesta,
-        params.idCliente,
-        params.idTrabajador
-      );
-
-    return false;
+  /* Eze 4.0 */
+  @Post("crearTicket")
+  async crearTicket(@Body() { total, idCesta, idCliente, idTrabajador, tipo }) {
+    try {
+      if (typeof total == "number" && idCesta && idCliente && idTrabajador && tipo) {
+        const ticket = await ticketsInstance.generarNuevoTicket(total, idCesta, idCliente, idTrabajador);
+        if (ticket) throw Error("Error, no se ha podido generar el objecto del ticket en crearTicket controller 3");
+        if (ticketsInstance.insertarTicket(ticket)) return await movimientosInstance.nuevoMovimiento(total, "", tipo, ticket._id, idTrabajador);
+        
+        throw Error("Error, no se ha podido crear el ticket en crearTicket() controller 2");
+      }
+      throw Error("Error, faltan datos en crearTicket() controller 1");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
-  /* Eze v23 */
-  @Post("crearTicketDatafono3G")
-  crearTicketDatafono3G(@Body() params) {
-    if (
-      params.total != undefined &&
-      params.idCesta != undefined &&
-      params.idCliente != undefined &&
-      params.idTrabajador
-    )
-      return ticketsInstance.crearTicketDatafono3G(
-        params.total,
-        params.idCesta,
-        params.idCliente,
-        params.idTrabajador
-      );
-
-    return false;
-  }
-
-  /* Eze v23 */
-  @Post("crearTicketDeuda")
-  crearTicketDeuda(@Body() params) {
-    if (
-      params.total != undefined &&
-      params.idCesta != undefined &&
-      params.idCliente != undefined &&
-      params.infoClienteVip != undefined &&
-      params.idTrabajador
-    )
-      return ticketsInstance.crearTicketDeuda(
-        params.total,
-        params.idCesta,
-        params.idCliente,
-        params.infoClienteVip,
-        params.idTrabajador
-      );
-
-    return false;
-  }
-
-  /* Eze v23 */
-  @Post("crearTicketConsumoPersonal")
-  crearTicketConsumoPersonal(@Body() params) {
-    if (params.idCesta != undefined && params.idTrabajador)
-      return ticketsInstance.crearTicketConsumoPersonal(
-        params.idCesta,
-        params.idTrabajador
-      );
-
-    return false;
-  }
-
-  /* Eze v23 */
-  @Post("crearTicketTKRS")
-  crearTicketTKRS(@Body() params) {
-    if (
-      params.total != undefined &&
-      params.idCesta != undefined &&
-      params.idCliente != undefined &&
-      params.idTrabajador
-    )
-      return ticketsInstance.crearTicketTKRS(
-        params.total,
-        params.totalTkrs,
-        params.idCesta,
-        params.idCliente,
-        params.idTrabajador
-      );
-
-    return false;
-  }
-
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("rectificativa")
-  rectificativa(@Body() params) {
-    return ticketsInstance.anularTicket(params.ticketID);
+  async rectificativa(@Body() { ticketId }) {
+    try {
+      if (ticketId) return await ticketsInstance.anularTicket(ticketId);
+      throw Error("Error, faltan datos en rectificativa() controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 }

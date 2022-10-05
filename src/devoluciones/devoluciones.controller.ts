@@ -1,22 +1,22 @@
 import { Controller, Post, Body } from "@nestjs/common";
-import { UtilesModule } from "src/utiles/utiles.module";
 import { devolucionesInstance } from "./devoluciones.clase";
 
 @Controller("devoluciones")
 export class DevolucionesController {
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("nuevaDevolucion")
-  nuevaDevolucion(@Body() params) {
-    if (
-      params.total != undefined &&
-      UtilesModule.checkVariable(params.idCesta, params.idTrabajador)
-    )
-      return devolucionesInstance.nuevaDevolucion(
-        params.total,
-        params.idCesta,
-        params.idTrabajador
-      );
-
-    return false;
+  async nuevaDevolucion(@Body() { total, idCesta, idTrabajador }) {
+    try {
+      if (typeof total == "number" && idCesta && idTrabajador)
+        return await devolucionesInstance.nuevaDevolucion(
+          total,
+          idCesta,
+          idTrabajador
+        );
+      throw Error("Error, faltan datos en nuevaDevolucion() controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 }

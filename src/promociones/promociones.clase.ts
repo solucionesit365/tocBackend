@@ -8,12 +8,13 @@ import { ClientesInterface } from "../clientes/clientes.interface";
 
 export class PromocionesClase {
   /* Eze 4.0 */
-  async deshacerOfertas(cesta: CestasInterface): Promise<CestasInterface> {
+  async deshacerOfertas(cesta: CestasInterface, idCliente: ClientesInterface["id"] = null): Promise<CestasInterface> {
     let cestaAux: CestasInterface = {
       _id: null,
       detalleIva: null,
       lista: [],
       modo: null,
+      idCliente: idCliente
     }; // Esta cesta no tendrá promos después del primer bucle
 
     for (let i = 0; i < cesta.lista.length; i++) {
@@ -218,7 +219,7 @@ export class PromocionesClase {
     let hayOferta = false;
     const promociones = await schPromociones.getPromociones();
 
-    if (clienteInstance.getEstadoClienteVIP() == false) {
+    if (!(await clienteInstance.tieneTarifaEspecial(idCliente))) {
       for (let i = 0; i < promociones.length; i++) {
         for (let j = 0; j < promociones[i].principal.length; j++) {
           const preguntaPrincipal = this.existeArticuloParaOfertaEnCesta(

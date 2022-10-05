@@ -42,7 +42,7 @@ export class TicketsClase {
   async generarNuevoTicket(
     total: TicketsInterface["total"],
     idCesta: CestasInterface["_id"],
-    cliente: TicketsInterface["cliente"],
+    idCliente: TicketsInterface["idCliente"],
     idTrabajador: TicketsInterface["idTrabajador"]
   ): Promise<TicketsInterface> {
     try {
@@ -51,7 +51,7 @@ export class TicketsClase {
         _id: await this.getProximoId(),
         timestamp: Date.now(),
         total,
-        cliente,
+        idCliente,
         idTrabajador,
         cesta,
         enviado: false
