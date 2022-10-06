@@ -11,6 +11,7 @@ export class PromocionesClase {
   async deshacerOfertas(cesta: CestasInterface, idCliente: ClientesInterface["id"] = null): Promise<CestasInterface> {
     let cestaAux: CestasInterface = {
       _id: null,
+      timestamp: null,
       detalleIva: null,
       lista: [],
       modo: null,
@@ -68,6 +69,7 @@ export class PromocionesClase {
     cestaAux._id = cesta._id;
     cestaAux.detalleIva = cesta.detalleIva;
     cestaAux.modo = cesta.modo;
+    cestaAux.timestamp = cesta.timestamp;
     return cestaAux;
   }
 

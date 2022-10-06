@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
-import { impresoraInstance } from "src/impresora/impresora.class";
+import { CestasInterface } from "../cestas/cestas.interface";
+import { impresoraInstance } from "../impresora/impresora.class";
 import { cestasInstance } from "../cestas/cestas.clase";
 import { DevolucionesInterface } from "./devoluciones.interface";
 import * as schDevoluciones from "./devoluciones.mongodb";
@@ -8,7 +9,7 @@ export class Devoluciones {
   /* Eze 4.0 */
   async nuevaDevolucion(
     total: number,
-    idCesta: number,
+    idCesta: CestasInterface["_id"],
     idTrabajador: number
   ): Promise<boolean> {
     const nuevoIdTicket = Date.now();

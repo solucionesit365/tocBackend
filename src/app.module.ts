@@ -24,7 +24,6 @@ import { VersionController } from "./version/version.controller";
 import { TestController } from "./test/test.controller";
 import { UtilesModule } from "./utiles/utiles.module";
 import { DobleMenusController } from "./doble-menus/doble-menus.controller";
-import { TransaccionesController } from "./transacciones/transacciones.controller";
 import { ApagarController } from "./apagar/apagar.controller";
 import { DoctorController } from "./doctor/doctor.controller";
 import { SatelitesController } from "./satelites/satelites.controller";
@@ -58,7 +57,6 @@ import { TarifasController } from './tarifas/tarifas.controller';
     VersionController,
     TestController,
     DobleMenusController,
-    TransaccionesController,
     DoctorController,
     SatelitesController,
     TarifasController,

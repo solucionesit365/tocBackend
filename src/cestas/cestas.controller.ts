@@ -49,7 +49,10 @@ export class CestasController {
   @Post("crearCesta")
   async crearCesta(@Body() { idTrabajador }) {
     try {
-      if (idTrabajador) return await cestasInstance.crearCesta(idTrabajador);
+      if (idTrabajador) {
+        const idCesta = await cestasInstance.crearCesta();
+        return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
+      }
       throw Error("Error, faltan datos en crearCesta controller");
     } catch (err) {
       console.log(err);
