@@ -1,5 +1,7 @@
-export interface Respuesta {
-    error: boolean,
-    mensaje?: string,
-    info?: number
+export interface CancelInterface {
+  info: {
+    message: string;
+    success: boolean;
+  };
+  version: string;
 }

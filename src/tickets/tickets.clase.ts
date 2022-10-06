@@ -7,7 +7,7 @@ import { CestasInterface } from "../cestas/cestas.interface";
 
 export class TicketsClase {
   /* Eze 4.0 */
-  getTicketByID = (idTicket: number) => schTickets.getTicketByID(idTicket);
+  getTicketById = (idTicket: number) => schTickets.getTicketByID(idTicket);
 
   /* Eze 4.0 */
   anularTicket = (idTicket: number) => schTickets.anularTicket(idTicket);

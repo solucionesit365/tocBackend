@@ -20,7 +20,7 @@ export class TicketsController {
   @Post("getTicket")
   async getTickets(@Body() { ticketId }) {
     try {
-      if (ticketId) await ticketsInstance.getTicketByID(ticketId);
+      if (ticketId) await ticketsInstance.getTicketById(ticketId);
       throw Error("Error, faltan datos en getTicket() controller"); 
     } catch (err) {
       console.log(err);

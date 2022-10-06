@@ -5,9 +5,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
-import { UtilesModule } from "./utiles/utiles.module";
 import { paytefInstance } from "./paytef/paytef.class";
 import { Socket } from "dgram";
+import { ticketsInstance } from "./tickets/tickets.clase";
+import { cestasInstance } from "./cestas/cestas.clase";
 
 const net = require("net");
 const fs = require("fs");
@@ -24,69 +25,58 @@ export class SocketGateway {
   @WebSocketServer()
   server: Socket;
 
-  // public enviar(canal: string, data: any) {
-  //   this.server.emit(canal, data);
-  // }
-
+  /* Eze 4.0 */
   handleConnection(client: any, ...args: any[]) {
     console.log("Nuevo cliente conectado por socket");
   }
+
+  /* Eze 4.0 */
   handleDisconnect() {
     console.log("Se ha desconectado un cliente del socket");
   }
 
+  /* Eze 4.0 */
   @SubscribeMessage("test")
-  test(@MessageBody() params) {
-    this.server.emit("test", "O Rei Ezeee");
+  test(@MessageBody() params, @ConnectedSocket() client: Socket) {
+    client.emit("test", "O Rei Ezeee");
   }
 
   @SubscribeMessage("consultarPuntos")
-  consultarPuntos(@MessageBody() params) {
+  consultarPuntos(@MessageBody() params, @ConnectedSocket() client: Socket) {
     if (params != undefined) {
       if (params.idClienteFinal != undefined) {
-        this.server.emit("resConsultaPuntos", { error: false, info: 69 });
+        client.emit("resConsultaPuntos", { error: false, info: 69 });
       } else {
-        this.server.emit("resConsultaPuntos", {
+        client.emit("resConsultaPuntos", {
           error: true,
           mensaje: "Backend: Faltan datos en socket > consultarPuntos",
         });
       }
     } else {
-      this.server.emit("resConsultaPuntos", {
+      client.emit("resConsultaPuntos", {
         error: true,
         mensaje: "Backend: Faltan datos en socket > consultarPuntos",
       });
     }
   }
 
+  /* Eze 4.0 */
   @SubscribeMessage("iniciarTransaccion")
-  iniciarPaytef(@MessageBody() params, @ConnectedSocket() client: Socket) {
-    if (UtilesModule.checkVariable(params)) {
-      if (
-        UtilesModule.checkVariable(
-          params.idClienteFinal,
-          params.idCesta,
-          params.idTrabajador
-        )
-      ) {
-        paytefInstance.iniciarTransaccion(
-          client,
-          params.idClienteFinal,
-          params.idCesta,
-          params.idTrabajador
-        );
-      } else {
-        client.emit("consultaPaytef", {
-          error: true,
-          mensaje:
-            "Backend: paytef/iniciarTransaccion faltan datos idClienteFinal",
-        });
+  async iniciarPaytef(@MessageBody() { idTrabajador, idCesta, idCliente }, @ConnectedSocket() client: Socket) {
+    try {
+      if (idTrabajador && idCesta) {
+        const cesta = await cestasInstance.getCestaById(idCesta);
+        const total = cestasInstance.getTotalCesta(cesta);
+        if (total == 0) throw Error("Error, no se puede pagar una compra con importe 0 con datáfono");
+        const nuevoTicket = await ticketsInstance.generarNuevoTicket(total, idCesta, idCliente, idTrabajador);
+        if (await ticketsInstance.insertarTicket(nuevoTicket)) await paytefInstance.iniciarTransaccion(client, idTrabajador, nuevoTicket._id);
+        throw Error("Error, no se ha podido crear el ticket en iniciarTransaccion() socket.gateway");        
       }
-    } else {
-      client.emit("consultaPaytef", {
-        error: true,
-        mensaje: "Backend: paytef/iniciarTransaccion faltan todos los datos",
-      });
+      throw Error("Error, faltan datos en iniciarTransaccion() socket.gateway");
+    } catch (err) {
+      console.log(err);
+      paytefInstance.cancelarOperacionActual();
+      client.emit("consultaPaytef", false);
     }
   }
 }

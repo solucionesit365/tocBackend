@@ -61,6 +61,8 @@ export class CestaClase {
     throw Error("Error, no se ha podido crear la cesta");
   }
 
+  getTotalCesta = (cesta: CestasInterface) => cesta.detalleIva.importe1 + cesta.detalleIva.importe2 + cesta.detalleIva.importe3;
+
   /* Eze 4.0 */
   async borrarItemCesta(idCesta: number, index: number): Promise<boolean> {
     try {
