@@ -57,6 +57,7 @@ export function construirObjetoIvas(
 export const convertirPuntosEnDinero = (puntos: number): number =>
   Math.trunc(puntos * 0.03 * 0.02);
 
+/* Eze 4.0 */
 export function fusionarObjetosDetalleIva(obj1: DetalleIvaInterface, obj2: DetalleIvaInterface): DetalleIvaInterface {
   return {
     base1: obj1.base1 + obj2.base1,

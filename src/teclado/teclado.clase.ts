@@ -2,7 +2,7 @@ import axios from "axios";
 import { menusInstance } from "../menus/menus.clase";
 import { articulosInstance } from "../articulos/articulos.clase";
 import { parametrosInstance } from "../parametros/parametros.clase";
-import { ofertas } from "../promociones/promociones.clase";
+import { promocionesInstance } from "../promociones/promociones.clase";
 import * as schTeclas from "./teclado.mongodb";
 
 export class TecladoClase {
@@ -52,7 +52,7 @@ export class TecladoClase {
             codigoTienda: parametros.codigoTienda,
           }
         );
-        return await ofertas.insertarPromociones(resPromociones.data.info);
+        return await promocionesInstance.insertarPromociones(resPromociones.data.info);
       }
       return false;
     } catch (err) {

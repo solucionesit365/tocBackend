@@ -7,7 +7,7 @@ const SERVER_URL = "https://sanpedroserver.com";
 class TocSockets {
   private socket: Socket;
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   async iniciarSockets() {
     const parametros = await parametrosInstance.getParametros();
     this.socket = io.connect(SERVER_URL, { query: `token=${parametros.token}` });

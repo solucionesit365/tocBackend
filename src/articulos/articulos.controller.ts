@@ -6,9 +6,12 @@ export class ArticulosController {
   /* Eze 4.0 */
   @Post("getArticulo")
   async getArticulo(@Body() { idArticulo, idCliente }) {
-
     try {
-      if (idArticulo) return await articulosInstance.getPrecioConTarifa(await articulosInstance.getInfoArticulo(idArticulo), idCliente);
+      if (idArticulo)
+        return await articulosInstance.getPrecioConTarifa(
+          await articulosInstance.getInfoArticulo(idArticulo),
+          idCliente
+        );
       throw Error("Error, faltan datos en getArticulo controller");
     } catch (err) {
       console.log(err);

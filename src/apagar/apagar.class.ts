@@ -1,15 +1,13 @@
-
-const exec = require('child_process').exec;
-const os = require('os');
+const exec = require("child_process").exec;
+const os = require("os");
 export class Apagar {
   apagarEquipo() {
-    if (os.platform() === 'linux') {
-      exec('sudo -s shutdown now');
+    if (os.platform() === "linux") {
+      exec("sudo -s shutdown now");
     } else {
-      exec('shutdown /p');
+      exec("shutdown /p");
     }
   }
 }
 
 export const apagarinstance = new Apagar();
-

@@ -6,9 +6,19 @@ import { cajaInstance } from "./caja.clase";
 export class CajaController {
   /* Eze 4.0 */
   @Post("cerrarCaja")
-  async cerrarCaja(@Body() { total, detalleMonedas, infoDinero, cantidad3G, idDependienta }) {
+  async cerrarCaja(
+    @Body() { total, detalleMonedas, infoDinero, cantidad3G, idDependienta }
+  ) {
     try {
-      if (UtilesModule.checkVariable(total, detalleMonedas, infoDinero, cantidad3G, idDependienta)) {
+      if (
+        UtilesModule.checkVariable(
+          total,
+          detalleMonedas,
+          infoDinero,
+          cantidad3G,
+          idDependienta
+        )
+      ) {
         return await cajaInstance.cerrarCaja(
           total,
           detalleMonedas,
@@ -29,7 +39,12 @@ export class CajaController {
   async abrirCaja(@Body() { total, detalle, idDependienta }) {
     try {
       if (total != undefined && detalle != undefined)
-        return await cajaInstance.abrirCaja({ detalleApertura: detalle, idDependientaApertura: idDependienta, inicioTime: Date.now(), totalApertura: total });
+        return await cajaInstance.abrirCaja({
+          detalleApertura: detalle,
+          idDependientaApertura: idDependienta,
+          inicioTime: Date.now(),
+          totalApertura: total,
+        });
       throw Error("Error abrirCaja > Faltan datos o son incorrectos");
     } catch (err) {
       console.log(err);

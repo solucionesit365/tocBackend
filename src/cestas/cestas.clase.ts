@@ -16,7 +16,6 @@ import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ObjectId } from "mongodb";
 
-/* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
   /* Eze 4.0 */
   getCestaById = async (idCesta: CestasInterface["_id"]) =>
@@ -58,6 +57,7 @@ export class CestaClase {
     throw Error("Error, no se ha podido crear la cesta");
   }
 
+  /* Eze 4.0 */
   getTotalCesta = (cesta: CestasInterface) => cesta.detalleIva.importe1 + cesta.detalleIva.importe2 + cesta.detalleIva.importe3;
 
   /* Eze 4.0 */

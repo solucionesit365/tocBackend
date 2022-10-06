@@ -2,20 +2,17 @@ import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
 import { TrabajadoresInterface } from "src/trabajadores/trabajadores.interface";
 
 export class DoctorClass {
+    /* Eze 4.0 */
     async checkTrabajadores() {
-        try {
-            const trabajadores: TrabajadoresInterface[] = await trabajadoresInstance.getTrabajadoresFichados();
-            for (let i = 0; i < trabajadores.length; i++) {
-                if (trabajadores[i].idCesta === undefined) {
-                    return false;
-                }
+        const trabajadores: TrabajadoresInterface[] = await trabajadoresInstance.getTrabajadoresFichados();
+        for (let i = 0; i < trabajadores.length; i++) {
+            if (trabajadores[i].idCesta === undefined) {
+                return false;
             }
-            return true;
-        } catch (err) {
-            console.log(err);
-            return false;
         }
+        return true;
     }
+
     async checkCestas() {
         try {
             return true;

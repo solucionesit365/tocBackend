@@ -3,12 +3,25 @@ import { doctorInstance } from './doctor.class';
 
 @Controller('doctor')
 export class DoctorController {
+    /* Eze 4.0 */
     @Get('checkTrabajadores')
-    checkTrabajadoresDoctor() {
-        return doctorInstance.checkTrabajadores();
+    async checkTrabajadoresDoctor() {
+        try {
+            return await doctorInstance.checkTrabajadores();
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
     }
+
+    /* Eze 4.0 */
     @Get('checkCestas')
-    checkCestasDoctor() {
-        return doctorInstance.checkCestas();
+    async checkCestasDoctor() {
+        try {
+            return await doctorInstance.checkCestas();
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
     }
 }

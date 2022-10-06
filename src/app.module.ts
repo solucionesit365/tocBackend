@@ -17,7 +17,6 @@ import { DevolucionesController } from "./devoluciones/devoluciones.controller";
 import { MovimientosController } from "./movimientos/movimientos.controller";
 import { PruebasController } from "./pruebas/pruebas.controller";
 import { InstaladorController } from "./instalador/instalador.controller";
-import { FamiliasController } from "./familias/familias.controller";
 import { ParamsTicketController } from "./params-ticket/params-ticket.controller";
 import { PaytefController } from "./paytef/paytef.controller";
 import { VersionController } from "./version/version.controller";
@@ -51,7 +50,6 @@ import { TarifasController } from './tarifas/tarifas.controller';
     MovimientosController,
     PruebasController,
     InstaladorController,
-    FamiliasController,
     ParamsTicketController,
     PaytefController,
     VersionController,
