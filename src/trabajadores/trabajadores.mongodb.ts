@@ -61,15 +61,14 @@ export async function getTrabajadoresFichados(): Promise<
 
 /* Eze 4.0 */
 export async function ficharTrabajador(
-  idTrabajador: number,
-  idCesta: number
+  idTrabajador: number
 ): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const trabajadores = database.collection("trabajadores");
   return (
     await trabajadores.updateOne(
       { _id: idTrabajador },
-      { $set: { fichado: true, idCesta } }
+      { $set: { fichado: true } }
     )
   ).acknowledged;
 }

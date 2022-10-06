@@ -50,8 +50,8 @@ export class TrabajadoresClase {
   getTrabajadoresFichados= async (): Promise<TrabajadoresInterface[]> => await schTrabajadores.getTrabajadoresFichados();
 
   /* Eze 4.0 */
-  async ficharTrabajador(idTrabajador: number, idCesta: CestasInterface["_id"]): Promise<boolean> {
-    if (await schTrabajadores.ficharTrabajador(idTrabajador, idCesta)) {
+  async ficharTrabajador(idTrabajador: number): Promise<boolean> {
+    if (await schTrabajadores.ficharTrabajador(idTrabajador)) {
       return await this.nuevoFichajesSincro("ENTRADA", idTrabajador);
     }
     throw Error("Error, no se ha podido fichar al trabajador ficharTrabajador() class");
@@ -75,8 +75,8 @@ export class TrabajadoresClase {
   }
 
   /* Eze 4.0 */
-  async finDescanso(idTrabajador: number, idCesta: CestasInterface["_id"]): Promise<boolean> {
-    if (await schTrabajadores.ficharTrabajador(idTrabajador, idCesta)) {
+  async finDescanso(idTrabajador: number): Promise<boolean> {
+    if (await schTrabajadores.ficharTrabajador(idTrabajador)) {
       return await this.nuevoFichajesSincro("FINDESCANSO", idTrabajador);
     }
     throw Error("No se ha podido fichar al trabajador");

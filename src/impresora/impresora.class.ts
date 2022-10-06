@@ -171,7 +171,7 @@ export class Impresora {
     // const infoTicket: TicketsInterface = await ticketsInstance.getTicketByID(idTicket);
     let infoTicket;
     if (!esDevolucion) {
-      infoTicket = await ticketsInstance.getTicketByID(idTicket);
+      infoTicket = await ticketsInstance.getTicketById(idTicket);
     }
     // console.log(infoTicket)
     const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajadorById(infoTicket.idTrabajador);

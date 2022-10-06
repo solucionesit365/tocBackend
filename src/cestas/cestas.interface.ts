@@ -1,8 +1,10 @@
 import { ClientesInterface } from "../clientes/clientes.interface";
 import { ArticulosInterface, TiposIva } from "../articulos/articulos.interface";
+import { ObjectId } from "mongodb";
 
 export interface CestasInterface {
-  _id: number;
+  _id: ObjectId;
+  timestamp: number,
   detalleIva: DetalleIvaInterface,
   lista: ItemLista[],
   modo: ModoCesta,

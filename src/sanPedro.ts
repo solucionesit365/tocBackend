@@ -47,7 +47,7 @@ socket.on('resCajas', (data) => {
         console.log(err);
       });
     } else {
-      cajaInstance.confirmarCajaHabiaLlegado(data.infoCaja).then((res) => {
+      cajaInstance.confirmarCajaEnviada(data.infoCaja).then((res) => {
         if (res) {
           sincronizarCajas();
         } else {

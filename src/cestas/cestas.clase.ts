@@ -14,6 +14,7 @@ import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ClientesInterface } from "../clientes/clientes.interface";
 import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+import { ObjectId } from "mongodb";
 
 /* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
@@ -22,9 +23,10 @@ export class CestaClase {
     await schCestas.getCestaById(idCesta);
 
   /* Eze 4.0 */
-  generarObjetoCesta(nuevoId: CestasInterface["_id"]): CestasInterface {
+  private generarObjetoCesta(nuevoId: CestasInterface["_id"]): CestasInterface {
     return {
       _id: nuevoId,
+      timestamp: Date.now(),
       detalleIva: {
         base1: 0,
         base2: 0,
@@ -50,21 +52,16 @@ export class CestaClase {
     await schCestas.deleteCesta(idCesta);
 
   /* Eze 4.0 */
-  async crearCesta(idTrabajador: TrabajadoresInterface["_id"]) {
-    const nuevaCesta = this.generarObjetoCesta(Date.now());
-    if (await schCestas.createCesta(nuevaCesta))
-      return await trabajadoresInstance.setIdCesta(
-        idTrabajador,
-        nuevaCesta._id
-      );
-
+  async crearCesta(): Promise<CestasInterface["_id"]> {
+    const nuevaCesta = this.generarObjetoCesta(new ObjectId());
+    if (await schCestas.createCesta(nuevaCesta)) return nuevaCesta._id;
     throw Error("Error, no se ha podido crear la cesta");
   }
 
   getTotalCesta = (cesta: CestasInterface) => cesta.detalleIva.importe1 + cesta.detalleIva.importe2 + cesta.detalleIva.importe3;
 
   /* Eze 4.0 */
-  async borrarItemCesta(idCesta: number, index: number): Promise<boolean> {
+  async borrarItemCesta(idCesta: CestasInterface["_id"], index: number): Promise<boolean> {
     try {
       let cesta = await this.getCestaById(idCesta);
 
@@ -151,9 +148,9 @@ export class CestaClase {
 
   /* Eze 4.0 */
   async clickTeclaArticulo(
-    idArticulo: CestasInterface["_id"],
+    idArticulo: ArticulosInterface["_id"],
     gramos: ItemLista["gramos"],
-    idCesta: number,
+    idCesta: CestasInterface["_id"],
     unidades: number,
     idCliente: ClientesInterface["id"],
     arraySuplementos: ItemLista["arraySuplementos"]
@@ -347,7 +344,7 @@ export class CestaClase {
   }
 
   /* Eze 4.0 */
-  async borrarArticulosCesta(idCesta: number) {
+  async borrarArticulosCesta(idCesta: CestasInterface["_id"]) {
     const vacia = this.generarObjetoCesta(idCesta);
     return await this.updateCesta(vacia);
   }

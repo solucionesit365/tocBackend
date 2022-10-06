@@ -2,7 +2,7 @@ import { conexion } from "../conexion/mongodb";
 import { CestasInterface } from "./cestas.interface";
 
 /* Eze 4.0 */
-export async function getCestaById(idCesta: number): Promise<CestasInterface> {
+export async function getCestaById(idCesta: CestasInterface["_id"]): Promise<CestasInterface> {
   try {
     const database = (await conexion).db("tocgame");
     const cesta = database.collection<CestasInterface>("cestas");
@@ -15,7 +15,7 @@ export async function getCestaById(idCesta: number): Promise<CestasInterface> {
 
 
 /* Eze 4.0 */
-export async function deleteCesta(idCesta: number): Promise<boolean> {
+export async function deleteCesta(idCesta: CestasInterface["_id"]): Promise<boolean> {
   try {
     const database = (await conexion).db("tocgame");
     const cesta = database.collection<CestasInterface>("cestas");

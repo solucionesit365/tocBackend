@@ -1,10 +1,12 @@
+import { CestasInterface } from "../cestas/cestas.interface";
+
 export interface TrabajadoresInterface {
     _id: number, // IGUAL A idTrabajador
     idTrabajador: number, // IGUAL A _id
     nombre: string,
     nombreCorto: string,
     fichado: boolean,
-    idCesta: number,
+    idCesta: CestasInterface["_id"],
     satelite: string,
     descansando: boolean,
 }

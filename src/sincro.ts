@@ -46,8 +46,7 @@ function sincronizarCajas() {
     .getParametros()
     .then((parametros) => {
       if (parametros != null) {
-        cajaInstance
-          .getCajaMasAntigua()
+        cajaInstance.getCajaSincroMasAntigua()
           .then((resCaja) => {
             if (resCaja) {
               emitSocket("sincroCajas", {

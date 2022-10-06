@@ -1,61 +1,92 @@
 import { Body, Controller, Post, Get } from "@nestjs/common";
 import { trabajadoresInstance } from "./trabajadores.clase";
-import { UtilesModule } from "../utiles/utiles.module";
+import { cestasInstance } from "../cestas/cestas.clase";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Get("getTrabajadoresFichados")
-  getTrabajadoresFichados() {
-    return trabajadoresInstance.getTrabajadoresFichados();
+  async getTrabajadoresFichados() {
+    try {
+      return await trabajadoresInstance.getTrabajadoresFichados();
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("buscar")
-  buscar(@Body() params) {
-    return trabajadoresInstance.buscar(params.busqueda);
+  async buscar(@Body() { busqueda }) {
+    try {
+      return await trabajadoresInstance.buscar(busqueda);
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("fichar")
-  fichar(@Body() params) {
-    if (UtilesModule.checkVariable(params.idTrabajador))
-      return trabajadoresInstance.ficharTrabajador(params.idTrabajador);
-
-    return false;
+  async fichar(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) {
+        const idCesta = await cestasInstance.crearCesta();
+        if (await trabajadoresInstance.setIdCesta(idTrabajador, idCesta))
+          return trabajadoresInstance.ficharTrabajador(idTrabajador);
+        throw Error("Error, no se ha podido asignar el idCesta nuevo al trabajador. trabajadores controller");
+      }
+      throw Error("Error, faltan datos en fichar() trabajadores controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("desfichar")
-  desfichar(@Body() params) {
-    if (UtilesModule.checkVariable(params.idTrabajador))
-      return trabajadoresInstance.desficharTrabajador(params.idTrabajador);
-
-    return false;
+  async desfichar(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) return await trabajadoresInstance.desficharTrabajador(idTrabajador);
+      throw Error("Error, faltan datos en desfichar() controller");
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
-  /* Eze v23 */
-  @Post("actualizarTrabajadores")
-  actualizarTrabajadores() {
-    return trabajadoresInstance.actualizarTrabajadores();
+  /* Eze 4.0 */
+  @Get("actualizarTrabajadores")
+  async actualizarTrabajadores() {
+    try {
+      return await trabajadoresInstance.actualizarTrabajadores();
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("inicioDescanso")
-  inicioDescanso(@Body() params) {
-    if (UtilesModule.checkVariable(params.idTrabajador)) {
-      return trabajadoresInstance.inicioDescanso(params.idTrabajador);
+  async inicioDescanso(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) return await trabajadoresInstance.inicioDescanso(idTrabajador);
+      throw Error("Error, faltan datos en inicioDescanso() controller");
+    } catch (err) {
+      console.log(err);
+      return false;
     }
-    return false;
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("finDescanso")
-  finDescanso(@Body() params) {
-    if (UtilesModule.checkVariable(params.idTrabajador)) {
-      return trabajadoresInstance.finDescanso(params.idTrabajador);
+  async finDescanso(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) return await trabajadoresInstance.finDescanso(idTrabajador);
+    } catch (err) {
+      console.log(err);
+      return false;
     }
-    return false;
   }
 }
