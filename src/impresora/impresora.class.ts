@@ -20,7 +20,8 @@ escpos.Serial = require('escpos-serialport');
 escpos.Screen = require('escpos-screen');
 const TIPO_ENTRADA_DINERO = 'ENTRADA';
 const TIPO_SALIDA_DINERO = 'SALIDA';
-
+const mqtt = require('mqtt')
+const client  = mqtt.connect('mqtt://192.168.1.57 ')
 function permisosImpresora() {
   try {
     exec(`  echo sa | sudo -S chmod 777 -R /dev/bus/usb/
@@ -76,7 +77,13 @@ export class Impresora {
       permisosImpresora();
       //   var device = new escpos.USB('0x67b','0x2303');
       const device = await dispositivos.getDeviceVisor();
+
       if (device != null) {
+        if(device === 'MQTT'){
+          client.publish('Visor','Bon Dia!!')
+          return
+        }
+
         const options = {encoding: 'iso88591'};
         const printer = new escpos.Screen(device, options);
 
@@ -110,6 +117,10 @@ export class Impresora {
       //   var device = new escpos.USB('0x67b','0x2303');
       const device = await dispositivos.getDeviceVisor();
       if (device != null) {
+        if(device === 'MQTT'){
+          client.publish('Visor','Moltes Gracies !!')
+          return
+        }
         const options = {encoding: 'iso88591'};
         const printer = new escpos.Screen(device, options);
         try {
@@ -244,7 +255,7 @@ export class Impresora {
     }
     try {
       permisosImpresora();
-
+      
       // if(tipoImpresora === 'USB')
       // {
       //     const arrayDevices = escpos.USB.findPrinter();
@@ -269,9 +280,10 @@ export class Impresora {
       //     }
       // }
       const device = await dispositivos.getDevice();
-      if (device == null) {
+      if (device == null && tipoImpresora != 'MQTT') {
         throw 'Error controlado: El dispositivo es null';
       }
+      
       const printer = new escpos.Printer(device);
 
       let detalles = '';
@@ -349,54 +361,68 @@ export class Impresora {
         detalleIva = '';
       }
 
+
+
+
+
+
       const diasSemana = ['Diumenge', 'Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres', 'Dissabte'];
 
+      if(tipoImpresora ==='MQTT'){
+        console.log('mqtt')
+        client.publish('Impresora', `${cabecera} Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()} 
+        Factura simplificada N: ${numFactura} Ates per: ${nombreDependienta} ${detalleClienteVip} ${detalleNombreCliente}
+        ${detallePuntosCliente} Quantitat      Article        Import (EUR) ${detalles} ${pagoTarjeta} ${pagoTkrs} ${infoConsumoPersonal}
+        ${pagoDevolucion} TOTAL:  ${total.toFixed(2)} € Base IVA         IVA         IMPORT ${detalleIva} ID:  ${random()}  -  ${random()} ${pie}`)
+      }else{
+        device.open(function() {
+          printer
+  
+              .setCharacterCodeTable(19)
+              .encode('CP858')
+              .font('a')
+              .style('b')
+              .size(0, 0)
+              .text(cabecera)
+              .text(`Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
+              .text('Factura simplificada N: ' + numFactura)
+              .text('Ates per: ' + nombreDependienta)
+              .text(detalleClienteVip)
+              .text(detalleNombreCliente)
+              .text(detallePuntosCliente)
+              .control('LF')
+              .control('LF')
+              .control('LF')
+              .text('Quantitat      Article        Import (EUR)')
+              .text('-----------------------------------------')
+              .align('LT')
+              .text(detalles)
+              .align('CT')
+              .text(pagoTarjeta)
+              .text(pagoTkrs)
+              .align('LT')
+              .text(infoConsumoPersonal)
+              .size(1, 1)
+              .text(pagoDevolucion)
+              .text('TOTAL: ' + total.toFixed(2) + ' €')
+              .control('LF')
+              .size(0, 0)
+              .align('CT')
+              .text('Base IVA         IVA         IMPORT')
+              .text(detalleIva)
+              .text('-- ES COPIA --')
+              .control('LF')
+              .text('ID: '+ random() +' - '+ random())
+              .text(pie)
+              .control('LF')
+              .control('LF')
+              .control('LF')
+              .cut('PAPER_FULL_CUT')
+              .close();
+        });
+      }
 
-      device.open(function() {
-        printer
-
-            .setCharacterCodeTable(19)
-            .encode('CP858')
-            .font('a')
-            .style('b')
-            .size(0, 0)
-            .text(cabecera)
-            .text(`Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()}`)
-            .text('Factura simplificada N: ' + numFactura)
-            .text('Ates per: ' + nombreDependienta)
-            .text(detalleClienteVip)
-            .text(detalleNombreCliente)
-            .text(detallePuntosCliente)
-            .control('LF')
-            .control('LF')
-            .control('LF')
-            .text('Quantitat      Article        Import (EUR)')
-            .text('-----------------------------------------')
-            .align('LT')
-            .text(detalles)
-            .align('CT')
-            .text(pagoTarjeta)
-            .text(pagoTkrs)
-            .align('LT')
-            .text(infoConsumoPersonal)
-            .size(1, 1)
-            .text(pagoDevolucion)
-            .text('TOTAL: ' + total.toFixed(2) + ' €')
-            .control('LF')
-            .size(0, 0)
-            .align('CT')
-            .text('Base IVA         IVA         IMPORT')
-            .text(detalleIva)
-            .text('-- ES COPIA --')
-            .control('LF')
-            .text('ID: '+ random() +' - '+ random())
-            .text(pie)
-            .control('LF')
-            .control('LF')
-            .control('LF')
-            .cut('PAPER_FULL_CUT')
-            .close();
-      });
+    
     } catch (err) {
       console.log('Error impresora: ', err);
     }
@@ -653,7 +679,6 @@ export class Impresora {
     const parametros = parametrosInstance.getParametros();
     try {
       if (os.platform() === 'linux') {
-        console.log('abrir cajon linux')
         permisosImpresora();
         // if(parametros.tipoImpresora === 'USB')
         // {

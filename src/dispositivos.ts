@@ -59,7 +59,10 @@ export class Dispositivos {
   async getDeviceVisor() {
     const parametros = await parametrosInstance.getEspecialParametros();
     if (parametros.visor != undefined) {
-      if (parametros.visor.includes('COM') || parametros.visor == 'SI') {
+      if(parametros.visor == 'MQTT'){
+        return 'MQTT'
+      }
+      if (parametros.visor.includes('COM') || parametros.visor == 'SI' ) {
         if (os.platform() === 'win32') {
           const device = new escpos.Serial(parametros.visor, {
             baudRate: 9600,
