@@ -1,5 +1,6 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { cestasInstance } from "./cestas/cestas.clase";
 import { logger } from "./logger";
 import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 
@@ -15,8 +16,17 @@ io.on("connection", (socket) => {
   /* Eze 4.0 */
   socket.on("cargarTrabajadores", async (data) => {
     try {
-      console.log(data);
-      socket.emit("cargarTrabajadores", 456789);
+      socket.emit("cargarTrabajadores", await trabajadoresInstance.getTrabajadoresFichados());
+    } catch (err) {
+      logger.Error(err);
+      console.log(err);
+    }
+  });
+
+  /* Eze 4.0 */
+  socket.on("cargarCestas", async (data) => {
+    try {
+      socket.emit("cargarCestas", await cestasInstance.getAllCestas());
     } catch (err) {
       logger.Error(err);
       console.log(err);
@@ -24,8 +34,6 @@ io.on("connection", (socket) => {
   });
 });
 
-
-
 httpServer.listen(5051);
-io.emit("cargarTrabajadores", "putaqtepario")
+
 export { io };
