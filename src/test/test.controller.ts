@@ -1,11 +1,10 @@
-import {Body, Controller, Post} from '@nestjs/common';
-import {ticketsInstance} from 'src/tickets/tickets.clase';
+import { Body, Controller, Post } from "@nestjs/common";
+import { io } from "../sockets.gateway";
 
-
-@Controller('test')
+@Controller("test")
 export class TestController {
-    @Post('test')
+  @Post("test")
   imprimirAlgo(@Body() parms) {
-    return ticketsInstance.anularTicket(2);
+    io.emit("cargarTrabajadores", "putaqtepario")
   }
 }

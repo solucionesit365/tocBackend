@@ -47,7 +47,7 @@ export class TrabajadoresClase {
   }
 
   /* Eze 4.0 */
-  getTrabajadoresFichados= async (): Promise<TrabajadoresInterface[]> => await schTrabajadores.getTrabajadoresFichados();
+  getTrabajadoresFichados = async (): Promise<TrabajadoresInterface[]> => await schTrabajadores.getTrabajadoresFichados();
 
   /* Eze 4.0 */
   async ficharTrabajador(idTrabajador: number): Promise<boolean> {
@@ -106,9 +106,6 @@ export class TrabajadoresClase {
     };
     return await schTrabajadores.insertNuevoFichaje(objGuardar);
   }
-
-  /* Eze 4.0 */
-  getFichados = async() => await schTrabajadores.buscarTrabajadoresFichados();
 
   /* Eze 4.0 */
   insertarTrabajadores = async (arrayTrabajadores: TrabajadoresInterface[]) => await schTrabajadores.insertarTrabajadores(arrayTrabajadores);

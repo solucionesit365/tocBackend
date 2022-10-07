@@ -119,13 +119,6 @@ export async function insertNuevoFichaje(data): Promise<boolean> {
 }
 
 /* Eze 4.0 */
-export async function buscarTrabajadoresFichados() {
-  const database = (await conexion).db("tocgame");
-  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
-  return await trabajadores.find({ fichado: true }).toArray();
-}
-
-/* Eze 4.0 */
 export async function borrarTrabajadores(): Promise<void> {
   const database = (await conexion).db("tocgame");
   const collectionList = await database.listCollections().toArray();

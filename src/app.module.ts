@@ -12,7 +12,7 @@ import { MenusController } from "./menus/menus.controller"; // 100%
 import { CajaController } from "./caja/caja.controller";
 import { ClientesController } from "./clientes/clientes.controller";
 import { ImpresoraController } from "./impresora/impresora.controller";
-import { SocketGateway } from "./sockets.gateway";
+// import { SocketGateway } from "./sockets.gateway";
 import { DevolucionesController } from "./devoluciones/devoluciones.controller";
 import { MovimientosController } from "./movimientos/movimientos.controller";
 import { PruebasController } from "./pruebas/pruebas.controller";
@@ -59,6 +59,6 @@ import { TarifasController } from './tarifas/tarifas.controller';
     SatelitesController,
     TarifasController,
   ],
-  providers: [SocketGateway],
+  // providers: [SocketGateway],
 })
 export class AppModule {}
