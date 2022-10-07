@@ -517,6 +517,21 @@ export class CestaClase {
     return res;
   }
 
+  async modificarNombreCesta(cestaId, nombreArticulo) {
+  
+    const miCesta = await this.getCesta(cestaId);
+
+    miCesta.lista.forEach(element => {
+      if (element.nombre.includes('Varis')){
+        element.nombre = nombreArticulo; 
+      }
+      
+    });
+    return schCestas.modificarNombreCesta(cestaId, miCesta.lista);
+
+
+  }
+
   async enviarACocina(idCesta) {
     const cestaActual = await this.getCesta(idCesta);
     const nombreMesa = cestaActual.idCestaSincro ? cestaActual.idCestaSincro.split(' ')[0] === 'Taula' ? cestaActual.idCestaSincro : 'Barra' : 'Barra';

@@ -322,6 +322,25 @@ export class CestasController {
       }
     }
 
+    @Post('modificarNombreCesta')
+    modificarNombreCesta(@Body() params) {
+      if (params.cestaId && params.nombreArticulo) {
+        return cestas.modificarNombreCesta(params.cestaId, params.nombreArticulo).then((res) => {
+          return {
+            error: false,
+            bloqueado: false,
+            cesta: res,
+          };
+        }).catch((err) => {
+          console.log(err);
+          return {
+            error: true,
+            bloqueado: false,
+          };
+        });
+     }
+    }
+
     @Post('enviarACocina')
     enviarACocina(@Body() params) {
       if (params.idCesta) {
