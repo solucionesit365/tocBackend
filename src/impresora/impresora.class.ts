@@ -370,13 +370,26 @@ export class Impresora {
 
       if(tipoImpresora ==='MQTT'){
         console.log('mqtt')
-        client.publish('Impresora', `${cabecera} Data: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()} 
-        Factura simplificada N: ${numFactura} Ates per: ${nombreDependienta} ${detalleClienteVip} ${detalleNombreCliente}
-        ${detallePuntosCliente} Quantitat      Article        Import (EUR) ${detalles} ${pagoTarjeta} ${pagoTkrs} ${infoConsumoPersonal}
-        ${pagoDevolucion} TOTAL:  ${total.toFixed(2)} € Base IVA         IVA         IMPORT ${detalleIva} ID:  ${random()}  -  ${random()} ${pie}`)
+        client.publish('Visor', `${cabecera} 
+        \nData: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()} 
+        \nFactura simplificada N: ${numFactura} 
+        \nAtes per: ${nombreDependienta} 
+        \n${detalleClienteVip} 
+        \n${detalleNombreCliente}
+        \n${detallePuntosCliente} 
+        \nQuantitat      Article        Import (EUR) 
+        \n${detalles} 
+        \n${pagoTarjeta}
+        \n${pagoTkrs} 
+        \n${infoConsumoPersonal}
+        \n${pagoDevolucion} 
+        \nTOTAL:  ${total.toFixed(2)} € 
+        \nBase IVA         IVA         IMPORT 
+        \n${detalleIva} 
+        \nID:  ${random()}  -  ${random()} n\${pie}`)
       }else{
         device.open(function() {
-          printer
+          printer 
   
               .setCharacterCodeTable(19)
               .encode('CP858')
@@ -781,6 +794,12 @@ export class Impresora {
       //   var device = new escpos.USB('0x67b','0x2303');
       const device = await dispositivos.getDeviceVisor();
       if (device != null) {
+       
+          if(device === 'MQTT'){
+            client.publish('Visor',`${datosExtra} \n ${data.texto}`)
+            return
+          }
+
         const options = {encoding: 'iso88591'};
         const printer = new escpos.Screen(device, options);
 
