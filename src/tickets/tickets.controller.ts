@@ -1,6 +1,7 @@
 import { Controller, Post, Body } from "@nestjs/common";
 import { ticketsInstance } from "./tickets.clase";
 import { movimientosInstance } from "../movimientos/movimientos.clase";
+import { logger } from "../logger";
 
 @Controller("tickets")
 export class TicketsController {
@@ -11,7 +12,7 @@ export class TicketsController {
       if (inicioTime && finalTime) return await ticketsInstance.getTicketsIntervalo(inicioTime, finalTime);
       throw Error("Error, faltan datos en getTiketsIntervalo() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -23,7 +24,7 @@ export class TicketsController {
       if (ticketId) await ticketsInstance.getTicketById(ticketId);
       throw Error("Error, faltan datos en getTicket() controller"); 
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -41,7 +42,7 @@ export class TicketsController {
       }
       throw Error("Error, faltan datos en crearTicket() controller 1");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -53,7 +54,7 @@ export class TicketsController {
       if (ticketId) return await ticketsInstance.anularTicket(ticketId);
       throw Error("Error, faltan datos en rectificativa() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

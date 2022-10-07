@@ -1,5 +1,6 @@
 import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
 import { TrabajadoresInterface } from "src/trabajadores/trabajadores.interface";
+import { logger } from "../logger";
 
 export class DoctorClass {
     /* Eze 4.0 */
@@ -17,7 +18,7 @@ export class DoctorClass {
         try {
             return true;
         } catch (err) {
-            console.log(err);
+            logger.Error(err);
             return false;
         }
     }

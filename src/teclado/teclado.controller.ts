@@ -2,7 +2,7 @@ import {Controller, Post, Body} from '@nestjs/common';
 import { UtilesModule } from 'src/utiles/utiles.module';
 import {cestasInstance} from '../cestas/cestas.clase';
 import {tecladoInstance} from './teclado.clase';
-
+import { logger } from "../logger";
 
 @Controller('teclado')
 export class TecladoController {
@@ -35,7 +35,7 @@ export class TecladoController {
       }
       throw Error("Faltan datos en cestas (controller) > clickTeclaArticulo");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

@@ -6,6 +6,7 @@ const os = require('os');
 escpos.USB = require('escpos-usb');
 escpos.Serial = require('escpos-serialport');
 escpos.Screen = require('escpos-screen');
+import { logger } from "./logger";
 
 export class Dispositivos {
   async getDevice() {
@@ -22,20 +23,17 @@ export class Dispositivos {
           });
           return device;
         } else {
-          console.log('Parametros de impresora no configurados');
+          logger.Info('Parametros de impresora no configurados');
           return null;
         }
       } catch (err) {
-        console.log(err);
+        logger.Error(err);
         return null;
       }
     } else if (os.platform() === 'win32') {
       try {
         if (parametros.tipoImpresora == 'USB') {
-          // const device: number = new escpos.USB();
-          console.log('OBSERVÁ: ', parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
           const device: number = new escpos.USB(parametros.impresoraUsbInfo.vid.toUpperCase(), parametros.impresoraUsbInfo.pid.toUpperCase());
-          console.log(device);
           return device;
         } else if (parametros.tipoImpresora == 'SERIE') {
           const device = new escpos.Serial('COM1', {
@@ -44,11 +42,11 @@ export class Dispositivos {
           });
           return device;
         } else {
-          console.log('Parametros de impresora no configurados');
+          logger.Info('Parametros de impresora no configurados');
           return null;
         }
       } catch (err) {
-        console.log(err.message);
+        logger.Error(err.message);
         return null;
       }
     }

@@ -1,5 +1,5 @@
 import { ticketsInstance } from "./tickets/tickets.clase";
-import { socket, emitSocket } from "./sanPedro";
+import { emitSocket } from "./sanPedro";
 import { parametrosInstance } from "./parametros/parametros.clase";
 import { cajaInstance } from "./caja/caja.clase";
 import { movimientosInstance } from "./movimientos/movimientos.clase";
@@ -11,7 +11,7 @@ import { limpiezaFichajes } from "./trabajadores/trabajadores.mongodb";
 import { limpiezaCajas } from "./caja/caja.mongodb";
 import { limpiezaMovimientos } from "./movimientos/movimientos.mongodb";
 import { tarifasInstance } from "./tarifas/tarifas.class";
-
+import { logger } from "./logger";
 let enProcesoTickets = false;
 let enProcesoMovimientos = false;
 
@@ -30,14 +30,14 @@ async function sincronizarTickets(continuar: boolean = false) {
           return true;
         }
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error("No hay parámetros definidos en la BBDD");
       }
     }
     enProcesoTickets = false;
     return false;
   } catch (err) {
     enProcesoTickets = false;
-    console.log(err);
+    logger.Error(err);
   }
 }
 
@@ -56,14 +56,14 @@ function sincronizarCajas() {
             }
           })
           .catch((err) => {
-            console.log(err);
+            logger.Error(err);
           });
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error("No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      console.log(err);
+      logger.Error(err);
     });
 }
 
@@ -82,13 +82,13 @@ async function sincronizarMovimientos(continuar: boolean = false) {
           return true;
         }
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error("No hay parámetros definidos en la BBDD");
       }
     }
     enProcesoMovimientos = false;
   } catch (err) {
     enProcesoMovimientos = false;
-    console.log(err);
+    logger.Error(err);
   }
 }
 
@@ -108,14 +108,14 @@ function sincronizarFichajes() {
             }
           })
           .catch((err) => {
-            console.log(err);
+            logger.Error(err);
           });
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error("No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      console.log(err);
+      logger.Error(err);
     });
 }
 
@@ -135,14 +135,14 @@ function sincronizarDevoluciones() {
             }
           })
           .catch((err) => {
-            console.log(err);
+            logger.Error(err);
           });
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error("No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      console.log(err);
+      logger.Error(err);
     });
 }
 
@@ -150,14 +150,14 @@ async function actualizarTarifas() {
   try {
     await tarifasInstance.actualizarTarifas();
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
   }
 }
 
 /* Actualiza precios, teclado y promociones (es decir, todo) */
 function actualizarTeclados() {
   tecladoInstance.actualizarTeclado().catch((err) => {
-    console.log(err);
+    logger.Error(err);
   });
 }
 

@@ -6,6 +6,7 @@ import {
   MonedasInterface,
   TiposInfoMoneda,
 } from "./caja.interface";
+import { logger } from "../logger";
 
 /* Eze 4.0 */
 export async function getInfoCajaAbierta(): Promise<CajaAbiertaInterface> {
@@ -40,7 +41,7 @@ export async function limpiezaCajas(): Promise<boolean> {
       })
     ).acknowledged;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }

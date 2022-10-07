@@ -1,5 +1,6 @@
 import { Controller, Get } from "@nestjs/common";
 import { paytefInstance } from "./paytef.class";
+import { logger } from "../logger";
 
 const exec = require("child_process").exec;
 
@@ -10,7 +11,7 @@ export class PaytefController {
     try {
       return await paytefInstance.cancelarOperacionActual();
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -19,7 +20,7 @@ export class PaytefController {
   buscarDispositivos() {
     exec("arp -a", (err, stdout, stderr) => {
       if (err) {
-        console.log(err);
+        logger.Error(err);
       } else {
         let ipTefpay = "";
         const arrayDevices: any = stdout.split(/\r?\n/);

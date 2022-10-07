@@ -1,5 +1,6 @@
 import { Controller, Post, Body } from "@nestjs/common";
 import { devolucionesInstance } from "./devoluciones.clase";
+import { logger } from "../logger";
 
 @Controller("devoluciones")
 export class DevolucionesController {
@@ -15,7 +16,7 @@ export class DevolucionesController {
         );
       throw Error("Error, faltan datos en nuevaDevolucion() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

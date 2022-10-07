@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Get } from "@nestjs/common";
 import { trabajadoresInstance } from "./trabajadores.clase";
 import { cestasInstance } from "../cestas/cestas.clase";
+import { logger } from "../logger";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -11,7 +12,7 @@ export class TrabajadoresController {
     try {
       return await trabajadoresInstance.getTrabajadoresFichados();
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -22,7 +23,7 @@ export class TrabajadoresController {
     try {
       return await trabajadoresInstance.buscar(busqueda);
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -39,7 +40,7 @@ export class TrabajadoresController {
       }
       throw Error("Error, faltan datos en fichar() trabajadores controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -51,7 +52,7 @@ export class TrabajadoresController {
       if (idTrabajador) return await trabajadoresInstance.desficharTrabajador(idTrabajador);
       throw Error("Error, faltan datos en desfichar() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -62,7 +63,7 @@ export class TrabajadoresController {
     try {
       return await trabajadoresInstance.actualizarTrabajadores();
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -74,7 +75,7 @@ export class TrabajadoresController {
       if (idTrabajador) return await trabajadoresInstance.inicioDescanso(idTrabajador);
       throw Error("Error, faltan datos en inicioDescanso() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -85,7 +86,7 @@ export class TrabajadoresController {
     try {
       if (idTrabajador) return await trabajadoresInstance.finDescanso(idTrabajador);
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

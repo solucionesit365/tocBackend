@@ -1,5 +1,6 @@
 import { FamiliasInterface } from "./familias.interface";
 import * as schFamilias from "./familias.mongodb";
+import { logger } from "../logger";
 
 export class FamiliasClass {
   /* Eze 4.0 */
@@ -7,7 +8,7 @@ export class FamiliasClass {
     try {
       return await schFamilias.insertarFamilias(arrayFamilias);
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

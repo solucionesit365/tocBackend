@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from "@nestjs/common";
 import { articulosInstance } from "./articulos.clase";
-
+import { logger } from "../logger";
 @Controller("articulos")
 export class ArticulosController {
   /* Eze 4.0 */
@@ -14,7 +14,7 @@ export class ArticulosController {
         );
       throw Error("Error, faltan datos en getArticulo controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -27,7 +27,7 @@ export class ArticulosController {
   //     params.precioBase &&
   //     params.precioConIva
   //   ) {
-  //     // console.log('Hola', params.idArticulo, params.nombre, params.precioBase, params.precioConIva)
+  //     // logger.Error('Hola', params.idArticulo, params.nombre, params.precioBase, params.precioConIva)
   //     return articulosInstance
   //       .editarArticulo(
   //         params.idArticulo,

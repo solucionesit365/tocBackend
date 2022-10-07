@@ -3,6 +3,7 @@ import {TicketsInterface} from './tickets.interface';
 import {UtilesModule} from '../utiles/utiles.module';
 import { ticketsInstance } from './tickets.clase';
 import { parametrosInstance } from '../parametros/parametros.clase';
+import { logger } from "../logger";
 
 /* Eze v23 */
 export async function limpiezaTickets(): Promise<boolean> {
@@ -11,7 +12,7 @@ export async function limpiezaTickets(): Promise<boolean> {
     const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.deleteMany({enviado: true, timestamp: {$lte: UtilesModule.restarDiasTimestamp(Date.now())}})).acknowledged;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }
@@ -23,7 +24,7 @@ export async function getTicketByID(idTicket: number): Promise<TicketsInterface>
     const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.findOne({_id: idTicket});
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return null;
   }
 }
@@ -35,7 +36,7 @@ export async function getTicketsIntervalo(inicioTime: number, finalTime: number)
     const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.find({timestamp: {$lte: finalTime, $gte: inicioTime}}).toArray();
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return [];
   }
 }
@@ -68,7 +69,7 @@ export async function getDedudaGlovo(inicioTime: number, finalTime: number): Pro
     }
     return suma;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return 0;
   }
 }
@@ -93,7 +94,7 @@ export async function getTotalTkrs(inicioTime: number, finalTime: number): Promi
     }
     return suma;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return 0;
   }
 }
@@ -108,7 +109,7 @@ export async function getTicketMasAntiguo(): Promise<TicketsInterface> {
     const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.findOne({enviado: false}, {sort: {_id: 1}}) as TicketsInterface;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return null;
   }
 }
@@ -120,7 +121,7 @@ export async function getUltimoTicket(): Promise<TicketsInterface> {
     const tickets = database.collection<TicketsInterface>("tickets");
     return await tickets.findOne({}, { sort: { _id: -1 } });
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return null;
   }
 }
@@ -132,7 +133,7 @@ export async function nuevoTicket(ticket: TicketsInterface): Promise<boolean> {
     const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.insertOne(ticket)).acknowledged;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }
@@ -144,7 +145,7 @@ export async function desbloquearTicket(idTicket: number) {
     const tickets = database.collection<TicketsInterface>("tickets");
     return (await tickets.updateOne({ _id: idTicket }, {$set: { "bloqueado": false }}, { upsert: true })).acknowledged;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }
@@ -158,7 +159,7 @@ export async function actualizarEstadoTicket(ticket: TicketsInterface): Promise<
       "enviado": ticket.enviado,
     }})).acknowledged;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }
@@ -172,7 +173,7 @@ export async function borrarTicket(idTicket: number): Promise<boolean> {
     const resSetUltimoTicket = await parametrosInstance.setUltimoTicket((idTicket-1 < 0) ? (0) : (idTicket-1));
     return (resultado.acknowledged && resSetUltimoTicket);
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }
@@ -204,7 +205,7 @@ export async function anularTicket(idTicket: number): Promise<boolean> {
       }
       return false;
     } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }

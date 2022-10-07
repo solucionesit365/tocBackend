@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Body } from "@nestjs/common";
 import { UtilesModule } from "../utiles/utiles.module";
 import { cajaInstance } from "./caja.clase";
+import { logger } from "../logger";
 
 @Controller("caja")
 export class CajaController {
@@ -29,7 +30,7 @@ export class CajaController {
       }
       throw Error("Error cerrarCaja > Faltan datos");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -47,7 +48,7 @@ export class CajaController {
         });
       throw Error("Error abrirCaja > Faltan datos o son incorrectos");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -58,7 +59,7 @@ export class CajaController {
     try {
       return await cajaInstance.cajaAbierta();
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -69,7 +70,7 @@ export class CajaController {
     try {
       return cajaInstance.getMonedas("CLAUSURA");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }

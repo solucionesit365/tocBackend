@@ -4,6 +4,7 @@ import { articulosInstance } from "../articulos/articulos.clase";
 import { parametrosInstance } from "../parametros/parametros.clase";
 import { promocionesInstance } from "../promociones/promociones.clase";
 import * as schTeclas from "./teclado.mongodb";
+import { logger } from "../logger";
 
 export class TecladoClase {
   insertarTeclas(arrayTeclas) {
@@ -13,7 +14,7 @@ export class TecladoClase {
         return res.acknowledged;
       })
       .catch((err) => {
-        console.log(err);
+        logger.Error(err);
         return false;
       });
   }
@@ -56,7 +57,7 @@ export class TecladoClase {
       }
       return false;
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

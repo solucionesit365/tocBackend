@@ -9,9 +9,7 @@ import { paytefInstance } from "./paytef/paytef.class";
 import { Socket } from "dgram";
 import { ticketsInstance } from "./tickets/tickets.clase";
 import { cestasInstance } from "./cestas/cestas.clase";
-
-const net = require("net");
-const fs = require("fs");
+import { logger } from "./logger";
 
 @WebSocketGateway(5051, {
   cors: {
@@ -27,12 +25,14 @@ export class SocketGateway {
 
   /* Eze 4.0 */
   handleConnection(client: any, ...args: any[]) {
-    console.log("Nuevo cliente conectado por socket");
+    logger.Info("Nuevo cliente conectado por socket 1");
+    console.warn("Nuevo cliente conectado por socket");
   }
 
   /* Eze 4.0 */
   handleDisconnect() {
-    console.log("Se ha desconectado un cliente del socket");
+    logger.Error("Nuevo cliente conectado por socket 2");
+    logger.Error("Se ha desconectado un cliente del socket");
   }
 
   /* Eze 4.0 */
@@ -74,7 +74,7 @@ export class SocketGateway {
       }
       throw Error("Error, faltan datos en iniciarTransaccion() socket.gateway");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       paytefInstance.cancelarOperacionActual();
       client.emit("consultaPaytef", false);
     }

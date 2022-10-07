@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { doctorInstance } from './doctor.class';
+import { logger } from "../logger";
 
 @Controller('doctor')
 export class DoctorController {
@@ -9,7 +10,7 @@ export class DoctorController {
         try {
             return await doctorInstance.checkTrabajadores();
         } catch (err) {
-            console.log(err);
+            logger.Error(err);
             return false;
         }
     }
@@ -20,7 +21,7 @@ export class DoctorController {
         try {
             return await doctorInstance.checkCestas();
         } catch (err) {
-            console.log(err);
+            logger.Error(err);
             return false;
         }
     }

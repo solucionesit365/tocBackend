@@ -1,38 +1,30 @@
-// 100%
 import { ParametrosInterface } from "./parametros.interface";
 import * as schParametros from "./parametros.mongodb";
+import { logger } from "../logger";
 
 export class ParametrosClase {
-  /* Eze v23 */
-  getParametros(): Promise<ParametrosInterface> {
-    return schParametros.getParametros();
-  }
+  /* Eze 4.0 */
+  getParametros = async (): Promise<ParametrosInterface> =>
+    await schParametros.getParametros();
 
-  /* Eze v23 */
-  actParametros(params: ParametrosInterface) {
-    return schParametros.setParametros(params);
-  }
+  /* Eze 4.0 */
+  actParametros = async (params: ParametrosInterface) =>
+    await schParametros.setParametros(params);
 
-  /* Eze v23 */
-  setParametros(params: ParametrosInterface): Promise<boolean> {
-    return schParametros.setParametros(params);
-  }
+  /* Eze 4.0 */
+  setParametros = async (params: ParametrosInterface): Promise<boolean> =>
+    await schParametros.setParametros(params);
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   async todoInstalado(): Promise<boolean> {
-    try {
-      const params = await this.getParametros();
-      if (params) {
-        return this.checkParametrosOK(params);
-      }
-      return false;
-    } catch (err) {
-      console.log(err);
-      return false;
+    const params = await this.getParametros();
+    if (params) {
+      return this.checkParametrosOK(params);
     }
+    return false;
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   checkParametrosOK(params: ParametrosInterface): boolean {
     if (
       params._id === "PARAMETROS" &&
@@ -49,32 +41,32 @@ export class ParametrosClase {
     return false;
   }
 
-  /* Eze v23 */
-  actualizarParametros() {
-    console.log("Lee el comentario");
-    /*
-      Esto antes actualizaba los parámetros del this.parametros de esta clase, pero
-      a partir de ahora, actualizarParametros se refiere a descargar datos del San Pedro
-      o Gestión de la Tienda y hará un set en mongodb del tpv.
-     */
-  }
+  // /* Eze v23 */
+  // actualizarParametros() {
+  //   logger.Error("Lee el comentario");
+  //   /*
+  //     Esto antes actualizaba los parámetros del this.parametros de esta clase, pero
+  //     a partir de ahora, actualizarParametros se refiere a descargar datos del San Pedro
+  //     o Gestión de la Tienda y hará un set en mongodb del tpv.
+  //    */
+  // }
 
-  /* Eze v23 */
-  setUltimoTicket(idTicket: number): Promise<boolean> {
-    return schParametros.setUltimoTicket(idTicket);
-  }
+  /* Eze 4.0 */
+  setUltimoTicket = async (idTicket: number): Promise<boolean> =>
+    await schParametros.setUltimoTicket(idTicket);
 
-  /* Eze v23 */
-  setVidAndPid(vid: string, pid: string, com: string): Promise<boolean> {
-    return schParametros.setVidAndPid(vid, pid, com);
-  }
+  /* Eze 4.0 */
+  setVidAndPid = async (
+    vid: string,
+    pid: string,
+    com: string
+  ): Promise<boolean> => await schParametros.setVidAndPid(vid, pid, com);
 
-  /* Eze v23 */
-  setIpPaytef(ip: string): Promise<boolean> {
-    return schParametros.setIpPaytef(ip);
-  }
+  /* Eze 4.0 */
+  setIpPaytef = async (ip: string): Promise<boolean> =>
+    await schParametros.setIpPaytef(ip);
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   generarObjetoParametros(): ParametrosInterface {
     return {
       _id: "PARAMETROS",
@@ -94,7 +86,7 @@ export class ParametrosClase {
       ultimoTicket: -1,
       impresoraUsbInfo: { vid: "", pid: "" },
       token: undefined,
-    }; 
+    };
   }
 }
 

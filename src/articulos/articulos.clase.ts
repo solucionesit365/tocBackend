@@ -32,7 +32,7 @@ export class Articulos {
 
   // async editarArticulo(id, nombre, precioBase, precioConIva) {
   //   const resultado = await schArticulos.editarArticulo(id, nombre, precioBase, precioConIva);
-  //   // console.log(resultado)
+  //   // logger.Error(resultado)
   //   return resultado;
   // }
 }

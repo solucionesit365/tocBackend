@@ -1,5 +1,6 @@
 import { conexion } from "../conexion/mongodb";
 import { CestasInterface } from "./cestas.interface";
+import { logger } from "../logger";
 
 /* Eze 4.0 */
 export async function getCestaById(idCesta: CestasInterface["_id"]): Promise<CestasInterface> {
@@ -8,7 +9,7 @@ export async function getCestaById(idCesta: CestasInterface["_id"]): Promise<Ces
     const cesta = database.collection<CestasInterface>("cestas");
     return await cesta.findOne({ _id: idCesta });
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return null;
   }
 }
@@ -22,7 +23,7 @@ export async function deleteCesta(idCesta: CestasInterface["_id"]): Promise<bool
     const resultado = await cesta.deleteOne({ _id: idCesta });
     return (resultado.acknowledged && resultado.deletedCount === 1);
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
   }
 }
 
@@ -33,7 +34,7 @@ export async function getAllCestas(): Promise<CestasInterface[]> {
     const cesta = database.collection<CestasInterface>("cestas");
     return await cesta.find().toArray();
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return [];
   }
 }
@@ -56,7 +57,7 @@ export async function createCesta(cesta: CestasInterface): Promise<boolean> {
     const cestasColeccion = database.collection<CestasInterface>("cestas");
     return (await cestasColeccion.insertOne(cesta)).acknowledged;
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
     return false;
   }
 }

@@ -12,9 +12,10 @@ import { articulosInstance } from "../articulos/articulos.clase";
 import { cajaInstance } from "../caja/caja.clase";
 import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ClientesInterface } from "../clientes/clientes.interface";
-import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
-import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+// import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
+// import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ObjectId } from "mongodb";
+import { logger } from "../logger";
 
 export class CestaClase {
   /* Eze 4.0 */
@@ -71,7 +72,7 @@ export class CestaClase {
       await this.recalcularIvas(cesta);
       return true;
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

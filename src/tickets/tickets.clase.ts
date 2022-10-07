@@ -3,7 +3,7 @@ import * as schTickets from "./tickets.mongodb";
 import { cestasInstance } from "../cestas/cestas.clase";
 import { parametrosInstance } from "../parametros/parametros.clase";
 import { CestasInterface } from "../cestas/cestas.interface";
-
+import { logger } from "../logger";
 
 export class TicketsClase {
   /* Eze 4.0 */
@@ -58,7 +58,7 @@ export class TicketsClase {
       };
       return nuevoTicket;
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }

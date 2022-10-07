@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get } from "@nestjs/common";
 import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
 import { cestasInstance } from "./cestas.clase";
+import { logger } from "../logger";
 
 @Controller("cestas")
 export class CestasController {
@@ -12,7 +13,7 @@ export class CestasController {
 
       throw Error("Error, faltan datos en borrarCesta controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -25,7 +26,7 @@ export class CestasController {
         return await cestasInstance.borrarItemCesta(idCesta, index);
       throw Error("Error, faltan datos en borrarItemCesta controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -38,7 +39,7 @@ export class CestasController {
 
       throw Error("Error, faltan datos en getCestaById() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -53,7 +54,7 @@ export class CestasController {
       }
       throw Error("Error, faltan datos en crearCesta controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -66,7 +67,7 @@ export class CestasController {
         return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
       throw Error("Error, faltan datos en cambiarCestaTrabajador controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -77,7 +78,7 @@ export class CestasController {
     try {
       return await cestasInstance.getAllCestas();
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -90,7 +91,7 @@ export class CestasController {
         return await cestasInstance.regalarItem(idCesta, index);
       throw Error("Error, faltan datos en regalarProducto controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

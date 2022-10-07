@@ -1,13 +1,14 @@
 import { parametrosInstance } from "../parametros/parametros.clase";
 import { MovimientosInterface } from "./movimientos.interface";
 import * as schMovimientos from "./movimientos.mongodb";
-import { impresoraInstance } from "../impresora/impresora.class";
-import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+// import { impresoraInstance } from "../impresora/impresora.class";
+// import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+import { logger } from "../logger";
 
 const moment = require("moment");
 const Ean13Utils = require("ean13-lib").Ean13Utils;
-const TIPO_ENTRADA = "ENTRADA";
-const TIPO_SALIDA = "SALIDA";
+// const TIPO_ENTRADA = "ENTRADA";
+// const TIPO_SALIDA = "SALIDA";
 
 function getNumeroTresDigitos(x: number) {
   let devolver = "";
@@ -28,7 +29,7 @@ export class MovimientosClase {
   getMovimientosIntervalo = (inicioTime: number, finalTime: number) =>
     schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   public async nuevoMovimiento(
     valor: MovimientosInterface["valor"],
     concepto: MovimientosInterface["concepto"],
@@ -89,7 +90,7 @@ export class MovimientosClase {
       )}${strNumeroCodigosDeBarras}`;
       return codigoFinal;
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }

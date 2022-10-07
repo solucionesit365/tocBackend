@@ -1,4 +1,5 @@
 import { conexion } from "../conexion/mongodb";
+import { logger } from "../logger";
 
 export async function verifyToken(token: string): Promise<any> {
     try {
@@ -7,7 +8,7 @@ export async function verifyToken(token: string): Promise<any> {
         const resultado = await satelites.findOne({ token });
         return resultado;
     } catch (err) {
-        console.log(err);
+        logger.Error(err);
         return false;
     }
 }
@@ -19,7 +20,7 @@ export async function verifyToken(token: string): Promise<any> {
 //         const resultado = await satelites.insertOne({ token });
 //         return resultado;
 //     } catch (err) {
-//         console.log(err);
+//         logger.Error(err);
 //         return false;
 //     }
 // }

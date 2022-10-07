@@ -1,12 +1,13 @@
-import { Controller, Post } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
 import axios from "axios";
 import { parametrosInstance } from "src/parametros/parametros.clase";
 import { paramsTicketInstance } from "./params-ticket.class";
+import { logger } from "../logger";
 
 @Controller("params-ticket")
 export class ParamsTicketController {
-  /* Eze v23 */
-  @Post("descargarInfoTicket")
+  /* Eze 4.0 */
+  @Get("descargarInfoTicket")
   async descargarInfoTicket() {
     try {
       const parametros = await parametrosInstance.getParametros();
@@ -16,7 +17,7 @@ export class ParamsTicketController {
       });
       return await paramsTicketInstance.insertarParametrosTicket(res.data.info);
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }

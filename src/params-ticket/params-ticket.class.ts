@@ -1,26 +1,13 @@
-import * as schParamsTicket from './params-ticket.mongo';
+import * as schParamsTicket from "./params-ticket.mongo";
+import { ParamsTicketInterface } from "./params-ticket.interface";
 
 export class ParamsTicketClass {
-  insertarParametrosTicket(data) {
-    return schParamsTicket.insertarParametrosTicket(data).then((res) => {
-      if (res) {
-        return true;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  insertarParametrosTicket = async (data: ParamsTicketInterface[]) =>
+    await schParamsTicket.insertarParametrosTicket(data);
 
-  getParamsTicket() {
-    return schParamsTicket.getParamsTicket().then((res) => {
-      return res;
-    }).catch((err) => {
-      console.log(err);
-      return [];
-    });
-  }
+  /* Eze 4.0 */
+  getParamsTicket = async () => await schParamsTicket.getParamsTicket();
 }
+
 export const paramsTicketInstance = new ParamsTicketClass();

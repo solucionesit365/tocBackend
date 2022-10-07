@@ -2,23 +2,34 @@ import { Body, Controller, Post, Get, ConsoleLogger } from "@nestjs/common";
 import { parametrosInstance } from "./parametros.clase"
 import axios from "axios";
 import { UtilesModule } from "src/utiles/utiles.module";
+import { logger } from "../logger";
 
 @Controller("parametros")
 export class ParametrosController {
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("todoInstalado")
-  todoInstalado() {
-    return parametrosInstance.todoInstalado();
+  async todoInstalado() {
+    try {
+      return await parametrosInstance.todoInstalado();
+    } catch (err) {
+      logger.Error(err);
+      return false;
+    }
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("getParametros")
-  getParametros() {
-    return parametrosInstance.getParametros();
+  async getParametros() {
+    try {
+      return await parametrosInstance.getParametros();
+    } catch (err) {
+      logger.Error(err);
+      return null;
+    }
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Post("actualizarParametros")
   async actualizarParametros() {
     try {
@@ -30,46 +41,64 @@ export class ParametrosController {
 
       if (!res.data.error) {
         const paramstpv = res.data.info;
-        return parametrosInstance.setParametros(paramstpv);
+        return await parametrosInstance.setParametros(paramstpv);
       }
       return false;
+    } catch (err) {
+      logger.Error(err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Post("setVidAndPid")
+  async vidAndPid(@Body() { vid, pid, com }) {
+    try {
+      if (UtilesModule.checkVariable(vid, pid, com))
+      return await parametrosInstance.setVidAndPid(
+        vid,
+        pid,
+        com
+      );
+      throw Error("Error, faltan datos en setVidAndPid() controller");
+    } catch (err) {
+      logger.Error(err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Get("getVidAndPid")
+  async getVidAndPid() {
+    try {
+      return (await parametrosInstance.getParametros()).impresoraUsbInfo;
+    } catch (err) {
+      logger.Error(err);
+      return null;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Post("setIpPaytef")
+  async setIpPaytef(@Body() { ip }) {
+    try {
+      if (UtilesModule.checkVariable(ip))
+        return await parametrosInstance.setIpPaytef(ip);
+    throw Error("Error, faltan datos en setIpPaytef() controller");
     } catch (err) {
       console.log(err);
       return false;
     }
   }
 
-  /* Eze v23 */
-  @Post("vidAndPid")
-  vidAndPid(@Body() params) {
-    if (UtilesModule.checkVariable(params.vid, params.pid, params.com))
-      return parametrosInstance.setVidAndPid(
-        params.vid,
-        params.pid,
-        params.com
-      );
-
-    return false;
-  }
-
-  /* Eze v23 */
-  @Get("getVidAndPid")
-  async getVidAndPid() {
-    return (await parametrosInstance.getParametros()).impresoraUsbInfo;
-  }
-
-  /* Eze v23 */
-  @Post("setIpPaytef")
-  setIpPaytef(@Body() params) {
-    if (UtilesModule.checkVariable(params.ip))
-      return parametrosInstance.setIpPaytef(params.ip);
-
-    return false;
-  }
-
-  /* Eze v23 */
+  /* Eze 4.0 */
   @Get("getIpPaytef")
   async getIpPaytef() {
-    return (await parametrosInstance.getParametros()).ipTefpay;
+    try {
+      return (await parametrosInstance.getParametros()).ipTefpay;
+    } catch (err) {
+      logger.Error(err);
+      return null;
+    }
   }
 }

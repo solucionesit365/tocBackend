@@ -1,4 +1,5 @@
 import * as schMenus from './menus.mongodb';
+import { logger } from "../logger";
 
 export class MenusClase {
   private bloqueado: boolean;
@@ -27,7 +28,7 @@ export class MenusClase {
     return schMenus.insertarMenus(arrayMenus).then((res) => {
       return res.acknowledged;
     }).catch((err) => {
-      console.log(err);
+      logger.Error(err);
       return false;
     });
   }

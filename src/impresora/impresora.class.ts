@@ -6,13 +6,13 @@ import {TrabajadoresInterface} from '../trabajadores/trabajadores.interface';
 import {clienteInstance} from '../clientes/clientes.clase';
 import {parametrosInstance} from '../parametros/parametros.clase';
 import {Dispositivos} from '../dispositivos';
-import {devolucionesInstance} from 'src/devoluciones/devoluciones.clase';
+// import {devolucionesInstance} from 'src/devoluciones/devoluciones.clase';
 import axios from 'axios';
 import { cajaInstance } from "../caja/caja.clase";
 import { CajaSincro } from "../caja/caja.interface";
 import { movimientosInstance } from '../movimientos/movimientos.clase';
 import { TicketsInterface } from '../tickets/tickets.interface';
-
+import { logger } from "../logger";
 
 const dispositivos = new Dispositivos();
 const escpos = require('escpos');
@@ -32,7 +32,7 @@ function permisosImpresora() {
         echo sa | sudo -S chmod 777 -R /dev/    
     `);
   } catch (err) {
-    console.log(err);
+    logger.Error(err);
   }
 }
 function random() {
@@ -100,10 +100,10 @@ export class Impresora {
 
         }
       } else {
-        console.log('Controlado: dispositivo es null');
+        logger.Error('Controlado: dispositivo es null');
       }
     } catch (err) {
-      console.log('Error1: ', err);
+      logger.Error('Error1: ', err);
       // errorImpresora(err, event);
     }
   }
@@ -131,7 +131,7 @@ export class Impresora {
         parametros.tipoImpresora,
       );
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
     }
   }
 
@@ -159,10 +159,10 @@ export class Impresora {
 
         }
       } else {
-        console.log('Controlado: dispositivo es null');
+        logger.Error('Controlado: dispositivo es null');
       }
     } catch (err) {
-      console.log('Error1: ', err);
+      logger.Error('Error1: ', err);
       // errorImpresora(err, event);
     }
   }
@@ -173,7 +173,7 @@ export class Impresora {
     if (!esDevolucion) {
       infoTicket = await ticketsInstance.getTicketById(idTicket);
     }
-    // console.log(infoTicket)
+    // logger.Error(infoTicket)
     const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajadorById(infoTicket.idTrabajador);
     const parametros = await parametrosInstance.getParametros();
     let sendObject;
@@ -229,7 +229,7 @@ export class Impresora {
   }
 
   private async imprimirRecibo(recibo: string) {
-    console.log('imprimir recibo');
+    logger.Error('imprimir recibo');
     try {
       permisosImpresora();
       const device = await dispositivos.getDevice();
@@ -250,7 +250,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      console.log('Error impresora: ', err);
+      logger.Error('Error impresora: ', err);
     }
   }
 
@@ -259,7 +259,7 @@ export class Impresora {
     const arrayCompra = info.arrayCompra;
     const total = info.total;
     const tipoPago = info.visa;
-    // console.log(tipoPago)
+    // logger.Error(tipoPago)
     const tiposIva = info.tiposIva;
     const cabecera = info.cabecera;
     const pie = info.pie;
@@ -353,7 +353,7 @@ export class Impresora {
       let pagoDevolucion: string = '';
 
       if (tipoPago == 'DEVOLUCION') {
-        // console.log('Entramos en tipo pago devolucion')
+        // logger.Error('Entramos en tipo pago devolucion')
         pagoDevolucion = '-- ES DEVOLUCION --\n';
       }
 
@@ -427,7 +427,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      console.log('Error impresora: ', err);
+      logger.Error('Error impresora: ', err);
     }
   }
 
@@ -486,7 +486,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
     }
   }
 
@@ -523,7 +523,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
     }
   }
 
@@ -567,7 +567,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
     }
   }
 
@@ -655,7 +655,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
     }
   }
 
@@ -694,7 +694,7 @@ export class Impresora {
         });
       }
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
     }
   }
   async mostrarVisor(data) {
@@ -756,13 +756,13 @@ export class Impresora {
 
         }
       } else {
-        console.log('Controlado: dispositivo es null');
+        logger.Error('Controlado: dispositivo es null');
       }
     } catch (err) {
-      console.log('Error2: ', err);
+      logger.Error('Error2: ', err);
       // errorImpresora(err, event);
     }
-    // console.log('El visor da muchos problemas');
+    // logger.Error('El visor da muchos problemas');
   }
   async imprimirEntregas() {
     const params = await parametrosInstance.getParametros();
@@ -789,11 +789,11 @@ export class Impresora {
         }
         return {error: true, info: 'Error, no se encuentra la impresora'};
       } catch (err) {
-        console.log(err);
+        logger.Error(err);
         return {error: true, info: 'Error en CATCH imprimirEntregas() 2'};
       }
     }).catch((err) => {
-      console.log(err);
+      logger.Error(err);
       return {error: true, info: 'Error en CATCH imprimirEntregas() 1'};
     });
   }

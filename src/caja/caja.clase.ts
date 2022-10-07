@@ -12,6 +12,7 @@ import { TicketsInterface } from "../tickets/tickets.interface";
 import { MovimientosInterface } from "../movimientos/movimientos.interface";
 import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { ObjectId } from "mongodb";
+import { logger } from "../logger";
 
 export class CajaClase {
   /* Eze 4.0 */
@@ -189,7 +190,7 @@ export class CajaClase {
           totalSalidas += arrayMovimientos[i].valor;
           break;
         default:
-          console.log("Error, tipo de movimiento desconocido");
+          logger.Error("Error, tipo de movimiento desconocido");
       }
     }
 

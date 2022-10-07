@@ -10,6 +10,7 @@ import { paramsTicketInstance } from "src/params-ticket/params-ticket.class";
 import { menusInstance } from "src/menus/menus.clase";
 import { tecladoInstance } from "src/teclado/teclado.clase";
 import { dobleMenusInstance } from "src/doble-menus/doble-menus.clase";
+import { logger } from "../logger";
 
 @Controller("instalador")
 export class InstaladorController {
@@ -54,7 +55,7 @@ export class InstaladorController {
               }
             })
             .catch((err) => {
-              console.log(err);
+              logger.Error(err);
               return {
                 error: true,
                 mensaje: "Backend: No se ha podido setear parametros",
@@ -65,7 +66,7 @@ export class InstaladorController {
         }
       })
       .catch((err) => {
-        console.log(err);
+        logger.Error(err);
         return {
           error: true,
           mensaje: "Error en pedir parametros/instaladorLicencia de sanPedro",
@@ -134,7 +135,7 @@ export class InstaladorController {
         }
       })
       .catch((err) => {
-        console.log(err);
+        logger.Error(err);
         return {
           error: true,
           mensaje: "Backend: Errro en instalador/descargarTodo. Mirar log",

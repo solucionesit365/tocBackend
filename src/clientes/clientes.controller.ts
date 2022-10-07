@@ -3,6 +3,7 @@ import axios from "axios";
 import { parametrosInstance } from "../parametros/parametros.clase";
 import { clienteInstance } from "./clientes.clase";
 import { ClientesInterface } from "./clientes.interface";
+import { logger } from "../logger";
 
 @Controller("clientes")
 export class ClientesController {
@@ -13,7 +14,7 @@ export class ClientesController {
       if (busqueda) return await clienteInstance.buscar(busqueda);
       throw Error("Error, faltan datos en buscarCliente() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -25,7 +26,7 @@ export class ClientesController {
       if (idCliente) return await clienteInstance.getClienteByID(idCliente);
       throw Error("Error, faltan datos en getClienteByID");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return null;
     }
   }
@@ -39,7 +40,7 @@ export class ClientesController {
       if (arrayClientes) return await clienteInstance.insertarClientes(arrayClientes);
       throw Error("Error, los clientes descargados de San Pedro son null o undefined");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
@@ -61,7 +62,7 @@ export class ClientesController {
       }
       throw Error("Error, faltan datos en crearNuevoCliente() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(err);
       return false;
     }
   }
