@@ -109,3 +109,99 @@
 10:28:27 | Info | 'Nuevo cliente conectado por socket 1' | 
 10:28:29 | Info | 'Nuevo cliente conectado por socket 1' | 
 10:29:08 | Error | '_id no es correcto' | 
+10:29:48 | Error | '_id no es correcto' | 
+10:30:28 | Error | '_id no es correcto' | 
+10:30:40 | Error | 'Nuevo cliente conectado por socket 2' | 
+10:30:40 | Error | 'Se ha desconectado un cliente del socket' | 
+10:30:40 | Info | 'Nuevo cliente conectado por socket 1' | 
+10:30:40 | Error | 'Controlado: dispositivo es null' | 
+10:30:42 | Error | 'Nuevo cliente conectado por socket 2' | 
+10:30:42 | Error | 'Se ha desconectado un cliente del socket' | 
+10:30:43 | Info | 'Nuevo cliente conectado por socket 1' | 
+10:31:07 | Error | 'Nuevo cliente conectado por socket 2' | 
+10:31:07 | Error | 'Se ha desconectado un cliente del socket' | 
+10:31:07 | Info | 'Nuevo cliente conectado por socket 1' | 
+10:31:08 | Error | '_id no es correcto' | 
+10:31:48 | Error | '_id no es correcto' | 
+10:32:28 | Error | '_id no es correcto' | 
+10:33:08 | Error | '_id no es correcto' | 
+10:33:48 | Error | '_id no es correcto' | 
+10:34:28 | Error | '_id no es correcto' | 
+10:35:08 | Error | '_id no es correcto' | 
+10:35:48 | Error | '_id no es correcto' | 
+10:36:28 | Error | '_id no es correcto' | 
+10:37:08 | Error | '_id no es correcto' | 
+10:37:48 | Error | '_id no es correcto' | 
+10:38:28 | Error | '_id no es correcto' | 
+10:39:08 | Error | '_id no es correcto' | 
+10:39:48 | Error | '_id no es correcto' | 
+10:40:30 | Info | 'Nuevo cliente conectado por socket 1' | 
+10:41:09 | Error | '_id no es correcto' | 
+10:41:49 | Error | '_id no es correcto' | 
+10:42:29 | Error | '_id no es correcto' | 
+10:43:09 | Error | '_id no es correcto' | 
+10:43:49 | Error | '_id no es correcto' | 
+10:44:29 | Error | '_id no es correcto' | 
+10:45:09 | Error | '_id no es correcto' | 
+10:45:49 | Error | '_id no es correcto' | 
+10:46:29 | Error | '_id no es correcto' | 
+10:47:09 | Error | '_id no es correcto' | 
+10:47:49 | Error | '_id no es correcto' | 
+10:48:30 | Error | '_id no es correcto' | 
+10:49:09 | Error | '_id no es correcto' | 
+10:49:13 | Error | 'Nuevo cliente conectado por socket 2' | 
+10:49:13 | Error | 'Se ha desconectado un cliente del socket' | 
+10:49:14 | Info | 'Nuevo cliente conectado por socket 1' | 
+10:49:14 | Error | 'Controlado: dispositivo es null' | 
+10:49:49 | Error | '_id no es correcto' | 
+10:50:29 | Error | '_id no es correcto' | 
+10:51:09 | Error | '_id no es correcto' | 
+10:51:26 | Error | 'Nuevo cliente conectado por socket 2' | 
+10:51:26 | Error | 'Se ha desconectado un cliente del socket' | 
+10:51:27 | Info | 'Nuevo cliente conectado por socket 1' | 
+10:51:27 | Error | 'Controlado: dispositivo es null' | 
+10:51:49 | Error | '_id no es correcto' | 
+10:52:29 | Error | '_id no es correcto' | 
+10:53:09 | Error | '_id no es correcto' | 
+10:53:49 | Error | '_id no es correcto' | 
+10:54:29 | Error | '_id no es correcto' | 
+10:55:09 | Error | '_id no es correcto' | 
+10:55:49 | Error | '_id no es correcto' | 
+10:56:29 | Error | '_id no es correcto' | 
+10:57:09 | Error | '_id no es correcto' | 
+10:57:49 | Error | '_id no es correcto' | 
+10:58:29 | Error | '_id no es correcto' | 
+10:59:09 | Error | '_id no es correcto' | 
+10:59:49 | Error | '_id no es correcto' | 
+11:00:29 | Error | '_id no es correcto' | 
+11:01:09 | Error | '_id no es correcto' | 
+11:01:49 | Error | '_id no es correcto' | 
+11:02:29 | Error | '_id no es correcto' | 
+11:02:58 | Info | 'Nuevo cliente conectado por socket 1' | 
+11:03:38 | Error | '_id no es correcto' | 
+11:04:18 | Error | '_id no es correcto' | 
+11:04:58 | Error | '_id no es correcto' | 
+11:05:38 | Error | '_id no es correcto' | 
+11:06:18 | Error | '_id no es correcto' | 
+11:06:35 | Info | 'Nuevo cliente conectado por socket 1' | 
+11:07:14 | Error | '_id no es correcto' | 
+11:07:54 | Error | '_id no es correcto' | 
+11:08:21 | Info | 'Nuevo cliente conectado por socket 1' | 
+11:08:47 | Info | 'Nuevo cliente conectado por socket 1' | 
+11:09:26 | Error | '_id no es correcto' | 
+11:10:06 | Error | '_id no es correcto' | 
+11:10:46 | Error | '_id no es correcto' | 
+11:11:26 | Error | '_id no es correcto' | 
+11:12:06 | Error | '_id no es correcto' | 
+11:12:46 | Error | '_id no es correcto' | 
+11:13:26 | Error | '_id no es correcto' | 
+11:14:06 | Error | '_id no es correcto' | 
+11:14:46 | Error | '_id no es correcto' | 
+11:15:26 | Error | '_id no es correcto' | 
+11:16:06 | Error | '_id no es correcto' | 
+11:16:46 | Error | '_id no es correcto' | 
+11:17:26 | Error | '_id no es correcto' | 
+11:18:06 | Error | '_id no es correcto' | 
+11:18:46 | Error | '_id no es correcto' | 
+11:18:50 | Info | 'Nuevo cliente conectado por socket 1' | 
+11:18:57 | Info | 'Nuevo cliente conectado por socket 1' | 

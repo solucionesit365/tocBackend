@@ -79,4 +79,14 @@ export class SocketGateway {
       client.emit("consultaPaytef", false);
     }
   }
+
+  /*  */
+  @SubscribeMessage("cargarTrabajadores")
+  async cargarTrabajadores(@ConnectedSocket() client: Socket) {
+    try {
+
+    } catch (err) {
+
+    }
+  }
 }

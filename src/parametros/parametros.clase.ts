@@ -1,6 +1,5 @@
 import { ParametrosInterface } from "./parametros.interface";
 import * as schParametros from "./parametros.mongodb";
-import { logger } from "../logger";
 
 export class ParametrosClase {
   /* Eze 4.0 */
