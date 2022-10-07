@@ -370,7 +370,7 @@ export class Impresora {
 
       if(tipoImpresora ==='MQTT'){
         console.log('mqtt')
-        client.publish('Visor', `${cabecera} 
+        client.publish('Impresora', `${cabecera} 
         \nData: ${diasSemana[fecha.getDay()]} ${fecha.getDate()}-${fecha.getMonth() + 1}-${fecha.getFullYear()}  ${(fecha.getHours()<10?'0':'') + fecha.getHours()}:${(fecha.getMinutes()<10?'0':'') + fecha.getMinutes()} 
         \nFactura simplificada N: ${numFactura} 
         \nAtes per: ${nombreDependienta} 
