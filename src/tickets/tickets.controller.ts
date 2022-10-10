@@ -12,7 +12,7 @@ export class TicketsController {
       if (inicioTime && finalTime) return await ticketsInstance.getTicketsIntervalo(inicioTime, finalTime);
       throw Error("Error, faltan datos en getTiketsIntervalo() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(105, err);
       return null;
     }
   }
@@ -24,7 +24,7 @@ export class TicketsController {
       if (ticketId) await ticketsInstance.getTicketById(ticketId);
       throw Error("Error, faltan datos en getTicket() controller"); 
     } catch (err) {
-      logger.Error(err);
+      logger.Error(106, err);
       return null;
     }
   }
@@ -42,7 +42,7 @@ export class TicketsController {
       }
       throw Error("Error, faltan datos en crearTicket() controller 1");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(107, err);
       return false;
     }
   }
@@ -54,7 +54,7 @@ export class TicketsController {
       if (ticketId) return await ticketsInstance.anularTicket(ticketId);
       throw Error("Error, faltan datos en rectificativa() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(108, err);
       return false;
     }
   }

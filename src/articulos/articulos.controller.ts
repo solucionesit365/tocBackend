@@ -14,7 +14,7 @@ export class ArticulosController {
         );
       throw Error("Error, faltan datos en getArticulo controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(50, err);
       return null;
     }
   }

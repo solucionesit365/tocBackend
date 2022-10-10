@@ -30,14 +30,14 @@ async function sincronizarTickets(continuar: boolean = false) {
           return true;
         }
       } else {
-        logger.Error("No hay parámetros definidos en la BBDD");
+        logger.Error(4, "No hay parámetros definidos en la BBDD");
       }
     }
     enProcesoTickets = false;
     return false;
   } catch (err) {
     enProcesoTickets = false;
-    logger.Error(err);
+    logger.Error(5, err);
   }
 }
 
@@ -56,14 +56,14 @@ function sincronizarCajas() {
             }
           })
           .catch((err) => {
-            logger.Error(err);
+            logger.Error(6, err);
           });
       } else {
-        logger.Error("No hay parámetros definidos en la BBDD");
+        logger.Error(7, "No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      logger.Error(err);
+      logger.Error(8, err);
     });
 }
 
@@ -82,13 +82,13 @@ async function sincronizarMovimientos(continuar: boolean = false) {
           return true;
         }
       } else {
-        logger.Error("No hay parámetros definidos en la BBDD");
+        logger.Error(9, "No hay parámetros definidos en la BBDD");
       }
     }
     enProcesoMovimientos = false;
   } catch (err) {
     enProcesoMovimientos = false;
-    logger.Error(err);
+    logger.Error(10, err);
   }
 }
 
@@ -108,14 +108,14 @@ function sincronizarFichajes() {
             }
           })
           .catch((err) => {
-            logger.Error(err);
+            logger.Error(11, err);
           });
       } else {
-        logger.Error("No hay parámetros definidos en la BBDD");
+        logger.Error(12, "No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      logger.Error(err);
+      logger.Error(13, err);
     });
 }
 
@@ -135,14 +135,14 @@ function sincronizarDevoluciones() {
             }
           })
           .catch((err) => {
-            logger.Error(err);
+            logger.Error(14, err);
           });
       } else {
-        logger.Error("No hay parámetros definidos en la BBDD");
+        logger.Error(15, "No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      logger.Error(err);
+      logger.Error(16, err);
     });
 }
 
@@ -150,14 +150,14 @@ async function actualizarTarifas() {
   try {
     await tarifasInstance.actualizarTarifas();
   } catch (err) {
-    logger.Error(err);
+    logger.Error(17, err);
   }
 }
 
 /* Actualiza precios, teclado y promociones (es decir, todo) */
 function actualizarTeclados() {
   tecladoInstance.actualizarTeclado().catch((err) => {
-    logger.Error(err);
+    logger.Error(18, err);
   });
 }
 

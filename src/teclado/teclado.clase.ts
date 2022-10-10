@@ -14,7 +14,7 @@ export class TecladoClase {
         return res.acknowledged;
       })
       .catch((err) => {
-        logger.Error(err);
+        logger.Error(102, err);
         return false;
       });
   }
@@ -57,7 +57,7 @@ export class TecladoClase {
       }
       return false;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(103, err);
       return false;
     }
   }

@@ -28,7 +28,7 @@ export class DobleMenusClase {
     return schDobleMenus.insertarMenus(arrayMenus).then((res) => {
       return res.acknowledged;
     }).catch((err) => {
-      logger.Error(err);
+      logger.Error(70, err);
       return false;
     });
   }

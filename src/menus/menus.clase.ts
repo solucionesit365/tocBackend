@@ -28,7 +28,7 @@ export class MenusClase {
     return schMenus.insertarMenus(arrayMenus).then((res) => {
       return res.acknowledged;
     }).catch((err) => {
-      logger.Error(err);
+      logger.Error(96, err);
       return false;
     });
   }

@@ -11,7 +11,7 @@ export class PaytefController {
     try {
       return await paytefInstance.cancelarOperacionActual();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(48, err);
       return false;
     }
   }
@@ -20,7 +20,7 @@ export class PaytefController {
   buscarDispositivos() {
     exec("arp -a", (err, stdout, stderr) => {
       if (err) {
-        logger.Error(err);
+        logger.Error(49, err);
       } else {
         let ipTefpay = "";
         const arrayDevices: any = stdout.split(/\r?\n/);

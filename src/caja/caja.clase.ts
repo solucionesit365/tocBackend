@@ -190,7 +190,7 @@ export class CajaClase {
           totalSalidas += arrayMovimientos[i].valor;
           break;
         default:
-          logger.Error("Error, tipo de movimiento desconocido");
+          logger.Error(51, "Error, tipo de movimiento desconocido");
       }
     }
 

@@ -17,7 +17,7 @@ export class ParamsTicketController {
       });
       return await paramsTicketInstance.insertarParametrosTicket(res.data.info);
     } catch (err) {
-      logger.Error(err);
+      logger.Error(47, err);
       return false;
     }
   }

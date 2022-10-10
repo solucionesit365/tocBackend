@@ -13,7 +13,7 @@ export class CestasController {
 
       throw Error("Error, faltan datos en borrarCesta controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(58, err);
       return false;
     }
   }
@@ -26,7 +26,7 @@ export class CestasController {
         return await cestasInstance.borrarItemCesta(idCesta, index);
       throw Error("Error, faltan datos en borrarItemCesta controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(59, err);
       return false;
     }
   }
@@ -39,7 +39,7 @@ export class CestasController {
 
       throw Error("Error, faltan datos en getCestaById() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(60, err);
       return null;
     }
   }
@@ -54,7 +54,7 @@ export class CestasController {
       }
       throw Error("Error, faltan datos en crearCesta controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(61, err);
       return false;
     }
   }
@@ -67,7 +67,7 @@ export class CestasController {
         return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
       throw Error("Error, faltan datos en cambiarCestaTrabajador controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(62,err);
       return false;
     }
   }
@@ -78,7 +78,7 @@ export class CestasController {
     try {
       return await cestasInstance.getAllCestas();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(63, err);
       return null;
     }
   }
@@ -91,7 +91,7 @@ export class CestasController {
         return await cestasInstance.regalarItem(idCesta, index);
       throw Error("Error, faltan datos en regalarProducto controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(64, err);
       return false;
     }
   }

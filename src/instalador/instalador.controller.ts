@@ -55,7 +55,7 @@ export class InstaladorController {
               }
             })
             .catch((err) => {
-              logger.Error(err);
+              logger.Error(93, err);
               return {
                 error: true,
                 mensaje: "Backend: No se ha podido setear parametros",
@@ -66,7 +66,7 @@ export class InstaladorController {
         }
       })
       .catch((err) => {
-        logger.Error(err);
+        logger.Error(94, err);
         return {
           error: true,
           mensaje: "Error en pedir parametros/instaladorLicencia de sanPedro",
@@ -135,7 +135,7 @@ export class InstaladorController {
         }
       })
       .catch((err) => {
-        logger.Error(err);
+        logger.Error(95, err);
         return {
           error: true,
           mensaje: "Backend: Errro en instalador/descargarTodo. Mirar log",

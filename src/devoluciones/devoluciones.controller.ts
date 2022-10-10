@@ -16,7 +16,7 @@ export class DevolucionesController {
         );
       throw Error("Error, faltan datos en nuevaDevolucion() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(69, err);
       return false;
     }
   }

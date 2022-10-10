@@ -41,7 +41,7 @@ export async function limpiezaCajas(): Promise<boolean> {
       })
     ).acknowledged;
   } catch (err) {
-    logger.Error(err);
+    logger.Error(56, err);
     return false;
   }
 }

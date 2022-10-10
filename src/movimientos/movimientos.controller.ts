@@ -27,7 +27,7 @@ export class MovimientosController {
       }
       throw Error("Error, faltan datos en nuevoMovimiento() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(99, err);
       return false;
     }
   }

@@ -90,7 +90,7 @@ export class MovimientosClase {
       )}${strNumeroCodigosDeBarras}`;
       return codigoFinal;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(98, err);
       return null;
     }
   }

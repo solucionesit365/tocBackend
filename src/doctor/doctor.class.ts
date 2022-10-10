@@ -18,7 +18,7 @@ export class DoctorClass {
         try {
             return true;
         } catch (err) {
-            logger.Error(err);
+            logger.Error(71, err);
             return false;
         }
     }

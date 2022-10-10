@@ -10,7 +10,7 @@ export class DoctorController {
         try {
             return await doctorInstance.checkTrabajadores();
         } catch (err) {
-            logger.Error(err);
+            logger.Error(72, err);
             return false;
         }
     }
@@ -21,7 +21,7 @@ export class DoctorController {
         try {
             return await doctorInstance.checkCestas();
         } catch (err) {
-            logger.Error(err);
+            logger.Error(73, err);
             return false;
         }
     }

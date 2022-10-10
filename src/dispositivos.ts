@@ -27,7 +27,7 @@ export class Dispositivos {
           return null;
         }
       } catch (err) {
-        logger.Error(err);
+        logger.Error(34, err);
         return null;
       }
     } else if (os.platform() === 'win32') {
@@ -46,7 +46,7 @@ export class Dispositivos {
           return null;
         }
       } catch (err) {
-        logger.Error(err.message);
+        logger.Error(35, err.message);
         return null;
       }
     }

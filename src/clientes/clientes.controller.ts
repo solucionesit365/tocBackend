@@ -14,7 +14,7 @@ export class ClientesController {
       if (busqueda) return await clienteInstance.buscar(busqueda);
       throw Error("Error, faltan datos en buscarCliente() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(65, err);
       return null;
     }
   }
@@ -26,7 +26,7 @@ export class ClientesController {
       if (idCliente) return await clienteInstance.getClienteByID(idCliente);
       throw Error("Error, faltan datos en getClienteByID");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(66, err);
       return null;
     }
   }
@@ -40,7 +40,7 @@ export class ClientesController {
       if (arrayClientes) return await clienteInstance.insertarClientes(arrayClientes);
       throw Error("Error, los clientes descargados de San Pedro son null o undefined");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(67, err);
       return false;
     }
   }
@@ -62,7 +62,7 @@ export class ClientesController {
       }
       throw Error("Error, faltan datos en crearNuevoCliente() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(68, err);
       return false;
     }
   }

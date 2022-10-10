@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, ConsoleLogger } from "@nestjs/common";
+import { Body, Controller, Post, Get } from "@nestjs/common";
 import { parametrosInstance } from "./parametros.clase"
 import axios from "axios";
 import { UtilesModule } from "src/utiles/utiles.module";
@@ -8,12 +8,12 @@ import { logger } from "../logger";
 export class ParametrosController {
 
   /* Eze 4.0 */
-  @Post("todoInstalado")
+  @Get("todoInstalado")
   async todoInstalado() {
     try {
       return await parametrosInstance.todoInstalado();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(40, err);
       return false;
     }
   }
@@ -24,7 +24,7 @@ export class ParametrosController {
     try {
       return await parametrosInstance.getParametros();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(41, err);
       return null;
     }
   }
@@ -45,7 +45,7 @@ export class ParametrosController {
       }
       return false;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(42, err);
       return false;
     }
   }
@@ -62,7 +62,7 @@ export class ParametrosController {
       );
       throw Error("Error, faltan datos en setVidAndPid() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(43, err);
       return false;
     }
   }
@@ -73,7 +73,7 @@ export class ParametrosController {
     try {
       return (await parametrosInstance.getParametros()).impresoraUsbInfo;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(44, err);
       return null;
     }
   }
@@ -86,7 +86,7 @@ export class ParametrosController {
         return await parametrosInstance.setIpPaytef(ip);
     throw Error("Error, faltan datos en setIpPaytef() controller");
     } catch (err) {
-      console.log(err);
+      logger.Error(45, err);
       return false;
     }
   }
@@ -97,7 +97,7 @@ export class ParametrosController {
     try {
       return (await parametrosInstance.getParametros()).ipTefpay;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(46, err);
       return null;
     }
   }

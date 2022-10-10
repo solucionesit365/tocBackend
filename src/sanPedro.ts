@@ -23,7 +23,7 @@ socket.on("resSincroTickets", async (data) => {
       if (await ticketsInstance.actualizarEstadoTicket(data.ticket)) {
         sincronizarTickets(true);
       } else {
-        logger.Error("Error al actualizar el ticket");
+        logger.Error(19, "Error al actualizar el ticket");
       }
     }
   } else {
@@ -42,25 +42,25 @@ socket.on('resCajas', (data) => {
         if (res) {
           sincronizarCajas();
         } else {
-          logger.Error('Error al actualizar el estado de la caja');
+          logger.Error(20, 'Error al actualizar el estado de la caja');
         }
       }).catch((err) => {
-        logger.Error(err);
+        logger.Error(21, err);
       });
     } else {
       cajaInstance.confirmarCajaEnviada(data.infoCaja).then((res) => {
         if (res) {
           sincronizarCajas();
         } else {
-          logger.Error('Error al actualizar el estado de la caja 2');
+          logger.Error(22, 'Error al actualizar el estado de la caja 2');
         }
       }).catch((err) => {
-        logger.Error(err);
+        logger.Error(23, err);
       });
       // cambiar estado infoCaja en mongo (enviado + comentario)
     }
   } else {
-    logger.Error(data.mensaje);
+    logger.Error(24, data.mensaje);
   }
 });
 
@@ -70,13 +70,13 @@ socket.on('resMovimientos', (data) => {
       if (res) {
         sincronizarMovimientos(true);
       } else {
-        logger.Error('Error al actualizar el estado del movimiento');
+        logger.Error(25, 'Error al actualizar el estado del movimiento');
       }
     }).catch((err) => {
-      logger.Error(err);
+      logger.Error(26, err);
     });
   } else {
-    logger.Error(data.mensaje);
+    logger.Error(27, data.mensaje);
   }
 });
 
@@ -86,13 +86,13 @@ socket.on('resFichajes', (data) => {
       if (res) {
         sincronizarFichajes();
       } else {
-        logger.Error('Error al actualizar el estado del fichaje');
+        logger.Error(28, 'Error al actualizar el estado del fichaje');
       }
     }).catch((err) => {
-      logger.Error(err);
+      logger.Error(29, err);
     });
   } else {
-    logger.Error(data.mensaje);
+    logger.Error(30, data.mensaje);
   }
 });
 
@@ -102,13 +102,13 @@ socket.on('resSincroDevoluciones', (data) => {
       if (res) {
         sincronizarDevoluciones();
       } else {
-        logger.Error('Error al actualizar el estadio de la devolución.');
+        logger.Error(31, 'Error al actualizar el estadio de la devolución.');
       }
     }).catch((err) => {
-      logger.Error(err);
+      logger.Error(32, err);
     });
   } else {
-    logger.Error(data.mensaje);
+    logger.Error(33, data.mensaje);
   }
 });
 

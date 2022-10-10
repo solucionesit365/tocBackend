@@ -30,7 +30,7 @@ export class CajaController {
       }
       throw Error("Error cerrarCaja > Faltan datos");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(52,err);
       return false;
     }
   }
@@ -48,18 +48,18 @@ export class CajaController {
         });
       throw Error("Error abrirCaja > Faltan datos o son incorrectos");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(53, err);
       return false;
     }
   }
 
   /* Eze 4.0 */
-  @Post("estadoCaja")
+  @Get("estadoCaja")
   async estadoCaja() {
     try {
       return await cajaInstance.cajaAbierta();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(54, err);
       return false;
     }
   }
@@ -70,7 +70,7 @@ export class CajaController {
     try {
       return cajaInstance.getMonedas("CLAUSURA");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(55, err);
       return null;
     }
   }

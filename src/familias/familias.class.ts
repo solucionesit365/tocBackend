@@ -8,7 +8,7 @@ export class FamiliasClass {
     try {
       return await schFamilias.insertarFamilias(arrayFamilias);
     } catch (err) {
-      logger.Error(err);
+      logger.Error(74, err);
       return false;
     }
   }

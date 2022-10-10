@@ -58,7 +58,7 @@ export class TicketsClase {
       };
       return nuevoTicket;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(104, err);
       return null;
     }
   }

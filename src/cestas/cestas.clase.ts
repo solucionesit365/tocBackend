@@ -72,7 +72,7 @@ export class CestaClase {
       await this.recalcularIvas(cesta);
       return true;
     } catch (err) {
-      logger.Error(err);
+      logger.Error(57, err);
       return false;
     }
   }
@@ -153,16 +153,15 @@ export class CestaClase {
     gramos: ItemLista["gramos"],
     idCesta: CestasInterface["_id"],
     unidades: number,
-    idCliente: ClientesInterface["id"],
     arraySuplementos: ItemLista["arraySuplementos"]
   ) {
     if (await cajaInstance.cajaAbierta()) {
       let articulo = await articulosInstance.getInfoArticulo(idArticulo);
-      if (idCliente)
-        articulo = await articulosInstance.getPrecioConTarifa(
-          articulo,
-          idCliente
-        );
+      const cesta = await cestasInstance.getCestaById(idCesta);
+
+      if (cesta.idCliente) {
+        articulo = await articulosInstance.getPrecioConTarifa(articulo, cesta.idCliente);
+      }
 
       // Va a peso. 1 unidad son 1000 gramos. Los precios son por kilogramo.
       if (gramos > 0)

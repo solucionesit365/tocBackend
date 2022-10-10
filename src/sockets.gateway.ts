@@ -21,8 +21,7 @@ io.on("connection", (socket) => {
     try {
       socket.emit("cargarTrabajadores", await trabajadoresInstance.getTrabajadoresFichados());
     } catch (err) {
-      logger.Error(err);
-      console.log(err);
+      logger.Error(36, err);
     }
   });
 
@@ -31,8 +30,7 @@ io.on("connection", (socket) => {
     try {
       socket.emit("cargarCestas", await cestasInstance.getAllCestas());
     } catch (err) {
-      logger.Error(err);
-      console.log(err);
+      logger.Error(37, err);
     }
   });
 
@@ -41,8 +39,7 @@ io.on("connection", (socket) => {
     try {
       socket.emit("cargarParametros", await parametrosInstance.getParametros());
     } catch (err) {
-      logger.Error(err);
-      console.log(err);
+      logger.Error(38, err);
     }
   });
 
@@ -54,8 +51,7 @@ io.on("connection", (socket) => {
         socket.emit("cargarVentas", await ticketsInstance.getTicketsIntervalo(caja.inicioTime, Date.now()));
       }      
     } catch (err) {
-      logger.Error(err);
-      console.log(err);
+      logger.Error(39, err);
     }
   });
 });

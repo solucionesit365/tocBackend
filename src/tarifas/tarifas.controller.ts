@@ -10,7 +10,7 @@ export class TarifasController {
     try {
       return await tarifasInstance.actualizarTarifas();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(101, err);
       return false;
     }
   }

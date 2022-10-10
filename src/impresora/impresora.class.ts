@@ -32,7 +32,7 @@ function permisosImpresora() {
         echo sa | sudo -S chmod 777 -R /dev/    
     `);
   } catch (err) {
-    logger.Error(err);
+    logger.Error(75, err);
   }
 }
 function random() {
@@ -100,10 +100,10 @@ export class Impresora {
 
         }
       } else {
-        logger.Error('Controlado: dispositivo es null');
+        logger.Error(76, 'Controlado: dispositivo es null');
       }
     } catch (err) {
-      logger.Error('Error1: ', err);
+      logger.Error(77,'Error1: ', err);
       // errorImpresora(err, event);
     }
   }
@@ -131,7 +131,7 @@ export class Impresora {
         parametros.tipoImpresora,
       );
     } catch (err) {
-      logger.Error(err);
+      logger.Error(78, err);
     }
   }
 
@@ -159,10 +159,10 @@ export class Impresora {
 
         }
       } else {
-        logger.Error('Controlado: dispositivo es null');
+        logger.Error(79, 'Controlado: dispositivo es null');
       }
     } catch (err) {
-      logger.Error('Error1: ', err);
+      logger.Error(80, 'Error1: ', err);
       // errorImpresora(err, event);
     }
   }
@@ -229,7 +229,7 @@ export class Impresora {
   }
 
   private async imprimirRecibo(recibo: string) {
-    logger.Error('imprimir recibo');
+    logger.Error(81, 'imprimir recibo');
     try {
       permisosImpresora();
       const device = await dispositivos.getDevice();
@@ -250,7 +250,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      logger.Error('Error impresora: ', err);
+      logger.Error(82, 'Error impresora: ', err);
     }
   }
 
@@ -427,7 +427,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      logger.Error('Error impresora: ', err);
+      logger.Error(83, 'Error impresora: ', err);
     }
   }
 
@@ -486,7 +486,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      logger.Error(err);
+      logger.Error(84, err);
     }
   }
 
@@ -523,7 +523,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      logger.Error(err);
+      logger.Error(85, err);
     }
   }
 
@@ -567,7 +567,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      logger.Error(err);
+      logger.Error(86, err);
     }
   }
 
@@ -655,7 +655,7 @@ export class Impresora {
             .close();
       });
     } catch (err) {
-      logger.Error(err);
+      logger.Error(87, err);
     }
   }
 
@@ -694,7 +694,7 @@ export class Impresora {
         });
       }
     } catch (err) {
-      logger.Error(err);
+      logger.Error(88, err);
     }
   }
   async mostrarVisor(data) {
@@ -756,10 +756,10 @@ export class Impresora {
 
         }
       } else {
-        logger.Error('Controlado: dispositivo es null');
+        logger.Error(89, 'Controlado: dispositivo es null');
       }
     } catch (err) {
-      logger.Error('Error2: ', err);
+      logger.Error(90, 'Error2: ', err);
       // errorImpresora(err, event);
     }
     // logger.Error('El visor da muchos problemas');
@@ -789,11 +789,11 @@ export class Impresora {
         }
         return {error: true, info: 'Error, no se encuentra la impresora'};
       } catch (err) {
-        logger.Error(err);
+        logger.Error(91, err);
         return {error: true, info: 'Error en CATCH imprimirEntregas() 2'};
       }
     }).catch((err) => {
-      logger.Error(err);
+      logger.Error(92, err);
       return {error: true, info: 'Error en CATCH imprimirEntregas() 1'};
     });
   }

@@ -12,8 +12,20 @@ export class TrabajadoresController {
     try {
       return await trabajadoresInstance.getTrabajadoresFichados();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(109, err);
       return null;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Post("hayFichados")
+  async hayFichados() {
+    try {
+      const arrayFichados = await trabajadoresInstance.getTrabajadoresFichados();
+      return (arrayFichados && arrayFichados.length > 0);
+    } catch (err) {
+      logger.Error(110, err);
+      return false;
     }
   }
 
@@ -23,7 +35,7 @@ export class TrabajadoresController {
     try {
       return await trabajadoresInstance.buscar(busqueda);
     } catch (err) {
-      logger.Error(err);
+      logger.Error(111, err);
       return null;
     }
   }
@@ -40,7 +52,7 @@ export class TrabajadoresController {
       }
       throw Error("Error, faltan datos en fichar() trabajadores controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(112, err);
       return false;
     }
   }
@@ -52,7 +64,7 @@ export class TrabajadoresController {
       if (idTrabajador) return await trabajadoresInstance.desficharTrabajador(idTrabajador);
       throw Error("Error, faltan datos en desfichar() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(113, err);
       return false;
     }
   }
@@ -63,7 +75,7 @@ export class TrabajadoresController {
     try {
       return await trabajadoresInstance.actualizarTrabajadores();
     } catch (err) {
-      logger.Error(err);
+      logger.Error(114, err);
       return false;
     }
   }
@@ -75,7 +87,7 @@ export class TrabajadoresController {
       if (idTrabajador) return await trabajadoresInstance.inicioDescanso(idTrabajador);
       throw Error("Error, faltan datos en inicioDescanso() controller");
     } catch (err) {
-      logger.Error(err);
+      logger.Error(115, err);
       return false;
     }
   }
@@ -86,7 +98,7 @@ export class TrabajadoresController {
     try {
       if (idTrabajador) return await trabajadoresInstance.finDescanso(idTrabajador);
     } catch (err) {
-      logger.Error(err);
+      logger.Error(116, err);
       return false;
     }
   }

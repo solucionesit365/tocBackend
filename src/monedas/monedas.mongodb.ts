@@ -9,7 +9,7 @@ export async function setMonedas(data: MonedasInterface["array"]): Promise<boole
     const resultado = await monedas.updateOne({_id: "INFO_MONEDAS"}, { $set: data }, { upsert: true });
     return (resultado.acknowledged && resultado.modifiedCount > 0);
   } catch (err) {
-    logger.Error(err);
+    logger.Error(97, err);
     return false;
   }
 }

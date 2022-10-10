@@ -8,7 +8,7 @@ export async function verifyToken(token: string): Promise<any> {
         const resultado = await satelites.findOne({ token });
         return resultado;
     } catch (err) {
-        logger.Error(err);
+        logger.Error(100, err);
         return false;
     }
 }
