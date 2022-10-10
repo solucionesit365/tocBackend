@@ -38,6 +38,7 @@ export class CajaController {
   /* Eze 4.0 */
   @Post("abrirCaja")
   async abrirCaja(@Body() { total, detalle, idDependienta }) {
+    console.log("total: ", total, " detalle: ", detalle, " idDependienta: ", idDependienta);
     try {
       if (total != undefined && detalle != undefined)
         return await cajaInstance.abrirCaja({

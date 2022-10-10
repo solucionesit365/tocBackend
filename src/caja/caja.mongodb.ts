@@ -19,14 +19,19 @@ export async function getInfoCajaAbierta(): Promise<CajaAbiertaInterface> {
 export async function resetCajaAbierta(): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const caja = database.collection<CajaAbiertaInterface>("caja");
-  return (await caja.updateMany({}, {
-    $set: {
-      inicioTime: null,
-      idDependientaApertura: null,
-      totalApertura: null,
-      detalleApertura: null,
-    }
-  })).acknowledged;
+  return (
+    await caja.updateMany(
+      {},
+      {
+        $set: {
+          inicioTime: null,
+          idDependientaApertura: null,
+          totalApertura: null,
+          detalleApertura: null,
+        },
+      }
+    )
+  ).acknowledged;
 }
 
 /* Eze 4.0 - Excepción */
@@ -45,7 +50,6 @@ export async function limpiezaCajas(): Promise<boolean> {
     return false;
   }
 }
-
 
 /* Eze 4.0 */
 export async function guardarMonedas(
@@ -82,12 +86,11 @@ export async function getMonedas(
 export async function setInfoCaja(data: CajaAbiertaInterface) {
   const database = (await conexion).db("tocgame");
   const caja = database.collection<CajaAbiertaInterface>("caja");
-  const resultado = await caja.updateMany(
-    {},
-    { $set: data }
+  const resultado = await caja.updateMany({}, { $set: data }, { upsert: true });
+  return (
+    resultado.acknowledged &&
+    (resultado.modifiedCount > 0 || resultado.upsertedCount > 0)
   );
-
-  return resultado.acknowledged && resultado.modifiedCount > 0;
 }
 
 /* Eze 4.0 (No se usa, pero aquí está) */
@@ -130,7 +133,9 @@ export async function confirmarCajaEnviada(
 /* Eze 4.0 */
 export async function getCajaSincroMasAntigua(): Promise<CajaSincro> {
   const database = (await conexion).db("tocgame");
-  const sincroCajas =
-    database.collection<CajaSincro>("sincro-cajas");
-  return await sincroCajas.findOne({ enviado: false }, { sort: { finalTime: 1 } });
+  const sincroCajas = database.collection<CajaSincro>("sincro-cajas");
+  return await sincroCajas.findOne(
+    { enviado: false },
+    { sort: { finalTime: 1 } }
+  );
 }
