@@ -59,8 +59,8 @@ export class TicketsClase {
       });
   }
 
-  anularTicket(idTicket) {
-    return schTickets.anularTicket(idTicket).catch((err) => {
+  anularTicket(idTicket, forzar = false) {
+    return schTickets.anularTicket(idTicket, forzar).catch((err) => {
       console.log(err);
       return false;
     });
@@ -84,6 +84,8 @@ export class TicketsClase {
         return null;
       });
   }
+
+  getTicketAnulado = async (idTicket: number) => await schTickets.getTicketAnulado(idTicket);
 
   getUltimoTicket() {
     return parametrosInstance
@@ -566,12 +568,20 @@ export class TicketsClase {
       });
   }
 
-  desbloquearTicket(idTicket: number) {
-    return schTickets.desbloquearTicket(idTicket).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze v.recortada */
+  async getTicketsTarjeta() {
+    const fecha = new Date();
+    fecha.setHours(0, 0, 0, 0);
+    const inicioTime = fecha.valueOf();
+    return await schTickets.getTicketsTarjeta(inicioTime, Date.now());
   }
+
+  // desbloquearTicket(idTicket: number) {
+  //   return schTickets.desbloquearTicket(idTicket).catch((err) => {
+  //     console.log(err);
+  //     return false;
+  //   });
+  // }
 
   borrarTicket(idTicket: number): Promise<boolean> {
     return schTickets.borrarTicket(idTicket);

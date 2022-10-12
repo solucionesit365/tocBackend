@@ -167,16 +167,16 @@ export async function nuevoTicket(ticket: TicketsInterface): Promise<boolean> {
   }
 }
 
-export async function desbloquearTicket(idTicket: number) {
-  const database = (await conexion).db("tocgame");
-  const tickets = database.collection("tickets");
-  const resultado = await tickets.updateOne(
-    { _id: idTicket },
-    { $set: { bloqueado: false } },
-    { upsert: true }
-  );
-  return resultado.acknowledged;
-}
+// export async function desbloquearTicket(idTicket: number) {
+//   const database = (await conexion).db("tocgame");
+//   const tickets = database.collection("tickets");
+//   const resultado = await tickets.updateOne(
+//     { _id: idTicket },
+//     { $set: { bloqueado: false } },
+//     { upsert: true }
+//   );
+//   return resultado.acknowledged;
+// }
 
 export async function actualizarEstadoTicket(ticket: TicketsInterface) {
   const database = (await conexion).db("tocgame");
@@ -214,8 +214,8 @@ export async function borrarTicket(idTicket: number): Promise<boolean> {
     const database = (await conexion).db("tocgame");
     const tickets = database.collection("tickets");
     const resultado = await tickets.deleteOne({ _id: idTicket });
-    
-    if (resultado.deletedCount > 0 && resultado.acknowledged) {
+
+    if (resultado.acknowledged) {
       const resSetUltimoTicket = await parametrosInstance.setUltimoTicket(
         idTicket - 1 < 0 ? 0 : idTicket - 1
       );
@@ -231,7 +231,7 @@ export async function borrarTicket(idTicket: number): Promise<boolean> {
 }
 
 /* Solo se invoca manualmente desde la lista de tickets (frontend dependienta) */
-export async function anularTicket(idTicket: number) {
+export async function anularTicket(idTicket: number, forzar = false) {
   try {
     const database = (await conexion).db("tocgame");
     const ticketsAnulados = database.collection("ticketsAnulados");
@@ -240,7 +240,7 @@ export async function anularTicket(idTicket: number) {
     });
     if (resultado === null) {
       let ticket = await getTicketByID(idTicket);
-      if (ticket.tipoPago == "TARJETA") {
+      if (forzar === false && ticket.tipoPago == "TARJETA") {
         throw Error(
           "Por el momento no es posible anular un ticket pagado con tarjeta"
         );
@@ -271,6 +271,20 @@ export async function anularTicket(idTicket: number) {
     console.log(err);
     return false;
   }
+}
+
+/* Eze v.recortada */
+export async function getTicketAnulado(idTicket) {
+  const database = (await conexion).db("tocgame");
+  const ticketsAnulados = database.collection("ticketsAnulados");
+  return await ticketsAnulados.findOne({ idTicketAnulado: idTicket });
+}
+
+/* Eze v.recortada */
+export async function getTicketsTarjeta(inicioTime: number, finalTime: number) {
+  const database = (await conexion).db("tocgame");
+  const tickets = database.collection<TicketsInterface>("tickets");
+  return await tickets.find({ timestamp: { $lte: finalTime, $gte: inicioTime }, tipoPago: "TARJETA" }).toArray();
 }
 
 // export async function anotarAnulado(idTicket: number) {

@@ -56,7 +56,7 @@ class PaytefClass {
               idTrabajadorActivo,
               idCliente
             );
-            nuevoTicket.bloqueado = true;
+            // nuevoTicket.bloqueado = true;
             if (await paytefInstance.cerrarTicket(nuevoTicket)) {
               // Ticket creado
               this.iniciarDatafono(nuevoTicket._id, total, client, cesta._id);
@@ -185,7 +185,7 @@ class PaytefClass {
       /* ¿Ya existe el resultado de PayTef? */
       if (UtilesModule.checkVariable(resEstadoPaytef.data.result)) {
         if (resEstadoPaytef.data.result.approved) {
-          await ticketsInstance.desbloquearTicket(idTicket);
+          // await ticketsInstance.desbloquearTicket(idTicket);
           await movimientosInstance.nuevaSalida(
             total,
             "Targeta",

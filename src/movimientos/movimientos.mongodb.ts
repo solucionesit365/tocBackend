@@ -10,6 +10,13 @@ export async function getMovimientosIntervalo(inicioTime: number, finalTime: num
   return resultado;
 }
 
+/* Eze v.recortada */
+export async function getMovimientosTarjeta(inicioTime: number, finalTime: number): Promise<MovimientosInterface[]> {
+  const database = (await conexion).db('tocgame');
+  const movimientos = database.collection<MovimientosInterface>('movimientos');
+  return await movimientos.find({_id: {$lte: finalTime, $gte: inicioTime}, tipoExtra: "TARJETA"}).toArray();
+}
+
 export async function nuevaSalida(data) {
   const database = (await conexion).db('tocgame');
   const movimientos = database.collection('movimientos');
