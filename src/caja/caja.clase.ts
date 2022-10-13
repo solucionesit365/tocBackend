@@ -9,6 +9,7 @@ import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
 import {parametrosInstance} from '../parametros/parametros.clase';
 import {movimientosInstance} from '../movimientos/movimientos.clase';
 import {impresoraInstance} from '../impresora/impresora.class';
+import { ticketsInstance } from '../tickets/tickets.clase';
 
 const TIPO_ENTRADA = 'ENTRADA';
 const TIPO_SALIDA = 'SALIDA';
@@ -173,7 +174,33 @@ export class CajaClase {
     return schCajas.nuevoItemSincroCajas(cajaInsertar);
   }
 
+  async antiTicketsNoCobrados() {
+    try {
+      const ticketsTarjeta = await ticketsInstance.getTicketsTarjeta();
+      const movimientosTarjeta = await movimientosInstance.getMovimientosTarjeta();
+  
+      for (let i = 0; i < ticketsTarjeta.length; i++) {
+        let existe = false;
+        let saveData = ticketsTarjeta[i]._id;
+        for (let j = 0; j < movimientosTarjeta.length; j++) {
+          if (ticketsTarjeta[i]._id == movimientosTarjeta[j].idTicket) {
+            existe = true;
+            break;
+          }
+        }
+        if (existe === false) {
+          if (ticketsTarjeta[i].total > 0 && !await ticketsInstance.getTicketAnulado(saveData)) {
+            await ticketsInstance.anularTicket(saveData, true);
+          }
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async cerrarCaja(total: number, detalleCierre, guardarInfoMonedas, totalDatafono3G: number) { // Promise<boolean> {
+    await this.antiTicketsNoCobrados();
     const estaAbierta = await this.cajaAbierta();
 
     if (estaAbierta) {

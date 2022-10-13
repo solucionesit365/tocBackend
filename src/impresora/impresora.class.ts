@@ -656,6 +656,7 @@ export class Impresora {
     const parametros = parametrosInstance.getParametros();
     try {
       if (os.platform() === 'linux') {
+        console.log('abrir cajon linux')
         permisosImpresora();
         // if(parametros.tipoImpresora === 'USB')
         // {
@@ -685,6 +686,37 @@ export class Impresora {
               .cashdraw(2)
               .close();
         });
+      }else if (os.platform() === 'win32') {
+        permisosImpresora();
+        // if(parametros.tipoImpresora === 'USB')
+        // {
+        //     const arrayDevices = escpos.USB.findPrinter();
+        //     if (arrayDevices.length > 0) {
+        //         /* Solo puede haber un dispositivo USB */
+        //         const dispositivoUnico = arrayDevices[0];
+        //         var device = new escpos.USB(dispositivoUnico); //USB
+        //     } else if (arrayDevices.length == 0) {
+        //         throw 'Error, no hay ningún dispositivo USB conectado';
+        //     } else {
+        //         throw 'Error, hay más de un dispositivo USB conectado';
+        //     }
+        // } else {
+        //     if(parametros.tipoImpresora === 'SERIE') {
+        //         var device = new escpos.Serial('/dev/ttyS0', {
+        //             baudRate: 115000,
+        //             stopBit: 2
+        //           });
+        //     }
+        // }
+        const device = await dispositivos.getDevice();
+        const printer = new escpos.Printer(device);
+
+        device.open(function() {
+          printer
+              .cashdraw(2)
+              .close();
+        });
+        
       }
     } catch (err) {
       console.log(err);
@@ -711,8 +743,7 @@ export class Impresora {
       const total = data.total + eur;
       const espacio= ' ';
       const size = 20-(dependienta.length + total.length);
-
-      const espacios = ['', ' ', '  ', '   ', '    ', '      ', '       ', '        ', '        ', '         ', '         ', '           ', '            ', '            ', '              '];
+      const espacios = ['', ' ', '  ', '   ', '    ', '     ', '      ', '       ', '        ', '         ', '          ', '           ', '            ', '             ', '              '];
       datosExtra = dependienta +espacios[size] + total;
     }
     if (datosExtra.length <= 2) {
