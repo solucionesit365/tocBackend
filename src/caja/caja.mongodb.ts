@@ -29,6 +29,21 @@ export async function getMonedas(tipo: 'APERTURA' | 'CLAUSURA') {
   return resultado;
 }
 
+export async function getDatosUltimoCierre() {
+  const database = (await conexion).db('tocgame');
+  const caja = database.collection('sincro-cajas');
+  const resultado = await caja.find().sort({ _id: -1 }).limit(1).toArray();
+
+  return resultado;
+}
+
+export async function getDatosMoviments(inicioTime, finalTime) {
+  const database = (await conexion).db('tocgame');
+  const caja = database.collection('movimientos');
+  const resultado = await caja.find({ $and: [ {_id: {$gte:inicioTime}}, {_id:{$lte:finalTime} } ] }).toArray();
+  return resultado;
+}
+
 export async function setInfoCaja(data: CajaInterface) {
   const database = (await conexion).db('tocgame');
   const caja = database.collection('cajas');

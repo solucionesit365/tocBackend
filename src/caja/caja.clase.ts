@@ -123,6 +123,33 @@ export class CajaClase {
     });
   }
 
+  getDatosUltimoCierre() {
+    return schCajas.getDatosUltimoCierre().then((res) => {
+      if (res != null) {
+        return res;
+      } else {
+        return null;
+      }
+    }).catch((err) => {
+      console.log(err);
+      return null;
+    });
+  }
+
+  getDatosMoviments(inicioTime:any, finalTime:any) {
+    return schCajas.getDatosMoviments(inicioTime, finalTime ).then((res) => {
+   
+      if (res != null) {
+        return res;
+      } else {
+        return null;
+      }
+    }).catch((err) => {
+      console.log(err);
+      return null;
+    });
+  }
+
   nuevoItemSincroCajas(caja: CajaInterface) {
     const cajaInsertar: CajaForSincroInterface | {} = {};
     cajaInsertar['_id'] = Date.now();

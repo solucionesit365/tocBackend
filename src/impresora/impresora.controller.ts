@@ -1,4 +1,5 @@
 import {Controller, Post, Body} from '@nestjs/common';
+import { parametrosInstance } from 'src/parametros/parametros.clase';
 import {impresoraInstance} from './impresora.class';
 
 @Controller('impresora')
@@ -19,6 +20,13 @@ export class ImpresoraController {
       return impresoraInstance.imprimirEntregas();
     }
 
+    @Post('imprimirCaja')
+    imprimircaja(@Body() params) {
+      const parametros = parametrosInstance.getParametros();
+      return impresoraInstance.imprimirCaja(params.caja.calaixFetZ,params.caja.idDependienta, params.caja.descuadre, params.caja.nClientes,  params.caja.recaudado, params.caja.movimientos, parametros.nombreTienda, params.caja.inicioTime, params.caja.finalTime, params.caja.infoExtra.cambioInicial, params.caja.infoExtra.cambioFinal, null)
+
+    }
+    
     @Post('despedida')
     despedircliente() {
       impresoraInstance.despedircliente();

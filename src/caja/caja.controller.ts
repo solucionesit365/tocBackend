@@ -80,4 +80,25 @@ export class CajaController {
         return {error: true, mensaje: 'Backend: Error en caja/getMonedasUltimoCierre > CATCH'};
       });
     }
+
+    @Post('getDatosUltimoCierre')
+    getDatosUltimoCierre() { // No probado! Se le pasa solo el array de monedas
+      return cajaInstance.getDatosUltimoCierre().then((res) => {
+        return {error: false, info: res};
+      }).catch((err) => {
+        console.log(err);
+        return {error: true, mensaje: 'Backend: Error en caja/getDatosUltimoCierre > CATCH'};
+      });
+    }
+
+    @Post('getDatosMoviments')
+    getDatosMoviments(@Body() params) { // No probado! Se le pasa solo el array de monedas
+      return cajaInstance.getDatosMoviments(params.fechaInicio, params.fechaFinal).then((res) => {
+        return {error: false, info: res};
+      }).catch((err) => {
+        console.log(err);
+        return {error: true, mensaje: 'Backend: Error en caja/getDatosMoviments > CATCH'};
+      });
+    }
+
 }

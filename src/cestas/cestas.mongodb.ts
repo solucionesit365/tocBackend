@@ -110,3 +110,10 @@ export async function getCestaDiferente(id_cesta: string) {
   const resultado = await cestas.findOne({_id: {$ne: id_cesta}, nombreCesta: {$ne: 'PRINCIPAL'}});
   return resultado;
 }
+
+export async function modificarNombreCesta( cestaId, miCesta) {
+  const database = (await conexion).db('tocgame');
+  const cestas = database.collection('cestas');
+  const resultado = await cestas.updateOne({_id: cestaId}, {$set: {'lista': miCesta}});
+  return resultado;
+}
