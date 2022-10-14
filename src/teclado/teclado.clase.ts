@@ -64,7 +64,7 @@ export class TecladoClase {
   }
 
   tienePrefijoSubmenu(x: string) {
-    if (x.startsWith("[")) return true;
+    if (x.includes("]")) return true;
     return false;
   }
 
@@ -77,13 +77,33 @@ export class TecladoClase {
   }
 
   getNombreSubmenu(stringCompleto: string) {
-    const limpio = stringCompleto.slice(stringCompleto.indexOf("]")+1);
+    const limpio = stringCompleto.slice(stringCompleto.indexOf("]") + 1);
     return limpio.trim();
   }
 
-  addNuevoMenu(arrayMenus: any[], nombreNuevo: string, nombreNuevoSubmenu: string, objTecla: any): boolean {
+  addTeclaNormal(
+    arrayMenus: any[],
+    nombreNuevo: string,
+    objTecla: any
+  ): boolean {
+    for (let i = 0; i < arrayMenus.length; i++) {
+      if (arrayMenus[i].nombre == nombreNuevo) {
+        arrayMenus[i].arrayTeclas.push(objTecla);
+        return true;
+      }
+    }
+    arrayMenus.push({ nombre: nombreNuevo, arrayTeclas: [objTecla], arrayMenus: null });
+    return true;
+  }
+
+  addTeclaConSubmenu(
+    arrayMenus: any[],
+    nombreNuevo: string,
+    nombreNuevoSubmenu: string,
+    objTecla: any
+  ): boolean {
     let existeMenu = false;
-    
+
     for (let i = 0; i < arrayMenus.length; i++) {
       if (arrayMenus[i].nombre == nombreNuevo) {
         existeMenu = true;
@@ -99,7 +119,8 @@ export class TecladoClase {
 
         if (!existeSubmenu) {
           arrayMenus[i].arraySubmenus.push({
-            nombre: nombreNuevoSubmenu, arrayTeclas: [objTecla]
+            nombre: nombreNuevoSubmenu,
+            arrayTeclas: [objTecla],
           });
           return true;
         }
@@ -109,9 +130,12 @@ export class TecladoClase {
     }
 
     if (!existeMenu) {
-      arrayMenus.push({ nombre: nombreNuevo, arraySubmenus: [
-        { nombre: nombreNuevoSubmenu, arrayTeclas: [objTecla] }
-      ]});
+      arrayMenus.push({
+        nombre: nombreNuevo,
+        arraySubmenus: [
+          { nombre: nombreNuevoSubmenu, arrayTeclas: [objTecla] },
+        ],
+      });
       return true;
     }
 
@@ -123,19 +147,30 @@ export class TecladoClase {
     const teclas = await schTeclas.getTeclas();
     const menus = [];
 
-
     for (let i = 0; i < teclas.length; i++) {
       if (this.tienePrefijoSubmenu(teclas[i].nomMenu)) {
         console.log(this.getNombreMenu(teclas[i].nomMenu));
-        this.addNuevoMenu(menus, this.getNombreMenu(teclas[i].nomMenu), this.getNombreSubmenu(teclas[i].nomMenu), {
+        this.addTeclaConSubmenu(
+          menus,
+          this.getNombreMenu(teclas[i].nomMenu),
+          this.getNombreSubmenu(teclas[i].nomMenu),
+          {
+            idArticle: teclas[i].idArticle,
+            nombreArticulo: teclas[i].nombreArticulo,
+            pos: teclas[i].pos,
+            color: teclas[i].color,
+            esSumable: teclas[i].esSumable,
+          }
+        );
+      } else {
+        console.log("ENTRO EN EL NORMAL");
+        this.addTeclaNormal(menus, teclas[i].nomMenu.trim(), {
           idArticle: teclas[i].idArticle,
           nombreArticulo: teclas[i].nombreArticulo,
           pos: teclas[i].pos,
           color: teclas[i].color,
           esSumable: teclas[i].esSumable,
         });
-      } else {
-        console.log("FALTA HACERLO");
       }
     }
 
