@@ -7,8 +7,8 @@ import {devolucionesInstance} from './devoluciones/devoluciones.clase';
 import { logger } from "./logger";
 
 const io = require('socket.io-client');
-//const socket = io('https://sanpedro.cloud');
-const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
+const socket = io('https://sanpedro.cloud');
+// const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
 
 
 function emitSocket(canal: string, datos: any = null) {

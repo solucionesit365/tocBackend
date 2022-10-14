@@ -1,5 +1,5 @@
 import * as schMenus from './menus.mongodb';
-import { logger } from "../logger";
+import { MenusInterface } from './menus.interface';
 
 export class MenusClase {
   private bloqueado: boolean;
@@ -16,22 +16,15 @@ export class MenusClase {
     return this.bloqueado;
   }
 
-  getMenus() {
-    return schMenus.getMenus();
-  }
+  /* Eze 4.0 */
+  getMenus = async () => await schMenus.getMenus();
 
   setBloqueado(x: boolean) {
     this.bloqueado = x;
   }
 
-  insertarMenus(arrayMenus) {
-    return schMenus.insertarMenus(arrayMenus).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      logger.Error(96, err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  insertarMenus = async (arrayMenus: MenusInterface[]) => await schMenus.insertarMenus(arrayMenus);
 
   getSubmenus(tag) {
     return schMenus.getSubmenus(tag);

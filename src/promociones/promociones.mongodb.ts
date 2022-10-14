@@ -24,7 +24,7 @@ export async function borrarPromociones(): Promise<void> {
 
 /* Eze 4.0 */
 export async function insertarPromociones(arrayPromociones): Promise<boolean> {
-  await borrarPromociones()
+  await borrarPromociones();
   const database = (await conexion).db("tocgame");
   const promociones = database.collection("promociones");
   return (await promociones.insertMany(arrayPromociones)).acknowledged;

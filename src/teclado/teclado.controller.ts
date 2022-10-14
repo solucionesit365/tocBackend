@@ -1,5 +1,5 @@
-import { Controller, Post, Body } from "@nestjs/common";
-import { UtilesModule } from "src/utiles/utiles.module";
+import { Controller, Post, Body, Get } from "@nestjs/common";
+import { UtilesModule } from "../utiles/utiles.module";
 import { cestasInstance } from "../cestas/cestas.clase";
 import { tecladoInstance } from "./teclado.clase";
 import { logger } from "../logger";
@@ -61,6 +61,16 @@ export class TecladoController {
     } catch (err) {
       logger.Error(3, err);
       return false;
+    }
+  }
+
+  @Get("getTecladoCompleto")
+  async getTecladoCompleto() {
+    try {
+      return await tecladoInstance.generarTecladoCompleto();
+    } catch (err) {
+      logger.Error(109, err);
+      return null;
     }
   }
 }

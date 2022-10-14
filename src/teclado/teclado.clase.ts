@@ -5,19 +5,11 @@ import { parametrosInstance } from "../parametros/parametros.clase";
 import { promocionesInstance } from "../promociones/promociones.clase";
 import * as schTeclas from "./teclado.mongodb";
 import { logger } from "../logger";
+import { TeclasInterface } from "./teclado.interface";
 
 export class TecladoClase {
-  insertarTeclas(arrayTeclas) {
-    return schTeclas
-      .insertarTeclas(arrayTeclas)
-      .then((res) => {
-        return res.acknowledged;
-      })
-      .catch((err) => {
-        logger.Error(102, err);
-        return false;
-      });
-  }
+  /* Eze 4.0 */
+  insertarTeclas = async (arrayTeclas: TeclasInterface[]) => await schTeclas.insertarTeclas(arrayTeclas);
 
   /* Eze v23 */
   async actualizarTeclado(): Promise<boolean> {
@@ -53,7 +45,8 @@ export class TecladoClase {
             codigoTienda: parametros.codigoTienda,
           }
         );
-        return await promocionesInstance.insertarPromociones(resPromociones.data.info);
+        if (resPromociones.data.info.lenght > 0) return await promocionesInstance.insertarPromociones(resPromociones.data.info);
+        return true;
       }
       return false;
     } catch (err) {
@@ -64,6 +57,58 @@ export class TecladoClase {
 
   async cambiarPosTecla(idArticle, nuevaPos, nombreMenu) {
     return await schTeclas.cambiarPosTecla(idArticle, nuevaPos, nombreMenu);
+  }
+
+  tienePrefijoSubmenu(x: string) {
+    if (x.startsWith("0")) return true;
+    return false;
+  }
+
+  async generarTecladoCompleto() {
+    const teclas = await schTeclas.getTeclas();
+    console.log(teclas);
+    // const menus = await menusInstance.getMenus();
+    let menus = {};
+    let submenus = {};
+
+    for (let i = 0; i < teclas.length; i++) {
+      if (this.tienePrefijoSubmenu(teclas[i].nomMenu)) {
+        const prefijo = teclas[i].nomMenu.slice(0, 2);
+        if (submenus[prefijo]) {
+          submenus[prefijo].push({
+            nomMenu: teclas[i].nomMenu.slice(3),
+            idArticle: teclas[i].idArticle,
+            nombreArticulo: teclas[i].nombreArticulo,
+            pos: teclas[i].pos,
+            color: teclas[i].color,
+            esSumable: teclas[i].esSumable
+          });
+        } else {
+          submenus[prefijo] = [];
+          submenus[prefijo].push({
+            nomMenu: teclas[i].nomMenu.slice(3),
+            idArticle: teclas[i].idArticle,
+            nombreArticulo: teclas[i].nombreArticulo,
+            pos: teclas[i].pos,
+            color: teclas[i].color,
+            esSumable: teclas[i].esSumable
+          });
+        }
+      } else {
+        const nombreGrupo = teclas[i].nomMenu;
+        if (menus[nombreGrupo]) {
+          menus[nombreGrupo].push(teclas[i]);
+        } else {
+          menus[nombreGrupo] = [];
+          menus[nombreGrupo].push(teclas[i]);
+        }
+      }
+    }
+    
+    return {
+      menusItems: menus,
+      submenusItems: submenus
+    };
   }
 }
 export const tecladoInstance = new TecladoClase();
