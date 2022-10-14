@@ -37,7 +37,7 @@ export class CajaClase {
   async abrirCaja(
     cajaAbierta: CajaAbiertaInterface
   ): Promise<boolean> {
-    if (cajaAbierta.detalleApertura && cajaAbierta.totalApertura) return await schCajas.setInfoCaja(cajaAbierta);
+    if (cajaAbierta.detalleApertura && typeof cajaAbierta.totalApertura === "number") return await schCajas.setInfoCaja(cajaAbierta);
     throw Error("Error precondiciones abrirCaja > caja.clase.ts");
   }
 

@@ -69,7 +69,7 @@ export class TecladoController {
     try {
       return await tecladoInstance.generarTecladoCompleto();
     } catch (err) {
-      logger.Error(109, err);
+      logger.Error(117, err);
       return null;
     }
   }

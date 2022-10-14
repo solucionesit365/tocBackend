@@ -9,7 +9,8 @@ import { TeclasInterface } from "./teclado.interface";
 
 export class TecladoClase {
   /* Eze 4.0 */
-  insertarTeclas = async (arrayTeclas: TeclasInterface[]) => await schTeclas.insertarTeclas(arrayTeclas);
+  insertarTeclas = async (arrayTeclas: TeclasInterface[]) =>
+    await schTeclas.insertarTeclas(arrayTeclas);
 
   /* Eze v23 */
   async actualizarTeclado(): Promise<boolean> {
@@ -45,7 +46,10 @@ export class TecladoClase {
             codigoTienda: parametros.codigoTienda,
           }
         );
-        if (resPromociones.data.info.lenght > 0) return await promocionesInstance.insertarPromociones(resPromociones.data.info);
+        if (resPromociones.data.info.lenght > 0)
+          return await promocionesInstance.insertarPromociones(
+            resPromociones.data.info
+          );
         return true;
       }
       return false;
@@ -60,55 +64,82 @@ export class TecladoClase {
   }
 
   tienePrefijoSubmenu(x: string) {
-    if (x.startsWith("0")) return true;
+    if (x.startsWith("[")) return true;
+    return false;
+  }
+
+  getNombreMenu(stringCompleto: string) {
+    const limpio = stringCompleto.slice(
+      stringCompleto.indexOf("[") + 1,
+      stringCompleto.lastIndexOf("]")
+    );
+    return limpio.trim();
+  }
+
+  getNombreSubmenu(stringCompleto: string) {
+    const limpio = stringCompleto.slice(stringCompleto.indexOf("]")+1);
+    return limpio.trim();
+  }
+
+  addNuevoMenu(arrayMenus: any[], nombreNuevo: string, nombreNuevoSubmenu: string, objTecla: any): boolean {
+    let existeMenu = false;
+    
+    for (let i = 0; i < arrayMenus.length; i++) {
+      if (arrayMenus[i].nombre == nombreNuevo) {
+        existeMenu = true;
+        let existeSubmenu = false;
+
+        for (let j = 0; j < arrayMenus[i].arraySubmenus.length; j++) {
+          if (arrayMenus[i].arraySubmenus[j].nombre == nombreNuevoSubmenu) {
+            existeSubmenu = true;
+            arrayMenus[i].arraySubmenus[j].arrayTeclas.push(objTecla);
+            return true;
+          }
+        }
+
+        if (!existeSubmenu) {
+          arrayMenus[i].arraySubmenus.push({
+            nombre: nombreNuevoSubmenu, arrayTeclas: [objTecla]
+          });
+          return true;
+        }
+        logger.Error(118, "Error, estado teclado desconocido");
+        return false;
+      }
+    }
+
+    if (!existeMenu) {
+      arrayMenus.push({ nombre: nombreNuevo, arraySubmenus: [
+        { nombre: nombreNuevoSubmenu, arrayTeclas: [objTecla] }
+      ]});
+      return true;
+    }
+
+    logger.Error(119, "Error, estado teclado desconocido");
     return false;
   }
 
   async generarTecladoCompleto() {
     const teclas = await schTeclas.getTeclas();
-    console.log(teclas);
-    // const menus = await menusInstance.getMenus();
-    let menus = {};
-    let submenus = {};
+    const menus = [];
+
 
     for (let i = 0; i < teclas.length; i++) {
       if (this.tienePrefijoSubmenu(teclas[i].nomMenu)) {
-        const prefijo = teclas[i].nomMenu.slice(0, 2);
-        if (submenus[prefijo]) {
-          submenus[prefijo].push({
-            nomMenu: teclas[i].nomMenu.slice(3),
-            idArticle: teclas[i].idArticle,
-            nombreArticulo: teclas[i].nombreArticulo,
-            pos: teclas[i].pos,
-            color: teclas[i].color,
-            esSumable: teclas[i].esSumable
-          });
-        } else {
-          submenus[prefijo] = [];
-          submenus[prefijo].push({
-            nomMenu: teclas[i].nomMenu.slice(3),
-            idArticle: teclas[i].idArticle,
-            nombreArticulo: teclas[i].nombreArticulo,
-            pos: teclas[i].pos,
-            color: teclas[i].color,
-            esSumable: teclas[i].esSumable
-          });
-        }
+        console.log(this.getNombreMenu(teclas[i].nomMenu));
+        this.addNuevoMenu(menus, this.getNombreMenu(teclas[i].nomMenu), this.getNombreSubmenu(teclas[i].nomMenu), {
+          idArticle: teclas[i].idArticle,
+          nombreArticulo: teclas[i].nombreArticulo,
+          pos: teclas[i].pos,
+          color: teclas[i].color,
+          esSumable: teclas[i].esSumable,
+        });
       } else {
-        const nombreGrupo = teclas[i].nomMenu;
-        if (menus[nombreGrupo]) {
-          menus[nombreGrupo].push(teclas[i]);
-        } else {
-          menus[nombreGrupo] = [];
-          menus[nombreGrupo].push(teclas[i]);
-        }
+        console.log("FALTA HACERLO");
       }
     }
-    
-    return {
-      menusItems: menus,
-      submenusItems: submenus
-    };
+
+    return menus;
   }
 }
 export const tecladoInstance = new TecladoClase();
