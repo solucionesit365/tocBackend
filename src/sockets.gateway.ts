@@ -4,6 +4,7 @@ import { cajaInstance } from "./caja/caja.clase";
 import { cestasInstance } from "./cestas/cestas.clase";
 import { logger } from "./logger";
 import { parametrosInstance } from "./parametros/parametros.clase";
+import { tecladoInstance } from "./teclado/teclado.clase";
 import { ticketsInstance } from "./tickets/tickets.clase";
 import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 
@@ -35,7 +36,7 @@ io.on("connection", (socket) => {
   });
 
   /* Eze 4.0 */
-  socket.on("cargarParametros", async (data) => {
+  socket.on("cargarParametros", async () => {
     try {
       socket.emit("cargarParametros", await parametrosInstance.getParametros());
     } catch (err) {
@@ -44,7 +45,7 @@ io.on("connection", (socket) => {
   });
 
   /* Eze 4.0 */
-  socket.on("cargarVentas", async (data) => {
+  socket.on("cargarVentas", async () => {
     try {
       if (await cajaInstance.cajaAbierta()) {
         const caja = await cajaInstance.getInfoCajaAbierta();
@@ -52,6 +53,15 @@ io.on("connection", (socket) => {
       }      
     } catch (err) {
       logger.Error(39, err);
+    }
+  });
+
+  /* Eze 4.0 */
+  socket.on("cargarTeclado", async () => {
+    try {
+      socket.emit("cargarTeclado", await tecladoInstance.generarTecladoCompleto());
+    } catch (err) {
+      logger.Error(118, err);
     }
   });
 });
