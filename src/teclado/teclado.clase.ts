@@ -92,7 +92,7 @@ export class TecladoClase {
         return true;
       }
     }
-    arrayMenus.push({ nombre: nombreNuevo, arrayTeclas: [objTecla], arrayMenus: null });
+    arrayMenus.push({ nombre: nombreNuevo, arrayTeclas: [objTecla], arraySubmenus: null });
     return true;
   }
 
@@ -103,18 +103,23 @@ export class TecladoClase {
     objTecla: any
   ): boolean {
     let existeMenu = false;
-
+    
     for (let i = 0; i < arrayMenus.length; i++) {
       if (arrayMenus[i].nombre == nombreNuevo) {
         existeMenu = true;
         let existeSubmenu = false;
+        console.log("una nueva: ", arrayMenus[i].arraySubmenus);
 
-        for (let j = 0; j < arrayMenus[i].arraySubmenus.length; j++) {
-          if (arrayMenus[i].arraySubmenus[j].nombre == nombreNuevoSubmenu) {
-            existeSubmenu = true;
-            arrayMenus[i].arraySubmenus[j].arrayTeclas.push(objTecla);
-            return true;
+        if (arrayMenus[i].arraySubmenus) {
+          for (let j = 0; j < arrayMenus[i].arraySubmenus.length; j++) {
+            if (arrayMenus[i].arraySubmenus[j].nombre == nombreNuevoSubmenu) {
+              existeSubmenu = true;
+              arrayMenus[i].arraySubmenus[j].arrayTeclas.push(objTecla);
+              return true;
+            }
           }
+        } else {
+          arrayMenus[i]["arraySubmenus"] = [];
         }
 
         if (!existeSubmenu) {
@@ -149,7 +154,6 @@ export class TecladoClase {
 
     for (let i = 0; i < teclas.length; i++) {
       if (this.tienePrefijoSubmenu(teclas[i].nomMenu)) {
-        console.log(this.getNombreMenu(teclas[i].nomMenu));
         this.addTeclaConSubmenu(
           menus,
           this.getNombreMenu(teclas[i].nomMenu),
@@ -163,7 +167,6 @@ export class TecladoClase {
           }
         );
       } else {
-        console.log("ENTRO EN EL NORMAL");
         this.addTeclaNormal(menus, teclas[i].nomMenu.trim(), {
           idArticle: teclas[i].idArticle,
           nombreArticulo: teclas[i].nombreArticulo,
