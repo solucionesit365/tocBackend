@@ -14,13 +14,15 @@ export class TecladoController {
   ) {
     try {
       if (UtilesModule.checkVariable(idArticulo, gramos, idCesta, unidades)) {
-        return await cestasInstance.clickTeclaArticulo(
+        const resultado = await cestasInstance.clickTeclaArticulo(
           idArticulo,
           gramos,
           idCesta,
           unidades,
           arraySuplementos
         );
+        cestasInstance.actualizarCestas();
+        return resultado;
       }
       throw Error("Faltan datos en cestas (controller) > clickTeclaArticulo");
     } catch (err) {

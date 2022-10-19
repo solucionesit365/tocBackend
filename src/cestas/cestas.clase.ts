@@ -16,8 +16,21 @@ import { ClientesInterface } from "../clientes/clientes.interface";
 // import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ObjectId } from "mongodb";
 import { logger } from "../logger";
+import { io } from "../sockets.gateway";
 
 export class CestaClase {
+  /* Eze 4.0 */
+  actualizarCestas() {
+    cestasInstance
+      .getAllCestas()
+      .then((arrayCestas) => {
+        io.emit("cargarCestas", arrayCestas);
+      })
+      .catch((err) => {
+        logger.Error(119, err);
+      });
+  }
+
   /* Eze 4.0 */
   getCestaById = async (idCesta: CestasInterface["_id"]) =>
     await schCestas.getCestaById(idCesta);
@@ -59,10 +72,16 @@ export class CestaClase {
   }
 
   /* Eze 4.0 */
-  getTotalCesta = (cesta: CestasInterface) => cesta.detalleIva.importe1 + cesta.detalleIva.importe2 + cesta.detalleIva.importe3;
+  getTotalCesta = (cesta: CestasInterface) =>
+    cesta.detalleIva.importe1 +
+    cesta.detalleIva.importe2 +
+    cesta.detalleIva.importe3;
 
   /* Eze 4.0 */
-  async borrarItemCesta(idCesta: CestasInterface["_id"], index: number): Promise<boolean> {
+  async borrarItemCesta(
+    idCesta: CestasInterface["_id"],
+    index: number
+  ): Promise<boolean> {
     try {
       let cesta = await this.getCestaById(idCesta);
 
@@ -127,20 +146,38 @@ export class CestaClase {
     arraySuplementos: ItemLista["arraySuplementos"], // Los suplentos no deben tener tarifa especial para simplificar.
     gramos: ItemLista["gramos"]
   ): Promise<CestasInterface> {
-    const cesta = await this.getCestaById(idCesta);
+    let cesta = await this.getCestaById(idCesta);
+    let articuloNuevo = true;
 
-    cesta.lista.push({
-      idArticulo: articulo._id,
-      nombre: articulo.nombre,
-      arraySuplementos: arraySuplementos,
-      promocion: null,
-      regalo: false,
-      subtotal: unidades * articulo.precioConIva,
-      unidades: unidades,
-      precioConIva: articulo.precioConIva,
-      gramos: gramos,
-      tipoIva: articulo.tipoIva,
-    });
+    for (let i = 0; i < cesta.lista.length; i++) {
+      if (
+        cesta.lista[i].idArticulo === articulo._id &&
+        !cesta.lista[i].promocion &&
+        !cesta.lista[i].regalo
+      ) {
+        cesta.lista[i].unidades += unidades;
+        cesta.lista[i].subtotal += unidades * cesta.lista[i].precioConIva;
+        articuloNuevo = false;
+        break;
+      }
+    }
+
+    if (articuloNuevo) {
+      cesta.lista.push({
+        idArticulo: articulo._id,
+        nombre: articulo.nombre,
+        arraySuplementos: arraySuplementos,
+        promocion: null,
+        regalo: false,
+        subtotal: unidades * articulo.precioConIva,
+        unidades: unidades,
+        precioConIva: articulo.precioConIva,
+        gramos: gramos,
+        tipoIva: articulo.tipoIva,
+      });
+    }
+
+    cesta = await this.recalcularIvas(cesta);
 
     if (await schCestas.updateCesta(cesta)) return cesta;
 
@@ -160,7 +197,10 @@ export class CestaClase {
       const cesta = await cestasInstance.getCestaById(idCesta);
 
       if (cesta.idCliente) {
-        articulo = await articulosInstance.getPrecioConTarifa(articulo, cesta.idCliente);
+        articulo = await articulosInstance.getPrecioConTarifa(
+          articulo,
+          cesta.idCliente
+        );
       }
 
       // Va a peso. 1 unidad son 1000 gramos. Los precios son por kilogramo.
@@ -255,6 +295,7 @@ export class CestaClase {
 
   /* Eze 4.0 */
   async recalcularIvas(cesta: CestasInterface): Promise<CestasInterface> {
+    console.log(cesta);
     cesta.detalleIva = {
       base1: 0,
       base2: 0,
@@ -268,8 +309,37 @@ export class CestaClase {
     };
 
     for (let i = 0; i < cesta.lista.length; i++) {
+      if (cesta.lista[i].regalo) continue;
+
       if (cesta.lista[i].promocion) {
-        if (cesta.lista[i].arraySuplementos.length > 0) {
+        // Una promoción no puede llevar suplementos
+        cesta.detalleIva = fusionarObjetosDetalleIva(
+          cesta.detalleIva,
+          await this.getDetalleIvaPromocion(cesta.lista[i])
+        );
+      } else {
+        let articulo = await articulosInstance.getInfoArticulo(
+          cesta.lista[i].idArticulo
+        );
+        articulo = await articulosInstance.getPrecioConTarifa(
+          articulo,
+          cesta.idCliente
+        );
+
+        const auxDetalleIva = construirObjetoIvas(
+          articulo.precioConIva,
+          articulo.tipoIva,
+          cesta.lista[i].unidades
+        );
+        cesta.detalleIva = fusionarObjetosDetalleIva(
+          auxDetalleIva,
+          cesta.detalleIva
+        );
+        /* Detalle IVA de suplementos */
+        if (
+          cesta.lista[i].arraySuplementos &&
+          cesta.lista[i].arraySuplementos.length > 0
+        ) {
           cesta.detalleIva = fusionarObjetosDetalleIva(
             cesta.detalleIva,
             await this.getDetalleIvaSuplementos(
@@ -278,34 +348,9 @@ export class CestaClase {
             )
           );
         }
-
-        if (cesta.lista[i].promocion) {
-          // Una promoción no puede llevar suplementos
-          cesta.detalleIva = fusionarObjetosDetalleIva(
-            cesta.detalleIva,
-            await this.getDetalleIvaPromocion(cesta.lista[i])
-          );
-        } else {
-          let articulo = await articulosInstance.getInfoArticulo(
-            cesta.lista[i].idArticulo
-          );
-          articulo = await articulosInstance.getPrecioConTarifa(
-            articulo,
-            cesta.idCliente
-          );
-
-          const auxDetalleIva = construirObjetoIvas(
-            articulo.precioConIva,
-            articulo.tipoIva,
-            cesta.lista[i].unidades
-          );
-          cesta.detalleIva = fusionarObjetosDetalleIva(
-            auxDetalleIva,
-            cesta.detalleIva
-          );
-        }
       }
     }
+
     return cesta;
   }
 

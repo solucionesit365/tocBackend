@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { conexion } from "../conexion/mongodb";
 import { CestasInterface } from "./cestas.interface";
 
@@ -7,7 +8,8 @@ export async function getCestaById(
 ): Promise<CestasInterface> {
   const database = (await conexion).db("tocgame");
   const cesta = database.collection<CestasInterface>("cestas");
-  return await cesta.findOne({ _id: idCesta });
+  console.log("Está buscando: ", idCesta);
+  return await cesta.findOne({ _id: new ObjectId(idCesta) });
 }
 
 /* Eze 4.0 */
