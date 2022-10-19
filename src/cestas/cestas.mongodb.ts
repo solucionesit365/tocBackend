@@ -45,7 +45,6 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
       },
     }
   );
-  console.log(resultado);
   return resultado.acknowledged && resultado.matchedCount === 1;
 }
 
