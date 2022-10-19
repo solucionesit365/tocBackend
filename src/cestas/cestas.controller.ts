@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get } from "@nestjs/common";
 import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
 import { cestasInstance } from "./cestas.clase";
 import { logger } from "../logger";
+import { UtilesModule } from "src/utiles/utiles.module";
 
 @Controller("cestas")
 export class CestasController {
@@ -21,8 +22,9 @@ export class CestasController {
   /* Eze 4.0 */
   @Post("borrarItemCesta")
   async borrarItemCesta(@Body() { idCesta, index }) {
+    console.log(idCesta, index);
     try {
-      if (index && idCesta)
+      if (UtilesModule.checkVariable(index, idCesta))
         return await cestasInstance.borrarItemCesta(idCesta, index);
       throw Error("Error, faltan datos en borrarItemCesta controller");
     } catch (err) {
@@ -67,7 +69,7 @@ export class CestasController {
         return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
       throw Error("Error, faltan datos en cambiarCestaTrabajador controller");
     } catch (err) {
-      logger.Error(62,err);
+      logger.Error(62, err);
       return false;
     }
   }

@@ -88,8 +88,14 @@ export class CestaClase {
       cesta.lista.splice(index, 1);
 
       // Enviar por socket
-      await this.recalcularIvas(cesta);
-      return true;
+      cesta = await this.recalcularIvas(cesta);
+      if (await this.updateCesta(cesta)) {
+        this.actualizarCestas();
+        return true;
+      }
+      throw Error(
+        "Error, no se ha podido actualizar la cesta borrarItemCesta()"
+      );
     } catch (err) {
       logger.Error(57, err);
       return false;
@@ -391,7 +397,11 @@ export class CestaClase {
   /* Eze 4.0 */
   async borrarArticulosCesta(idCesta: CestasInterface["_id"]) {
     const vacia = this.generarObjetoCesta(idCesta);
-    return await this.updateCesta(vacia);
+    if (await this.updateCesta(vacia)) {
+      this.actualizarCestas();
+      return true;
+    }
+    throw Error("Error en updateCesta borrarArticulosCesta()");
   }
 
   /* Eze 4.0 */

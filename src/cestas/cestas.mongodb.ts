@@ -34,9 +34,18 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const unaCesta = database.collection<CestasInterface>("cestas");
   const resultado = await unaCesta.updateOne(
-    { _id: cesta._id },
-    { $set: cesta }
+    { _id: new ObjectId(cesta._id) },
+    {
+      $set: {
+        detalleIva: cesta.detalleIva,
+        idCliente: cesta.idCliente,
+        lista: cesta.lista,
+        modo: cesta.modo,
+        timestamp: cesta.timestamp,
+      },
+    }
   );
+  console.log(resultado);
   return resultado.acknowledged && resultado.matchedCount === 1;
 }
 
