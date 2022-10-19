@@ -301,7 +301,6 @@ export class CestaClase {
 
   /* Eze 4.0 */
   async recalcularIvas(cesta: CestasInterface): Promise<CestasInterface> {
-    console.log(cesta);
     cesta.detalleIva = {
       base1: 0,
       base2: 0,

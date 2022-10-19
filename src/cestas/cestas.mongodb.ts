@@ -8,7 +8,6 @@ export async function getCestaById(
 ): Promise<CestasInterface> {
   const database = (await conexion).db("tocgame");
   const cesta = database.collection<CestasInterface>("cestas");
-  console.log("Está buscando: ", idCesta);
   return await cesta.findOne({ _id: new ObjectId(idCesta) });
 }
 

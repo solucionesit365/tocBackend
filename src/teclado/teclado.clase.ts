@@ -92,7 +92,11 @@ export class TecladoClase {
         return true;
       }
     }
-    arrayMenus.push({ nombre: nombreNuevo, arrayTeclas: [objTecla], arraySubmenus: null });
+    arrayMenus.push({
+      nombre: nombreNuevo,
+      arrayTeclas: [objTecla],
+      arraySubmenus: null,
+    });
     return true;
   }
 
@@ -103,12 +107,11 @@ export class TecladoClase {
     objTecla: any
   ): boolean {
     let existeMenu = false;
-    
+
     for (let i = 0; i < arrayMenus.length; i++) {
       if (arrayMenus[i].nombre == nombreNuevo) {
         existeMenu = true;
         let existeSubmenu = false;
-        console.log("una nueva: ", arrayMenus[i].arraySubmenus);
 
         if (arrayMenus[i].arraySubmenus) {
           for (let j = 0; j < arrayMenus[i].arraySubmenus.length; j++) {
