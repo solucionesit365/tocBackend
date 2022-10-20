@@ -5,6 +5,7 @@ import {
   TrabajadoresInterface,
 } from "./trabajadores.interface";
 import { CestasInterface } from "../cestas/cestas.interface";
+import { ObjectId } from "mongodb";
 
 /* Eze 4.0 */
 export async function limpiezaFichajes(): Promise<boolean> {
@@ -178,7 +179,7 @@ export async function setIdCestaTrabajador(
     { _id: idTrabajador },
     {
       $set: {
-        idCesta: idCesta,
+        idCesta: new ObjectId(idCesta),
       },
     }
   );

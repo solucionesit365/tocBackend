@@ -70,7 +70,11 @@ export class CestasController {
   async cambiarCestaTrabajador(@Body() { idTrabajador, idCesta }) {
     try {
       if (idCesta && idTrabajador)
-        return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
+        if (await trabajadoresInstance.setIdCesta(idTrabajador, idCesta)) {
+          cestasInstance.actualizarCestas();
+          trabajadoresInstance.actualizarTrabajadoresFrontend();
+          return true;
+        }
       throw Error("Error, faltan datos en cambiarCestaTrabajador controller");
     } catch (err) {
       logger.Error(62, err);
