@@ -52,7 +52,11 @@ export class CestasController {
     try {
       if (idTrabajador) {
         const idCesta = await cestasInstance.crearCesta();
-        return await trabajadoresInstance.setIdCesta(idTrabajador, idCesta);
+        if (await trabajadoresInstance.setIdCesta(idTrabajador, idCesta)) {
+          cestasInstance.actualizarCestas();
+          trabajadoresInstance.actualizarTrabajadoresFrontend();
+          return true;
+        }
       }
       throw Error("Error, faltan datos en crearCesta controller");
     } catch (err) {

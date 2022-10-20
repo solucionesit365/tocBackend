@@ -7,17 +7,21 @@ import * as schTrabajadores from "./trabajadores.mongodb";
 import { parametrosInstance } from "../parametros/parametros.clase";
 import axios from "axios";
 import { CestasInterface } from "../cestas/cestas.interface";
+import { io } from "src/sockets.gateway";
+import { logger } from "src/logger";
 
 export class TrabajadoresClase {
-
   /* Eze 4.0 */
-  getTrabajadorById = async (idTrabajador: number) => await schTrabajadores.getTrabajador(idTrabajador);
+  getTrabajadorById = async (idTrabajador: number) =>
+    await schTrabajadores.getTrabajador(idTrabajador);
 
   /* Eze 4.0 */
   buscar = async (busqueda: string) => await schTrabajadores.buscar(busqueda);
 
   /* Eze 4.0 */
-  async mantenerTrabajadoresFichados(nuevoArray: TrabajadoresInterface[]): Promise<TrabajadoresInterface[]> {
+  async mantenerTrabajadoresFichados(
+    nuevoArray: TrabajadoresInterface[]
+  ): Promise<TrabajadoresInterface[]> {
     const arrayFichados = await this.getTrabajadoresFichados();
 
     for (let i = 0; i < arrayFichados.length; i++) {
@@ -34,7 +38,9 @@ export class TrabajadoresClase {
   /* Eze OK. NO 4.0 */
   async actualizarTrabajadores(): Promise<boolean> {
     const params = await parametrosInstance.getParametros();
-    const res: any = await axios.post("dependientas/descargar", { database: params.database });
+    const res: any = await axios.post("dependientas/descargar", {
+      database: params.database,
+    });
     if (!res.data.error && res.data.info.length > 0) {
       const resKeep = await this.mantenerTrabajadoresFichados(res.data.info);
       if (resKeep.length > 0) {
@@ -43,18 +49,23 @@ export class TrabajadoresClase {
         return true;
       }
     }
-    throw Error("Error, la información que llega desde San Pedro no es correcta en actualizarTrabajadores() class");
+    throw Error(
+      "Error, la información que llega desde San Pedro no es correcta en actualizarTrabajadores() class"
+    );
   }
 
   /* Eze 4.0 */
-  getTrabajadoresFichados = async (): Promise<TrabajadoresInterface[]> => await schTrabajadores.getTrabajadoresFichados();
+  getTrabajadoresFichados = async (): Promise<TrabajadoresInterface[]> =>
+    await schTrabajadores.getTrabajadoresFichados();
 
   /* Eze 4.0 */
   async ficharTrabajador(idTrabajador: number): Promise<boolean> {
     if (await schTrabajadores.ficharTrabajador(idTrabajador)) {
       return await this.nuevoFichajesSincro("ENTRADA", idTrabajador);
     }
-    throw Error("Error, no se ha podido fichar al trabajador ficharTrabajador() class");
+    throw Error(
+      "Error, no se ha podido fichar al trabajador ficharTrabajador() class"
+    );
   }
 
   /* Eze 4.0 */
@@ -108,16 +119,36 @@ export class TrabajadoresClase {
   }
 
   /* Eze 4.0 */
-  insertarTrabajadores = async (arrayTrabajadores: TrabajadoresInterface[]) => await schTrabajadores.insertarTrabajadores(arrayTrabajadores);
+  insertarTrabajadores = async (arrayTrabajadores: TrabajadoresInterface[]) =>
+    await schTrabajadores.insertarTrabajadores(arrayTrabajadores);
 
   /* Eze 4.0 */
-  getFichajeMasAntiguo = async () => await schTrabajadores.getFichajeMasAntiguo();
+  getFichajeMasAntiguo = async () =>
+    await schTrabajadores.getFichajeMasAntiguo();
 
   /* Eze 4.0 */
-  actualizarEstadoFichaje = async (fichaje: SincroFichajesInterface) => await schTrabajadores.actualizarEstadoFichaje(fichaje);
+  actualizarEstadoFichaje = async (fichaje: SincroFichajesInterface) =>
+    await schTrabajadores.actualizarEstadoFichaje(fichaje);
 
   /* Eze 4.0 */
-  setIdCesta = async (idTrabajador: TrabajadoresInterface["_id"], idCesta: CestasInterface["_id"]) => await schTrabajadores.setIdCestaTrabajador(idTrabajador, idCesta);
+  setIdCesta = async (
+    idTrabajador: TrabajadoresInterface["_id"],
+    idCesta: CestasInterface["_id"]
+  ) => await schTrabajadores.setIdCestaTrabajador(idTrabajador, idCesta);
+
+  /* Eze 4.0 */
+  actualizarTrabajadoresFrontend() {
+    this.getTrabajadoresFichados()
+      .then((resTrabajadores) => {
+        if (resTrabajadores && resTrabajadores.length > 0) {
+          io.emit("cargarTrabajadores", resTrabajadores);
+        }
+        return null;
+      })
+      .catch((err) => {
+        logger.Error(120, err);
+      });
+  }
 }
 
 export const trabajadoresInstance = new TrabajadoresClase();

@@ -23,8 +23,9 @@ export async function buscar(
   busqueda: string
 ): Promise<TrabajadoresInterface[]> {
   const database = (await conexion).db("tocgame");
-  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
-  return (await trabajadores
+  const trabajadores =
+    database.collection<TrabajadoresInterface>("trabajadores");
+  return await trabajadores
     .find(
       {
         $or: [
@@ -34,7 +35,7 @@ export async function buscar(
       },
       { limit: 4 }
     )
-    .toArray());
+    .toArray();
 }
 
 /* Eze 4.0 */
@@ -42,27 +43,25 @@ export async function getTrabajador(
   idTrabajador: number
 ): Promise<TrabajadoresInterface> {
   const database = (await conexion).db("tocgame");
-  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
-  return (await trabajadores.findOne({
+  const trabajadores =
+    database.collection<TrabajadoresInterface>("trabajadores");
+  return await trabajadores.findOne({
     _id: idTrabajador,
-    }));
+  });
 }
 
 /* Eze 4.0 */
 export async function getTrabajadoresFichados(): Promise<
   TrabajadoresInterface[]
 > {
-    const database = (await conexion).db("tocgame");
-    const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
-    return (await trabajadores
-      .find({ fichado: true })
-      .toArray());
+  const database = (await conexion).db("tocgame");
+  const trabajadores =
+    database.collection<TrabajadoresInterface>("trabajadores");
+  return await trabajadores.find({ fichado: true }).toArray();
 }
 
 /* Eze 4.0 */
-export async function ficharTrabajador(
-  idTrabajador: number
-): Promise<boolean> {
+export async function ficharTrabajador(idTrabajador: number): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const trabajadores = database.collection("trabajadores");
   return (
@@ -136,25 +135,27 @@ export async function insertarTrabajadores(
 ): Promise<boolean> {
   await borrarTrabajadores();
   const database = (await conexion).db("tocgame");
-  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
+  const trabajadores =
+    database.collection<TrabajadoresInterface>("trabajadores");
   return (await trabajadores.insertMany(arrayTrabajadores)).acknowledged;
 }
 
 /* Eze 4.0 */
 export async function getFichajeMasAntiguo(): Promise<SincroFichajesInterface> {
   const database = (await conexion).db("tocgame");
-  const sincroFichajes = database.collection<SincroFichajesInterface>("sincro-fichajes");
-  return (await sincroFichajes.findOne(
-    { enviado: false },
-    { sort: { _id: 1 } }
-  ));
+  const sincroFichajes =
+    database.collection<SincroFichajesInterface>("sincro-fichajes");
+  return await sincroFichajes.findOne({ enviado: false }, { sort: { _id: 1 } });
 }
 
 /* Eze 4.0 */
-export async function actualizarEstadoFichaje(fichaje: SincroFichajesInterface): Promise<boolean> {
+export async function actualizarEstadoFichaje(
+  fichaje: SincroFichajesInterface
+): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const sincroFichajes = database.collection("sincro-fichajes");
-  return (await sincroFichajes.updateOne(
+  return (
+    await sincroFichajes.updateOne(
       { _id: fichaje._id },
       {
         $set: {
@@ -166,10 +167,20 @@ export async function actualizarEstadoFichaje(fichaje: SincroFichajesInterface):
 }
 
 /* Eze 4.0 */
-export async function setIdCestaTrabajador(idTrabajador: TrabajadoresInterface["_id"], idCesta: CestasInterface["_id"]): Promise<boolean> {
+export async function setIdCestaTrabajador(
+  idTrabajador: TrabajadoresInterface["_id"],
+  idCesta: CestasInterface["_id"]
+): Promise<boolean> {
   const database = (await conexion).db("tocgame");
-  const trabajadores = database.collection<TrabajadoresInterface>("trabajadores");
-  return (await trabajadores.updateOne({ _id: idTrabajador }, { $set: {
-    "idCesta": idCesta
-  } })).acknowledged;
+  const trabajadores =
+    database.collection<TrabajadoresInterface>("trabajadores");
+  const resultado = await trabajadores.updateOne(
+    { _id: idTrabajador },
+    {
+      $set: {
+        idCesta: idCesta,
+      },
+    }
+  );
+  return resultado.acknowledged && resultado.modifiedCount > 0;
 }
