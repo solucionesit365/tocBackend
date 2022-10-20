@@ -22,7 +22,6 @@ export class CestasController {
   /* Eze 4.0 */
   @Post("borrarItemCesta")
   async borrarItemCesta(@Body() { idCesta, index }) {
-    console.log(idCesta, index);
     try {
       if (UtilesModule.checkVariable(index, idCesta))
         return await cestasInstance.borrarItemCesta(idCesta, index);
