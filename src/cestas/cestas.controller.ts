@@ -18,6 +18,23 @@ export class CestasController {
       return false;
     }
   }
+  /* Eze 4.0 */
+  @Post("fulminarCesta")
+  async fulminarCesta(@Body() { idCesta }) {
+    try {
+      if (idCesta) {
+        if (await cestasInstance.deleteCesta(idCesta)) {
+          cestasInstance.actualizarCestas();
+          return true;
+        }
+      }
+
+      throw Error("Error, faltan datos en fulminarCesta controller");
+    } catch (err) {
+      logger.Error(121, err);
+      return false;
+    }
+  }
 
   /* Eze 4.0 */
   @Post("borrarItemCesta")
