@@ -1,10 +1,16 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { io } from "../sockets.gateway";
+import axios from "axios";
 
 @Controller("test")
 export class TestController {
   @Post("test")
-  imprimirAlgo(@Body() parms) {
-    io.emit("cargarTrabajadores", "putaqtepario")
+  async imprimirAlgo(@Body() _parms) {
+    try {
+      const res = await axios.post("test/test", { nombre: "Ezequi" });
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 }

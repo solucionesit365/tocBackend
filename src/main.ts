@@ -7,9 +7,10 @@ import {
 import axios from "axios";
 require("./sincro");
 require("./sockets.gateway");
-//  axios.defaults.baseURL = 'http://localhost:3001';
-axios.defaults.baseURL = "https://sanpedro.cloud";
-
+axios.defaults.baseURL = "http://localhost:3001";
+// axios.defaults.baseURL = "https://sanpedro.cloud";
+axios.defaults.headers.common["Authorization"] =
+  "79BCD15E-6AA2-4C9D-9BAD-0761A3B49F9D";
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
