@@ -80,6 +80,21 @@ export class CestasController {
       return false;
     }
   }
+  /* Eze 4.0 */
+  @Post("onlyCrearCestaParaMesa")
+  async onlyCrearCesta(@Body() { indexMesa }) {
+    try {
+      if (indexMesa) {
+        const idCesta = await cestasInstance.crearCesta(indexMesa);
+        cestasInstance.actualizarCestas();
+        return idCesta;
+      }
+      throw Error("Error, faltan datos en crearCesta controller");
+    } catch (err) {
+      logger.Error(61, err);
+      return false;
+    }
+  }
 
   /* Eze 4.0 */
   @Post("cambiarCestaTrabajador")

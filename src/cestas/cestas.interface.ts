@@ -9,7 +9,7 @@ export interface CestasInterface {
   lista: ItemLista[],
   modo: ModoCesta,
   idCliente: ClientesInterface["id"],
-  mesa: boolean
+  indexMesa?: boolean
 }
 
 export type ItemLista = {

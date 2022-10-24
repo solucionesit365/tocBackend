@@ -10,18 +10,10 @@ export class MesasController {
       const resultado = await mesasInstance.getMesas();
       if (resultado && resultado.length === 50) return resultado;
 
-      const resActualizar = await mesasInstance.actualizarMesasOnline();
-      if (resActualizar) {
-        const resultadoActualizado = await mesasInstance.getMesas();
-        if (resultadoActualizado && resultadoActualizado.length === 50) {
-          return resultadoActualizado;
-        }
-      }
-
       const arrayMesas = [];
       for (let i = 0; i < 50; i++) {
         arrayMesas.push({
-          color: "#fff",
+          idCesta: null,
         });
       }
       return arrayMesas;
@@ -34,7 +26,7 @@ export class MesasController {
   async saveMesas(@Body() { arrayMesas }) {
     try {
       if (arrayMesas && arrayMesas.length === 50) {
-        return await mesasInstance.saveMesasLocal(arrayMesas);
+        return await mesasInstance.saveMesas(arrayMesas);
       }
       throw Error(
         "Faltan datos o son incorrectos en guardarCambios mesas.controller.ts"
@@ -42,6 +34,18 @@ export class MesasController {
     } catch (err) {
       logger.Error(124, err);
       return false;
+    }
+  }
+
+  @Post("getMesa")
+  async getNombreMesa(@Body() { indexMesa }) {
+    try {
+      const arrayMesas = await mesasInstance.getMesas();
+      if (arrayMesas[indexMesa]) return arrayMesas[indexMesa];
+      return null;
+    } catch (err) {
+      logger.Error(126, err);
+      return null;
     }
   }
 }

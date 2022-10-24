@@ -163,13 +163,13 @@ function actualizarTeclados() {
   });
 }
 
-async function actualizarMesas() {
-  try {
-    await mesasInstance.actualizarMesasOnline();
-  } catch (err) {
-    logger.Error(123, err);
-  }
-}
+// async function actualizarMesas() {
+//   try {
+//     await mesasInstance.actualizarMesasOnline();
+//   } catch (err) {
+//     logger.Error(123, err);
+//   }
+// }
 
 // Borrar datos de más de 15 días y que estén enviados.
 function limpiezaProfunda(): void {
@@ -187,7 +187,7 @@ setInterval(sincronizarDevoluciones, 60000);
 setInterval(actualizarTeclados, 3600000);
 setInterval(actualizarTarifas, 3600000);
 setInterval(limpiezaProfunda, 60000);
-setInterval(actualizarMesas, 3600000);
+// setInterval(actualizarMesas, 3600000);
 
 export {
   sincronizarTickets,

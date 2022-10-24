@@ -1,10 +1,13 @@
 import { conexion } from "../conexion/mongodb";
-import { MesaInterface } from "./mesas.interface";
+import { MesaInterface, ItemMesaCollection } from "./mesas.interface";
 
 export async function getMesas() {
   const db = (await conexion).db("tocgame");
-  const mesasCollection = db.collection<MesaInterface>("mesas");
-  return await mesasCollection.find({}).toArray();
+  const mesasCollection = db.collection<ItemMesaCollection>("mesas");
+  const resItemMesaCollection = await mesasCollection.findOne({_id: "MESAS"});
+  if (resItemMesaCollection && resItemMesaCollection.estructura)
+    return resItemMesaCollection.estructura;
+  return null;
 }
 
 export async function deleteMesas() {
@@ -21,7 +24,17 @@ export async function deleteMesas() {
 export async function insertMesas(arrayMesas: MesaInterface[]) {
   await deleteMesas();
   const db = (await conexion).db("tocgame");
-  const mesasCollection = db.collection<MesaInterface>("mesas");
-  const resultado = await mesasCollection.insertMany(arrayMesas);
-  return resultado.acknowledged && resultado.insertedCount > 0;
+  const mesasCollection = db.collection<ItemMesaCollection>("mesas");
+  const resultado = await mesasCollection.replaceOne(
+    { _id: "MESAS" },
+    {
+      _id: "MESAS",
+      estructura: arrayMesas,
+    },
+    { upsert: true }
+  );
+  return (
+    resultado.acknowledged &&
+    (resultado.modifiedCount > 0 || resultado.upsertedCount > 0)
+  );
 }
