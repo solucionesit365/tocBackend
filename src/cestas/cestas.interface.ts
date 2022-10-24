@@ -8,7 +8,8 @@ export interface CestasInterface {
   detalleIva: DetalleIvaInterface,
   lista: ItemLista[],
   modo: ModoCesta,
-  idCliente: ClientesInterface["id"]
+  idCliente: ClientesInterface["id"],
+  mesa: boolean
 }
 
 export type ItemLista = {
