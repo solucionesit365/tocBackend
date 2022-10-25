@@ -5,7 +5,7 @@ import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
 import { articulosInstance } from "src/articulos/articulos.clase";
 import { clienteInstance } from "src/clientes/clientes.clase";
 import { familiasInstance } from "src/familias/familias.class";
-import { promocionesInstance } from "src/promociones/promociones.clase";
+import { nuevaInstancePromociones } from "src/promociones/promociones.clase";
 import { paramsTicketInstance } from "src/params-ticket/params-ticket.class";
 import { menusInstance } from "src/menus/menus.clase";
 import { tecladoInstance } from "src/teclado/teclado.clase";
@@ -97,7 +97,7 @@ export class InstaladorController {
           const info4 = await familiasInstance.insertarFamilias(
             res.data.info.familias
           );
-          const info5 = await promocionesInstance.insertarPromociones(
+          const info5 = await nuevaInstancePromociones.insertarPromociones(
             res.data.info.promociones
           );
           const info6 = await paramsTicketInstance.insertarParametrosTicket(

@@ -7,8 +7,8 @@ import {
 import axios from "axios";
 require("./sincro");
 require("./sockets.gateway");
-axios.defaults.baseURL = "http://localhost:3001";
-// axios.defaults.baseURL = "https://sanpedro.cloud";
+//axios.defaults.baseURL = "http://localhost:3001";
+axios.defaults.baseURL = "https://sanpedro.cloud";
 import { parametrosInstance } from "./parametros/parametros.clase";
 import { logger } from "./logger";
 

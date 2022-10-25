@@ -1,3 +1,5 @@
+import { ArticulosInterface } from "../articulos/articulos.interface";
+
 export interface PromocionesInterface {
   _id: string;
   cantidadPrincipal: number;
@@ -5,10 +7,18 @@ export interface PromocionesInterface {
   fechaFinal: string;
   fechaInicio: string;
   precioFinal: number;
-  principal: {
-    _id: number;
-  }[];
-  secundario: {
-    _id: number;
-  }[];
+  principal: number[];
+  secundario: number[];
+  tipo: "COMBO" | "INDIVIDUAL";
+}
+
+export interface InfoPromocionIndividual {
+  sobran: number;
+  cantidadPromos: number;
+  precioConIva: number;
+  idPromocion: string;
+  nombreArticulo: string;
+  idArticulo: ArticulosInterface["_id"];
+  cantidadNecesaria: number;
+  precioUnidad: number;
 }

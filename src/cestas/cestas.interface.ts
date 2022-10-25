@@ -29,8 +29,6 @@ export type ItemLista = {
     unidadesOferta: number;
     tipoPromo: TiposPromociones;
   };
-  tipoIva: TiposIva;
-  precioConIva: number;
   gramos: number,
   regalo: boolean;
 };
