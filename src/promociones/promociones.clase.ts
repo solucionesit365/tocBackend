@@ -51,7 +51,7 @@ export class NuevaPromocion {
         if (promoIndividual) {
             if (index1 != null) cesta.lista.splice(index1, 1);
             this.aplicarPromoIndividual(cesta, promoIndividual);
-            this.aplicarSobra(cesta, idArticulo, promoIndividual);
+            if (promoIndividual.sobran > 0) this.aplicarSobra(cesta, idArticulo, promoIndividual);
             return true;
         }
         // aquí falta gestionar las combo

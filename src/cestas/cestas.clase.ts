@@ -12,8 +12,6 @@ import { articulosInstance } from "../articulos/articulos.clase";
 import { cajaInstance } from "../caja/caja.clase";
 import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ClientesInterface } from "../clientes/clientes.interface";
-// import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
-// import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { ObjectId } from "mongodb";
 import { logger } from "../logger";
 import { io } from "../sockets.gateway";
@@ -256,10 +254,11 @@ export class CestaClase {
       const articulo = await articulosInstance.getInfoArticulo(
         itemPromocion.promocion.idArticuloPrincipal
       );
+      
       const importeRealUnitario =
         itemPromocion.promocion.precioRealArticuloPrincipal;
       const unidadesTotales =
-        itemPromocion.promocion.unidadesOferta * itemPromocion.unidades;
+        (itemPromocion.promocion.cantidadArticuloPrincipal) ? itemPromocion.promocion.cantidadArticuloPrincipal : itemPromocion.promocion.cantidadArticuloSecundario * itemPromocion.unidades;
       detalleIva = construirObjetoIvas(
         importeRealUnitario,
         articulo.tipoIva,

@@ -180,7 +180,7 @@ export class TecladoClase {
       }
     }
 
-    return menus;
+    return menus.sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
 }
 export const tecladoInstance = new TecladoClase();
