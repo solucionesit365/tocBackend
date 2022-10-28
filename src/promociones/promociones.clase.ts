@@ -1,10 +1,9 @@
 import axios from "axios";
-import { articulosInstance } from "src/articulos/articulos.clase";
-import { ArticulosInterface } from "src/articulos/articulos.interface";
-import { cestasInstance } from "src/cestas/cestas.clase";
-import { CestasInterface } from "src/cestas/cestas.interface";
-import { logger } from "src/logger";
-import { PromocionesInterface, InfoPromocionIndividual } from "./promociones.interface";
+import { articulosInstance } from "../articulos/articulos.clase";
+import { ArticulosInterface } from "../articulos/articulos.interface";
+import { CestasInterface } from "../cestas/cestas.interface";
+import { logger } from "../logger";
+import { PromocionesInterface, InfoPromocionIndividual, InfoPromocionCombo } from "./promociones.interface";
 import * as schPromociones from "./promociones.mongodb";
 
 export class NuevaPromocion {
@@ -47,15 +46,60 @@ export class NuevaPromocion {
             }
         }
 
+        /* INDIVIDUALES */
         const promoIndividual = await this.buscarPromocionesIndividuales(idArticulo, unidadesTotales);
         if (promoIndividual) {
             if (index1 != null) cesta.lista.splice(index1, 1);
             this.aplicarPromoIndividual(cesta, promoIndividual);
-            if (promoIndividual.sobran > 0) this.aplicarSobra(cesta, idArticulo, promoIndividual);
+            if (promoIndividual.sobran > 0) this.aplicarSobraIndividual(cesta, idArticulo, promoIndividual);
             return true;
         }
-        // aquí falta gestionar las combo
+        
+        /* COMBO */
+        let promoComboSecundario: { indexPromo: number; cantidadPromos: number; sobran: number; } = null;
+        const promoComboPrincipal = this.buscarPromocionesComboPrincipal(idArticulo, unidadesTotales);
+        if (promoComboPrincipal) {
+            // BUSCAR AHORA LOS SECUNDARIOS EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
+            for (let i = 0; i < cesta.lista.length; i++) {
+                if (idArticulo != cesta.lista[i].idArticulo) {
+                    for (let j = 0; j < this.promosCombo[promoComboPrincipal.indexPromo].secundario.length; j++) {
+                        if (this.promosCombo[promoComboPrincipal.indexPromo].secundario[j] === cesta.lista[i].idArticulo) {
+                            if (cesta.lista[i].unidades >= this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario) {
+                                const cantidadPromos = Math.trunc(cesta.lista[i].unidades/this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario);
+                                const sobran = cesta.lista[i].unidades%this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario;
+                                let aux = this.cuantasSePuedenAplicar(promoComboPrincipal, {
+                                    cantidadPromos,
+                                    sobran,
+                                    indexPromo: promoComboPrincipal.indexPromo
+                                });
+                                const infoFinal: InfoPromocionCombo = {...aux, ...{
+                                    indexListaOriginalPrincipal: index1,
+                                    indexListaOriginalSecundario: i,
+                                    idArticuloPrincipal: idArticulo,
+                                    idArticuloSecundario: cesta.lista[i].idArticulo,
+                                    precioPromoUnitario: this.promosCombo[promoComboPrincipal.indexPromo].precioFinal,
+                                    idPromocion: this.promosCombo[promoComboPrincipal.indexPromo]._id,
+                                    cantidadNecesariaPrincipal: this.promosCombo[promoComboPrincipal.indexPromo].cantidadPrincipal,
+                                    cantidadNecesariaSecundario: this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario,
+                                }};
+                                this.deleteIndexCestaCombo(cesta, infoFinal.indexListaOriginalPrincipal, infoFinal.indexListaOriginalSecundario);
+                                this.aplicarPromoCombo(cesta, infoFinal);
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (promoComboSecundario = this.buscarPromocionesComboSecundario(idArticulo, unidadesTotales)) {
+            // BUSCAR AHORA LOS PRINCIPALES EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
+        }
         return false;
+    }
+
+    private cuantasSePuedenAplicar(infoPromoPrincipal: { indexPromo: number; cantidadPromos: number; sobran: number; }, infoPromoSecundario: { indexPromo: number; cantidadPromos: number; sobran: number; }) {
+        const unidadesPromo = Math.min(infoPromoPrincipal.cantidadPromos, infoPromoSecundario.cantidadPromos);
+        const sobranPrincipal = (infoPromoPrincipal.cantidadPromos-unidadesPromo)*this.promosCombo[infoPromoPrincipal.indexPromo].cantidadPrincipal+infoPromoPrincipal.sobran;
+        const sobranSecundario = (infoPromoSecundario.cantidadPromos-unidadesPromo)*this.promosCombo[infoPromoSecundario.indexPromo].cantidadSecundario+infoPromoSecundario.sobran;
+        return { seAplican: unidadesPromo, sobranPrincipal, sobranSecundario };        
     }
 
     private async buscarPromocionesIndividuales(idArticulo: ArticulosInterface["_id"], unidadesTotales: number): Promise<InfoPromocionIndividual> {
@@ -103,9 +147,35 @@ export class NuevaPromocion {
         return null;
     }
 
-    // private async buscarPromocionesCombo() {
-    //     console.log("aplicamosCombo");
-    // }
+    private buscarPromocionesComboPrincipal(idArticulo1: ArticulosInterface["_id"], unidadesTotales1: number) {
+        for (let i = 0; i < this.promosCombo.length; i++) {
+            if (this.promosCombo[i].principal && this.promosCombo[i].principal.length > 0) { // Buscar comenzando por el secundario en el else
+                for (let j = 0; j < this.promosCombo[i].principal.length; j++) {
+                    if (this.promosCombo[i].principal[j] === idArticulo1 && unidadesTotales1 >= this.promosCombo[i].cantidadPrincipal) {
+                        const cantidadPromos = Math.trunc(unidadesTotales1/this.promosCombo[i].cantidadPrincipal);
+                        const sobran = unidadesTotales1%this.promosCombo[i].cantidadPrincipal;
+                        return { indexPromo: i, cantidadPromos, sobran };
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private buscarPromocionesComboSecundario(idArticulo1: ArticulosInterface["_id"], unidadesTotales1: number) {
+        for (let i = 0; i < this.promosCombo.length; i++) {
+            if (this.promosCombo[i].secundario && this.promosCombo[i].secundario.length > 0) { // Buscar comenzando por el secundario en el else
+                for (let j = 0; j < this.promosCombo[i].secundario.length; j++) {
+                    if (this.promosCombo[i].secundario[j] === idArticulo1 && unidadesTotales1 >= this.promosCombo[i].cantidadSecundario) {
+                        const cantidadPromos = Math.trunc(unidadesTotales1/this.promosCombo[i].cantidadSecundario);
+                        const sobran = unidadesTotales1%this.promosCombo[i].cantidadSecundario;
+                        return { indexPromo: i, cantidadPromos, sobran };
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
     private aplicarPromoIndividual(cesta: CestasInterface, data: InfoPromocionIndividual) {
         cesta.lista.push({
@@ -130,7 +200,61 @@ export class NuevaPromocion {
         });
     }
 
-    private aplicarSobra(cesta: CestasInterface, idArticulo: ArticulosInterface["_id"], data: InfoPromocionIndividual) {
+    private async aplicarPromoCombo(cesta: CestasInterface, data: InfoPromocionCombo) {
+        const articuloPrincipal = await articulosInstance.getInfoArticulo(data.idArticuloPrincipal);
+        const articuloSecundario = await articulosInstance.getInfoArticulo(data.idArticuloSecundario);
+
+        cesta.lista.push({
+            arraySuplementos: null,
+            gramos: 0,
+            idArticulo: -1,
+            unidades: data.seAplican,
+            nombre: `Promo. ${ articuloPrincipal.nombre } + ${ articuloSecundario.nombre }`,
+            regalo: false,
+            subtotal: data.precioPromoUnitario*data.seAplican, // No será necesario, se hace desde el recalcularIvas Cesta
+            promocion: {
+                idPromocion: data.idPromocion,
+                tipoPromo: "COMBO",
+                unidadesOferta: data.seAplican,
+                idArticuloPrincipal: data.idArticuloPrincipal,
+                cantidadArticuloPrincipal: data.cantidadNecesariaPrincipal,
+                cantidadArticuloSecundario: data.cantidadNecesariaSecundario,
+                idArticuloSecundario: data.idArticuloSecundario,
+                precioRealArticuloPrincipal: data.precioUnidad, // VOY POR AQUÍ
+                precioRealArticuloSecundario: null
+            }
+        });
+    }
+
+    private calcularDescuento(precioTotalSinOferta: number, precioTotalOferta: number) {
+        const dto = (precioTotalSinOferta - precioTotalOferta) / precioTotalSinOferta;
+        return {
+        precioRealPrincipal:
+            Math.round(
+            (precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
+                unidadesOferta *
+                cantidadPrincipal *
+                100
+            ) / 100,
+        };
+    }
+
+    private deleteIndexCestaCombo(cesta: CestasInterface, indexPrincipal: number, indexSecundario: number) {
+        const deleteIndexes: number[] = [];
+        if (indexPrincipal != null && indexPrincipal != undefined) {
+            deleteIndexes.push(indexPrincipal);
+        }
+
+        if (indexSecundario != null && indexSecundario != undefined) {
+            deleteIndexes.push(indexSecundario);
+        }
+        deleteIndexes.sort();
+        for (let i = deleteIndexes.length -1; i >= 0; i--) {
+            cesta.lista.splice(deleteIndexes[i], 1);
+        }
+    }
+
+    private aplicarSobraIndividual(cesta: CestasInterface, idArticulo: ArticulosInterface["_id"], data: InfoPromocionIndividual) {
         cesta.lista.push({
             arraySuplementos: null,
             gramos: 0,

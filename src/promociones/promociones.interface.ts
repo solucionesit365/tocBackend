@@ -22,3 +22,17 @@ export interface InfoPromocionIndividual {
   cantidadNecesaria: number;
   precioUnidad: number;
 }
+
+export interface InfoPromocionCombo {
+  indexListaOriginalPrincipal: any;
+  indexListaOriginalSecundario: number;
+  seAplican: number;
+  sobranPrincipal: number;
+  sobranSecundario: number;
+  idArticuloPrincipal: ArticulosInterface["_id"];
+  idArticuloSecundario: ArticulosInterface["_id"];
+  cantidadNecesariaPrincipal: number,
+  cantidadNecesariaSecundario: number,
+  precioPromoUnitario: number;
+  idPromocion: PromocionesInterface["_id"];
+}
