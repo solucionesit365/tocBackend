@@ -8,12 +8,12 @@ export async function setMonedas(
   try {
     const database = (await conexion).db("tocgame");
     const monedas = database.collection("monedas");
-    const resultado = await monedas.updateOne(
+    const resultado = await monedas.replaceOne(
       { _id: "INFO_MONEDAS" },
-      { $set: data },
+      { data },
       { upsert: true }
     );
-    return resultado.acknowledged && resultado.modifiedCount > 0;
+    return resultado.acknowledged && (resultado.modifiedCount > 0 || resultado.upsertedCount > 0);
   } catch (err) {
     logger.Error(97, err);
     return false;

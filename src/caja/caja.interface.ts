@@ -63,68 +63,7 @@ export type TiposInfoMoneda = "CLAUSURA" | "APERTURA";
 
 export interface MonedasInterface {
   _id: TiposInfoMoneda;
-  array: [
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    },
-    {
-      valor: number;
-      style: string;
-    }
-  ];
+  array: number[];
 }
 
 export type DetalleMonedas = {
