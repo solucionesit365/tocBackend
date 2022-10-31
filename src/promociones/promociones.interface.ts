@@ -31,8 +31,15 @@ export interface InfoPromocionCombo {
   sobranSecundario: number;
   idArticuloPrincipal: ArticulosInterface["_id"];
   idArticuloSecundario: ArticulosInterface["_id"];
-  cantidadNecesariaPrincipal: number,
-  cantidadNecesariaSecundario: number,
+  cantidadNecesariaPrincipal: number;
+  cantidadNecesariaSecundario: number;
   precioPromoUnitario: number;
   idPromocion: PromocionesInterface["_id"];
+  nombrePrincipal: string;
+  nombreSecundario: string;
+}
+
+export interface PreciosReales {
+  precioRealPrincipal: number;
+  precioRealSecundario: number;
 }

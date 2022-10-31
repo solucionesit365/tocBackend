@@ -3,7 +3,7 @@ import { articulosInstance } from "../articulos/articulos.clase";
 import { ArticulosInterface } from "../articulos/articulos.interface";
 import { CestasInterface } from "../cestas/cestas.interface";
 import { logger } from "../logger";
-import { PromocionesInterface, InfoPromocionIndividual, InfoPromocionCombo } from "./promociones.interface";
+import { PromocionesInterface, InfoPromocionIndividual, InfoPromocionCombo, PreciosReales } from "./promociones.interface";
 import * as schPromociones from "./promociones.mongodb";
 
 export class NuevaPromocion {
@@ -37,7 +37,7 @@ export class NuevaPromocion {
     public async gestionarPromociones(cesta: CestasInterface, idArticulo: ArticulosInterface["_id"], unidades: number): Promise<boolean> {
         let unidadesTotales = unidades;
         let index1 = null;
-
+        console.log("ENTRA EL ", idArticulo);
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].idArticulo === idArticulo) {
                 unidadesTotales += cesta.lista[i].unidades;
@@ -58,13 +58,23 @@ export class NuevaPromocion {
         /* COMBO */
         let promoComboSecundario: { indexPromo: number; cantidadPromos: number; sobran: number; } = null;
         const promoComboPrincipal = this.buscarPromocionesComboPrincipal(idArticulo, unidadesTotales);
+        console.log("TRAZA 1");
+        console.log(promoComboPrincipal);
         if (promoComboPrincipal) {
+            console.log("TRAZA 2");
             // BUSCAR AHORA LOS SECUNDARIOS EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
             for (let i = 0; i < cesta.lista.length; i++) {
+                console.log("TRAZA 3");
                 if (idArticulo != cesta.lista[i].idArticulo) {
+                    console.log("TRAZA 4");
                     for (let j = 0; j < this.promosCombo[promoComboPrincipal.indexPromo].secundario.length; j++) {
+                        console.log("idPromo: ", this.promosCombo[promoComboPrincipal.indexPromo]);
+                        console.log("TRAZA 5");
+                        console.log(this.promosCombo[promoComboPrincipal.indexPromo].secundario[j], cesta.lista[i].idArticulo);
                         if (this.promosCombo[promoComboPrincipal.indexPromo].secundario[j] === cesta.lista[i].idArticulo) {
+                            console.log("TRAZA 6");
                             if (cesta.lista[i].unidades >= this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario) {
+                                console.log("TRAZA 7");
                                 const cantidadPromos = Math.trunc(cesta.lista[i].unidades/this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario);
                                 const sobran = cesta.lista[i].unidades%this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario;
                                 let aux = this.cuantasSePuedenAplicar(promoComboPrincipal, {
@@ -72,6 +82,9 @@ export class NuevaPromocion {
                                     sobran,
                                     indexPromo: promoComboPrincipal.indexPromo
                                 });
+                                const articuloPrincipal = await articulosInstance.getInfoArticulo(idArticulo);
+                                const articuloSecundario = await articulosInstance.getInfoArticulo(cesta.lista[i].idArticulo);
+
                                 const infoFinal: InfoPromocionCombo = {...aux, ...{
                                     indexListaOriginalPrincipal: index1,
                                     indexListaOriginalSecundario: i,
@@ -81,16 +94,70 @@ export class NuevaPromocion {
                                     idPromocion: this.promosCombo[promoComboPrincipal.indexPromo]._id,
                                     cantidadNecesariaPrincipal: this.promosCombo[promoComboPrincipal.indexPromo].cantidadPrincipal,
                                     cantidadNecesariaSecundario: this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario,
+                                    nombrePrincipal: articuloPrincipal.nombre,
+                                    nombreSecundario: articuloSecundario.nombre
                                 }};
                                 this.deleteIndexCestaCombo(cesta, infoFinal.indexListaOriginalPrincipal, infoFinal.indexListaOriginalSecundario);
-                                this.aplicarPromoCombo(cesta, infoFinal);
+
+                                const preciosReales = this.calcularPrecioRealCombo(infoFinal, articuloPrincipal, articuloSecundario);
+                                this.aplicarPromoCombo(cesta, infoFinal, articuloPrincipal, articuloSecundario, preciosReales);
+                                if (infoFinal.sobranPrincipal > 0) this.aplicarSobraComboPrincipal(cesta, infoFinal);
+                                if (infoFinal.sobranSecundario > 0) this.aplicarSobraComboSecundario(cesta, infoFinal);
+                                console.log("TRAZA 8");
+                                return true;
                             }
                         }
                     }
                 }
             }
         } else if (promoComboSecundario = this.buscarPromocionesComboSecundario(idArticulo, unidadesTotales)) {
-            // BUSCAR AHORA LOS PRINCIPALES EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
+            console.log("TRAZA 22");
+            // BUSCAR AHORA LOS SECUNDARIOS EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
+            for (let i = 0; i < cesta.lista.length; i++) {
+                console.log("TRAZA 33");
+                if (idArticulo != cesta.lista[i].idArticulo) {
+                    console.log("TRAZA 44");
+                    for (let j = 0; j < this.promosCombo[promoComboSecundario.indexPromo].principal.length; j++) {
+                        console.log("TRAZA 55");
+                        if (this.promosCombo[promoComboSecundario.indexPromo].principal[j] === cesta.lista[i].idArticulo) {
+                            console.log("TRAZA 66");
+                            if (cesta.lista[i].unidades >= this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal) {
+                                console.log("TRAZA 77");
+                                const cantidadPromos = Math.trunc(cesta.lista[i].unidades/this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal);
+                                const sobran = cesta.lista[i].unidades%this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal;
+                                let aux = this.cuantasSePuedenAplicar(promoComboSecundario, {
+                                    cantidadPromos,
+                                    sobran,
+                                    indexPromo: promoComboSecundario.indexPromo
+                                });
+                                const articuloPrincipal = await articulosInstance.getInfoArticulo(cesta.lista[i].idArticulo);
+                                const articuloSecundario = await articulosInstance.getInfoArticulo(idArticulo);
+
+                                const infoFinal: InfoPromocionCombo = {...aux, ...{
+                                    indexListaOriginalPrincipal: index1,
+                                    indexListaOriginalSecundario: i,
+                                    idArticuloPrincipal: idArticulo,
+                                    idArticuloSecundario: cesta.lista[i].idArticulo,
+                                    precioPromoUnitario: this.promosCombo[promoComboSecundario.indexPromo].precioFinal,
+                                    idPromocion: this.promosCombo[promoComboSecundario.indexPromo]._id,
+                                    cantidadNecesariaPrincipal: this.promosCombo[promoComboSecundario.indexPromo].cantidadSecundario,
+                                    cantidadNecesariaSecundario: this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal,
+                                    nombrePrincipal: articuloPrincipal.nombre,
+                                    nombreSecundario: articuloSecundario.nombre
+                                }};
+                                this.deleteIndexCestaCombo(cesta, infoFinal.indexListaOriginalPrincipal, infoFinal.indexListaOriginalSecundario);
+
+                                const preciosReales = this.calcularPrecioRealCombo(infoFinal, articuloPrincipal, articuloSecundario);
+                                this.aplicarPromoCombo(cesta, infoFinal, articuloPrincipal, articuloSecundario, preciosReales);
+                                if (infoFinal.sobranPrincipal > 0) this.aplicarSobraComboPrincipal(cesta, infoFinal);
+                                if (infoFinal.sobranSecundario > 0) this.aplicarSobraComboSecundario(cesta, infoFinal);
+                                console.log("TRAZA 88");
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
         }
         return false;
     }
@@ -200,10 +267,7 @@ export class NuevaPromocion {
         });
     }
 
-    private async aplicarPromoCombo(cesta: CestasInterface, data: InfoPromocionCombo) {
-        const articuloPrincipal = await articulosInstance.getInfoArticulo(data.idArticuloPrincipal);
-        const articuloSecundario = await articulosInstance.getInfoArticulo(data.idArticuloSecundario);
-
+    private aplicarPromoCombo(cesta: CestasInterface, data: InfoPromocionCombo, articuloPrincipal: ArticulosInterface, articuloSecundario: ArticulosInterface, preciosReales: PreciosReales) {
         cesta.lista.push({
             arraySuplementos: null,
             gramos: 0,
@@ -220,24 +284,73 @@ export class NuevaPromocion {
                 cantidadArticuloPrincipal: data.cantidadNecesariaPrincipal,
                 cantidadArticuloSecundario: data.cantidadNecesariaSecundario,
                 idArticuloSecundario: data.idArticuloSecundario,
-                precioRealArticuloPrincipal: data.precioUnidad, // VOY POR AQUÍ
-                precioRealArticuloSecundario: null
+                precioRealArticuloPrincipal: preciosReales.precioRealPrincipal,
+                precioRealArticuloSecundario: preciosReales.precioRealSecundario
             }
         });
     }
 
-    private calcularDescuento(precioTotalSinOferta: number, precioTotalOferta: number) {
-        const dto = (precioTotalSinOferta - precioTotalOferta) / precioTotalSinOferta;
-        return {
+    calcularPrecioRealCombo(
+        data: InfoPromocionCombo,
+        articuloPrincipal: ArticulosInterface,
+        articuloSecundario: ArticulosInterface
+    ): PreciosReales {
+
+    let precioTotalSinOferta = 0;
+
+    const precioSinOfertaPrincipal = articuloPrincipal.precioConIva;
+    const precioSinOfertaSecundario = articuloSecundario.precioConIva;   
+
+    precioTotalSinOferta = (precioSinOfertaPrincipal * data.cantidadNecesariaPrincipal + precioSinOfertaSecundario * data.cantidadNecesariaSecundario) * data.seAplican;
+    
+    const dto = (precioTotalSinOferta - data.precioPromoUnitario) / precioTotalSinOferta;
+
+    const precioRealPrincipalDecimales = ((precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) * data.seAplican) % 1;
+    const precioRealSecundarioDecimales = ((precioSinOfertaSecundario - precioSinOfertaSecundario * dto) * data.seAplican) % 1;
+
+    if (
+      Math.round(
+        (precioRealPrincipalDecimales * data.cantidadNecesariaPrincipal +
+          precioRealSecundarioDecimales * data.cantidadNecesariaSecundario) *
+          100
+      ) /
+        100 ===
+      1
+    ) {
+      const sumaCentimos = 0.01 / data.cantidadNecesariaPrincipal;
+      return {
         precioRealPrincipal:
-            Math.round(
+          Math.round(
             (precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
-                unidadesOferta *
-                cantidadPrincipal *
-                100
-            ) / 100,
-        };
+              data.seAplican *
+              100
+          ) /
+            100 +
+          sumaCentimos,
+        precioRealSecundario:
+          Math.round(
+            (precioSinOfertaSecundario - precioSinOfertaSecundario * dto) *
+              data.seAplican *
+              100
+          ) / 100,
+      };
     }
+
+    return {
+      precioRealPrincipal:
+        Math.round(
+          (precioSinOfertaPrincipal - precioSinOfertaPrincipal * dto) *
+            data.seAplican *
+            100
+        ) / 100,
+      precioRealSecundario:
+        Math.round(
+          (precioSinOfertaSecundario - precioSinOfertaSecundario * dto) *
+            data.seAplican *
+            100
+        ) / 100,
+    };
+  }
 
     private deleteIndexCestaCombo(cesta: CestasInterface, indexPrincipal: number, indexSecundario: number) {
         const deleteIndexes: number[] = [];
@@ -264,6 +377,31 @@ export class NuevaPromocion {
             regalo: false,
             subtotal: null,
             unidades: data.sobran
+        });
+    }
+
+    private aplicarSobraComboPrincipal(cesta: CestasInterface, data: InfoPromocionCombo) {
+        cesta.lista.push({
+            arraySuplementos: null,
+            gramos: 0,
+            idArticulo: data.idArticuloPrincipal,
+            nombre: data.nombrePrincipal,
+            promocion: null,
+            regalo: false,
+            subtotal: null,
+            unidades: data.sobranPrincipal
+        });
+    }
+    private aplicarSobraComboSecundario(cesta: CestasInterface, data: InfoPromocionCombo) {
+        cesta.lista.push({
+            arraySuplementos: null,
+            gramos: 0,
+            idArticulo: data.idArticuloSecundario,
+            nombre: data.nombreSecundario,
+            promocion: null,
+            regalo: false,
+            subtotal: null,
+            unidades: data.sobranSecundario
         });
     }
 
