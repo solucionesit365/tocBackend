@@ -1,5 +1,5 @@
 import { ClientesInterface } from "../clientes/clientes.interface";
-import { ArticulosInterface, TiposIva } from "../articulos/articulos.interface";
+import { ArticulosInterface } from "../articulos/articulos.interface";
 import { ObjectId } from "mongodb";
 
 export interface CestasInterface {
