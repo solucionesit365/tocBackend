@@ -3,6 +3,7 @@ import { ticketsInstance } from "./tickets.clase";
 import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { logger } from "../logger";
 import { cestasInstance } from "../cestas/cestas.clase";
+import { paytefInstance } from "src/paytef/paytef.class";
 
 @Controller("tickets")
 export class TicketsController {
@@ -48,6 +49,7 @@ export class TicketsController {
           );
         if (await ticketsInstance.insertarTicket(ticket)) {
           await cestasInstance.borrarArticulosCesta(idCesta);
+          if (tipo === "TARJETA") paytefInstance.iniciarTransaccion();
           ticketsInstance.actualizarTickets();
           return await movimientosInstance.nuevoMovimiento(
             total,
