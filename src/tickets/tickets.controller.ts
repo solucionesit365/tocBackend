@@ -49,7 +49,7 @@ export class TicketsController {
           );
         if (await ticketsInstance.insertarTicket(ticket)) {
           await cestasInstance.borrarArticulosCesta(idCesta);
-          if (tipo === "TARJETA") paytefInstance.iniciarTransaccion();
+          if (tipo === "TARJETA") paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, total);
           ticketsInstance.actualizarTickets();
           return await movimientosInstance.nuevoMovimiento(
             total,

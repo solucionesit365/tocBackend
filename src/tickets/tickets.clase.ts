@@ -28,6 +28,8 @@ export class TicketsClase {
       : ultimoIdMongo;
   }
 
+  getUltimoTicket = async (): Promise<TicketsInterface> => await schTickets.getUltimoTicket();
+
   /* Eze 4.0 */
   async getProximoId(): Promise<number> {
     const ultimoIdTicket = await this.getUltimoIdTicket();

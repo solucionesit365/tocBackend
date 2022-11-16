@@ -1,6 +1,7 @@
-import { Controller, Get } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { paytefInstance } from "./paytef.class";
 import { logger } from "../logger";
+import { ticketsInstance } from "src/tickets/tickets.clase";
 
 const exec = require("child_process").exec;
 
@@ -32,5 +33,20 @@ export class PaytefController {
         }
       }
     });
+  }
+
+  @Post("cobrarUltimoTicket")
+  async cobrarUltimoTicket(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) {
+        const ticket = await ticketsInstance.getUltimoTicket();
+        paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total);
+        return true;
+      }
+      throw Error("Faltan datos {idTrabajador} controller");
+    } catch (err) {
+      logger.Error(131, err);
+      return false;
+    }
   }
 }
