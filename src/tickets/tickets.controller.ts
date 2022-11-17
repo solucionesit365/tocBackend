@@ -51,13 +51,7 @@ export class TicketsController {
           await cestasInstance.borrarArticulosCesta(idCesta);
           if (tipo === "TARJETA") paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, total);
           ticketsInstance.actualizarTickets();
-          return await movimientosInstance.nuevoMovimiento(
-            total,
-            "",
-            tipo,
-            ticket._id,
-            idTrabajador
-          );
+          return true;
         }
 
         throw Error(

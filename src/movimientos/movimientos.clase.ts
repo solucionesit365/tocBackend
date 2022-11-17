@@ -4,6 +4,9 @@ import * as schMovimientos from "./movimientos.mongodb";
 // import { impresoraInstance } from "../impresora/impresora.class";
 // import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { logger } from "../logger";
+import { TicketsInterface } from "../tickets/tickets.interface";
+import { ticketsInstance } from "src/tickets/tickets.clase";
+import { cajaInstance } from "src/caja/caja.clase";
 
 const moment = require("moment");
 const Ean13Utils = require("ean13-lib").Ean13Utils;
@@ -101,6 +104,65 @@ export class MovimientosClase {
   /* Eze v23 */
   actualizarEstadoMovimiento = (movimiento: MovimientosInterface) =>
     schMovimientos.actualizarEstadoMovimiento(movimiento);
+
+  /* Eze 4.0 */
+  construirArrayVentas = async () => {
+    const infoCaja = await cajaInstance.getInfoCajaAbierta();
+    if (infoCaja) {
+      const inicioCaja = infoCaja.inicioTime;
+      const final = Date.now();
+      const arrayTickets = await ticketsInstance.getTicketsIntervalo(inicioCaja, final);
+      const arrayMovimientos = await this.getMovimientosIntervalo(inicioCaja, final);
+
+      const arrayFinalTickets = [];
+
+      for (let i = 0; i < arrayTickets.length; i++) {
+        arrayFinalTickets.push(arrayTickets[i]);
+        arrayFinalTickets[i].movimientos = [];
+
+        for (let j = 0; j < arrayMovimientos.length; j++) {
+          if (arrayTickets[i]._id === arrayMovimientos[j].idTicket) {
+            arrayFinalTickets[i].movimientos.push(arrayMovimientos[j]);
+          }
+        }
+      }
+      
+      for (let i = 0; i < arrayFinalTickets.length; i++) {
+        if (arrayFinalTickets[i].movimientos.length === 1) {
+          if (arrayFinalTickets[i].movimientos[0].tipo === "TARJETA" && arrayFinalTickets[i].movimientos[0].valor > 0) {
+            arrayFinalTickets[i].tipoPago = "TARJETA";
+          } else {
+            arrayFinalTickets[i].tipoPago = "DESCONOCIDO";
+          }
+        } else if (arrayFinalTickets[i].movimientos.length === 0) {
+          arrayFinalTickets[i].tipoPago = "EFECTIVO";
+        } else if (arrayFinalTickets[i].movimientos.length > 1) {
+          arrayFinalTickets[i].tipoPago = "CASO COMPLEJO";
+        }
+      }
+
+      return arrayFinalTickets;
+    }
+    return null;
+    // const arrayTickets: TicketsInterface[] = await ticketsInstance. 
+
+
+
+
+    // const movimientosTicket = await schMovimientos.getMovimientosDelTicket(idTicket);
+    // if (movimientosTicket.length === 1) {
+    //   if (movimientosTicket[0].valor > 0 && movimientosTicket[0].tipo === "TARJETA") {
+    //     return "TARJETA";
+    //   }
+    // } else if (movimientosTicket.length === 0) {
+    //   return "EFECTIVO";
+    // } else if (movimientosTicket.length > 1) {
+    //   for (let i = 0; i < movimientosTicket.length; i++) {
+    //     console.log("controlar más adelante");
+    //   }
+    // }
+
+  }
 }
 
 export const movimientosInstance = new MovimientosClase();

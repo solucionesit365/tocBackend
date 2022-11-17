@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { cajaInstance } from "./caja/caja.clase";
 import { cestasInstance } from "./cestas/cestas.clase";
 import { logger } from "./logger";
+import { movimientosInstance } from "./movimientos/movimientos.clase";
 import { parametrosInstance } from "./parametros/parametros.clase";
 import { tecladoInstance } from "./teclado/teclado.clase";
 import { ticketsInstance } from "./tickets/tickets.clase";
@@ -48,8 +49,8 @@ io.on("connection", (socket) => {
   socket.on("cargarVentas", async () => {
     try {
       if (await cajaInstance.cajaAbierta()) {
-        const caja = await cajaInstance.getInfoCajaAbierta();
-        socket.emit("cargarVentas", (await ticketsInstance.getTicketsIntervalo(caja.inicioTime, Date.now())).reverse());
+        // const caja = await cajaInstance.getInfoCajaAbierta();
+        socket.emit("cargarVentas", (await movimientosInstance.construirArrayVentas()).reverse()); //(await ticketsInstance.getTicketsIntervalo(caja.inicioTime, Date.now())).reverse());
       }      
     } catch (err) {
       logger.Error(39, err);

@@ -4,6 +4,7 @@ import {
   CuentaCodigoBarras,
   MovimientosInterface,
 } from "./movimientos.interface";
+import { TicketsInterface } from "../tickets/tickets.interface";
 
 /* Eze 4.0 */
 export async function getMovimientosIntervalo(
@@ -95,4 +96,14 @@ export async function actualizarEstadoMovimiento(
     }
   );
   return resultado.acknowledged && resultado.modifiedCount > 0;
+}
+
+/* Eze 4.0 */
+export async function getMovimientosDelTicket(
+  idTicket: TicketsInterface["_id"]
+) {
+  const database = (await conexion).db("tocgame");
+  const movimientosCollection =
+    database.collection<MovimientosInterface>("movimientos");
+  return await movimientosCollection.find({ idTicket: idTicket }).toArray();
 }

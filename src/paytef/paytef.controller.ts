@@ -49,4 +49,19 @@ export class PaytefController {
       return false;
     }
   }
+
+  @Post("cobrarConTarjeta")
+  async cobrarConTarjeta(@Body() { idTrabajador, idTicket }) {
+    try {
+      if (idTrabajador && idTicket) {
+        const ticket = await ticketsInstance.getTicketById(idTicket);
+        paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total);
+        return true;
+      }
+      throw Error("Faltan datos {idTrabajador} controller");
+    } catch (err) {
+      logger.Error(131, err);
+      return false;
+    }
+  }
 }
