@@ -6,6 +6,7 @@ import { CestasInterface } from "../cestas/cestas.interface";
 import { logger } from "../logger";
 import { cajaInstance } from "../caja/caja.clase";
 import { io } from "../sockets.gateway";
+import { movimientosInstance } from "src/movimientos/movimientos.clase";
 
 export class TicketsClase {
   /* Eze 4.0 */
@@ -77,19 +78,14 @@ export class TicketsClase {
     schTickets.actualizarEstadoTicket(ticket);
 
   actualizarTickets = async () => {
-    const infoCaja = await cajaInstance.getInfoCajaAbierta();
-    if (infoCaja?.inicioTime) {
-      const arrayTickets = await this.getTicketsIntervalo(
-        infoCaja.inicioTime,
-        Date.now()
-      );
-      if (arrayTickets) io.emit("cargarVentas", arrayTickets);
-    } else {
-      logger.Error(
-        130,
-        "No se ha podido enviar los tickets actualizados por socket debido a problemas con la caja"
-      );
-    }
+    const arrayVentas = await movimientosInstance.construirArrayVentas();
+    if (arrayVentas) io.emit("cargarVentas", arrayVentas.reverse());
+    // {
+    //   logger.Error(
+    //     130,
+    //     "No se ha podido enviar los tickets actualizados por socket debido a problemas con la caja"
+    //   );
+    // }
   };
 }
 

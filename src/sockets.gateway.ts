@@ -50,7 +50,7 @@ io.on("connection", (socket) => {
     try {
       if (await cajaInstance.cajaAbierta()) {
         // const caja = await cajaInstance.getInfoCajaAbierta();
-        socket.emit("cargarVentas", (await movimientosInstance.construirArrayVentas()).reverse()); //(await ticketsInstance.getTicketsIntervalo(caja.inicioTime, Date.now())).reverse());
+        socket.emit("cargarVentas", (await movimientosInstance.construirArrayVentas()).reverse());
       }      
     } catch (err) {
       logger.Error(39, err);

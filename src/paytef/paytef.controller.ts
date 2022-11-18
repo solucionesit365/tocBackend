@@ -64,4 +64,22 @@ export class PaytefController {
       return false;
     }
   }
+
+  @Post("devoluciontTarjeta")
+  async devolucionTarjeta(@Body() { idTrabajador, idTicket }) {
+    try {
+      if (idTrabajador && idTicket) {
+        const ticket = await ticketsInstance.getTicketById(idTicket);
+        if (ticket) {
+          paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total, "refund");
+          return true;
+        }
+        throw Error("El ticket no existe");
+      }
+      throw Error("Faltan datos {idTrabajador} controller");
+    } catch (err) {
+      logger.Error(131, err);
+      return false;
+    }
+  }
 }

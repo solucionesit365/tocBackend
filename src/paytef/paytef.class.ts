@@ -6,18 +6,20 @@ import { TicketsInterface } from "src/tickets/tickets.interface";
 // import { Socket } from "dgram";
 import { CancelInterface } from "./paytef.interface";
 import { io } from "../sockets.gateway";
+import { logger } from "src/logger";
 
 class PaytefClass {
   /* Eze 4.0 */
   async iniciarTransaccion(
     idTrabajador: number,
     idTicket: TicketsInterface["_id"],
-    total: TicketsInterface["total"]
+    total: TicketsInterface["total"],
+    type: "refund" | "sale" = "sale"
   ): Promise<void> {
     const parametros = await parametrosInstance.getParametros();
     const opciones = {
       pinpad: "*",
-      opType: "sale",
+      opType: type,
       createReceipt: true,
       executeOptions: {
         method: "polling",
@@ -37,7 +39,7 @@ class PaytefClass {
         )
       ).data;
       if (respuestaPayef.info.started)
-        await this.bucleComprobacion(idTicket, total, idTrabajador);
+        await this.bucleComprobacion(idTicket, total, idTrabajador, type);
       else
         throw Error("Error, la transacción no ha podido empezar paytef.class");
     } else {
@@ -51,7 +53,8 @@ class PaytefClass {
   async bucleComprobacion(
     idTicket: TicketsInterface["_id"],
     total: TicketsInterface["total"],
-    idTrabajador: TicketsInterface["idTrabajador"]
+    idTrabajador: TicketsInterface["idTrabajador"],
+    type: "refund" | "sale" = "sale"
   ): Promise<void> {
     const ipDatafono = (await parametrosInstance.getParametros()).ipTefpay;
     const resEstadoPaytef: any = (
@@ -62,21 +65,38 @@ class PaytefClass {
 
     if (resEstadoPaytef.result) {
       if (resEstadoPaytef.result.approved) {
-        movimientosInstance.nuevoMovimiento(
-          total,
-          "Targeta",
-          "TARJETA",
-          idTicket,
-          idTrabajador
-        );
-
-        io.emit("consultaPaytef", true);
-      } else {
+        if (type === "sale") {
+          movimientosInstance.nuevoMovimiento(
+            total,
+            "Targeta",
+            "TARJETA",
+            idTicket,
+            idTrabajador
+          );
+          io.emit("consultaPaytef", true);
+        } else if (type === "refund") {
+          movimientosInstance.nuevoMovimiento(
+            total*-1,
+            "Targeta",
+            "TARJETA",
+            idTicket,
+            idTrabajador
+          );
+          io.emit("consultaPaytefRefund", true);
+        } else {
+          logger.Error("Error grave de devoluciones/movimientos !!!");
+        }
+        
+        ticketsInstance.actualizarTickets();
+        movimientosInstance.construirArrayVentas();
+      } else if (type === "sale") {
         io.emit("consultaPaytef", false);
+      } else if (type === "refund") {
+        io.emit("consultaPaytefRefund", false);
       }
     } else {
       await new Promise((r) => setTimeout(r, 1000));
-      await this.bucleComprobacion(idTicket, total, idTrabajador);
+      await this.bucleComprobacion(idTicket, total, idTrabajador, type);
     }
   }
 

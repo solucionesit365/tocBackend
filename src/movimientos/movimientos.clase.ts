@@ -137,7 +137,30 @@ export class MovimientosClase {
         } else if (arrayFinalTickets[i].movimientos.length === 0) {
           arrayFinalTickets[i].tipoPago = "EFECTIVO";
         } else if (arrayFinalTickets[i].movimientos.length > 1) {
-          arrayFinalTickets[i].tipoPago = "CASO COMPLEJO";
+          // CASO TARJETA ANULADA
+          if (arrayFinalTickets[i].movimientos.length === 2 && arrayFinalTickets[i].movimientos[0].tipo === "TARJETA") {
+            const busqueda = {
+              original: false,
+              rectificativo: false
+            };
+            for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
+              if (arrayFinalTickets[i].movimientos[j].tipo === "TARJETA") {
+                if (arrayFinalTickets[i].movimientos[j].valor > 0) {
+                  busqueda.original = true;
+                } else if (arrayFinalTickets[i].movimientos[j].valor < 0) {
+                  busqueda.rectificativo = true;
+                }
+              }
+            }
+            if (busqueda.original && busqueda.rectificativo) {
+              arrayFinalTickets[i].tipoPago = "DEVUELTO";
+            } else {
+              arrayFinalTickets[i].tipoPago = "NO FUNCIONA";
+            }
+          } else if (arrayFinalTickets[i].movimientos.length >= 2) {
+            console.log("AQUÍ CONTROLAR EL CASO DEL TICKET RESTAURANTE => CON EXCESO, SIN EXCESO, PAGADO A MEDIAS");
+            arrayFinalTickets[i].tipoPago = "POSIBLE TKRS";
+          }          
         }
       }
 
