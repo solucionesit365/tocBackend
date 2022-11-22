@@ -9,6 +9,7 @@ export interface CestasInterface {
   lista: ItemLista[],
   modo: ModoCesta,
   idCliente: ClientesInterface["id"],
+  nombreCliente?: string,
   indexMesa?: boolean
 }
 

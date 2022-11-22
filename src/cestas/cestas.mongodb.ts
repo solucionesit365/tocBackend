@@ -41,6 +41,7 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
         lista: cesta.lista,
         modo: cesta.modo,
         timestamp: cesta.timestamp,
+        nombreCliente: cesta.nombreCliente,
       },
     }
   );

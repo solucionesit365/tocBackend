@@ -136,4 +136,16 @@ export class CestasController {
       return false;
     }
   }
+
+  @Post("updateCestaInverso")
+  async updateCestaInverso(@Body() { cesta }) {
+    try {
+      if (cesta) {
+        return await cestasInstance.updateCesta(cesta);
+      }
+      throw Error("Error, faltan datos en cestas/updateCestaInverso");
+    } catch (err) {
+      logger.Error(133, err);
+    }
+  }
 }

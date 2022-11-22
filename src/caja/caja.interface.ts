@@ -31,7 +31,7 @@ export interface CajaCerradaInterface {
 }
 
 export interface CajaSincro {
-  _id: ObjectId;
+  _id?: ObjectId;
   inicioTime: number;
   idDependientaApertura: number;
   totalApertura: number;

@@ -28,16 +28,20 @@ export class CajaClase {
   }
 
   /* Eze 4.0 */
-  confirmarCajaEnviada = async (idCaja: CajaSincro["_id"]) => await schCajas.confirmarCajaEnviada(idCaja);
+  confirmarCajaEnviada = async (idCaja: CajaSincro["_id"]) =>
+    await schCajas.confirmarCajaEnviada(idCaja);
 
   /* Eze 4.0 */
-  getCajaSincroMasAntigua = async () => await schCajas.getCajaSincroMasAntigua();
+  getCajaSincroMasAntigua = async () =>
+    await schCajas.getCajaSincroMasAntigua();
 
   /* Eze 4.0 */
-  async abrirCaja(
-    cajaAbierta: CajaAbiertaInterface
-  ): Promise<boolean> {
-    if (cajaAbierta.detalleApertura && typeof cajaAbierta.totalApertura === "number") return await schCajas.setInfoCaja(cajaAbierta);
+  async abrirCaja(cajaAbierta: CajaAbiertaInterface): Promise<boolean> {
+    if (
+      cajaAbierta.detalleApertura &&
+      typeof cajaAbierta.totalApertura === "number"
+    )
+      return await schCajas.setInfoCaja(cajaAbierta);
     throw Error("Error precondiciones abrirCaja > caja.clase.ts");
   }
 
@@ -53,15 +57,14 @@ export class CajaClase {
   /* Eze 4.0 */
   nuevoItemSincroCajas(
     cajaAbierta: CajaAbiertaInterface,
-    cajaCerrada: CajaCerradaInterface,
-    nuevoId: ObjectId
+    cajaCerrada: CajaCerradaInterface
   ) {
     const cajaInsertar: CajaSincro = {
-      _id: nuevoId,
       ...cajaAbierta,
       ...cajaCerrada,
       enviado: false,
     };
+    cajaInsertar._id = new ObjectId();
     return schCajas.nuevoItemSincroCajas(cajaInsertar);
   }
 
@@ -73,35 +76,35 @@ export class CajaClase {
     totalDatafono3G: CajaCerradaInterface["totalDatafono3G"],
     idDependientaCierre: CajaCerradaInterface["idDependientaCierre"]
   ): Promise<boolean> {
-      if (!(await this.cajaAbierta()))
-        throw Error("Error al cerrar caja: La caja ya está cerrada");
+    if (!(await this.cajaAbierta()))
+      throw Error("Error al cerrar caja: La caja ya está cerrada");
 
-      const finalTime = Date.now();
-      const cajaAbiertaActual = await this.getInfoCajaAbierta();
-      const cajaCerradaActual = await this.getDatosCierre(
-        cajaAbiertaActual,
-        totalCierre,
-        detalleCierre,
-        idDependientaCierre,
+    const finalTime = Date.now();
+    const cajaAbiertaActual = await this.getInfoCajaAbierta();
+    const cajaCerradaActual = await this.getDatosCierre(
+      cajaAbiertaActual,
+      totalCierre,
+      detalleCierre,
+      idDependientaCierre,
+      totalDatafono3G,
+      finalTime
+    );
+
+    if (
+      !(await movimientosInstance.nuevoMovimiento(
         totalDatafono3G,
-        finalTime
-      );
+        "",
+        "DATAFONO_3G",
+        null,
+        idDependientaCierre
+      ))
+    )
+      throw Error("No se ha podido crear el movimiento 3G");
+    if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual))
+      if (await schMonedas.setMonedas(guardarInfoMonedas))
+        return await this.resetCajaAbierta();
 
-      if (
-        !(await movimientosInstance.nuevoMovimiento(
-          totalDatafono3G,
-          "",
-          "DATAFONO_3G",
-          null,
-          idDependientaCierre
-        ))
-      )
-        throw Error("No se ha podido crear el movimiento 3G");
-      if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual, new ObjectId()))
-        if (await schMonedas.setMonedas(guardarInfoMonedas))
-          return await this.resetCajaAbierta();
-
-      return false;
+    return false;
   }
 
   /* Eze 4.0 */
@@ -111,7 +114,7 @@ export class CajaClase {
   borrarCaja = async () => await schCajas.borrarCaja();
 
   /* Eze 4.0 */
-  getUltimoCierre = async() => await schCajas.getUltimoCierre();
+  getUltimoCierre = async () => await schCajas.getUltimoCierre();
 
   /* Eze 4.0 */
   async getDatosCierre(
