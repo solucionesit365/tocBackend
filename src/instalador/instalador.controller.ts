@@ -14,132 +14,114 @@ import { logger } from "../logger";
 
 @Controller("instalador")
 export class InstaladorController {
+  /* Eze 4.0 */
   @Post("pedirDatos")
-  instalador(@Body() params) {
-    return axios
-      .post("parametros/instaladorLicencia", {
-        password: params.password,
-        numLlicencia: params.numLlicencia,
-      })
-      .then((res: any) => {
-        if (!res.data.error) {
-          let objParams = parametrosInstance.generarObjetoParametros();
+  async instalador(
+    @Body()
+    { password, numLlicencia, tipoImpresora, tipoDatafono, impresoraCafeteria }
+  ) {
+    try {
+      if (
+        password &&
+        numLlicencia &&
+        tipoImpresora &&
+        tipoDatafono &&
+        impresoraCafeteria
+      ) {
+        const resAuth: any = await axios.post("parametros/instaladorLicencia", {
+          password,
+          numLlicencia,
+        });
 
-          objParams.licencia = params.numLicencia;
-          objParams.tipoImpresora = params.tipoImpresora;
-          objParams.tipoDatafono = params.tipoDatafono;
-          objParams.impresoraCafeteria = params.impresoraCafeteria;
-          objParams.ultimoTicket = res.data.info.ultimoTicket;
-          objParams.codigoTienda = res.data.info.codigoTienda;
-          objParams.nombreEmpresa = res.data.info.nombreEmpresa;
-          objParams.nombreTienda = res.data.info.nombreTienda;
-          objParams.token = res.data.info.token;
-          objParams.database = res.data.info.database;
+        if (resAuth.data) {
+          const objParams = parametrosInstance.generarObjetoParametros();
+
+          objParams.licencia = numLlicencia;
+          objParams.tipoImpresora = tipoImpresora;
+          objParams.tipoDatafono = tipoDatafono;
+          objParams.impresoraCafeteria = impresoraCafeteria;
+          objParams.ultimoTicket = resAuth.data.ultimoTicket;
+          objParams.codigoTienda = resAuth.data.codigoTienda;
+          objParams.nombreEmpresa = resAuth.data.nombreEmpresa;
+          objParams.nombreTienda = resAuth.data.nombreTienda;
+          objParams.token = resAuth.data.token;
+          objParams.database = resAuth.data.database;
           objParams.visor = "";
           objParams.impresoraUsbInfo = {
             pid: "",
             vid: "",
           };
 
-          return parametrosInstance
-            .setParametros(objParams)
-            .then((res2) => {
-              if (res2) {
-                return { error: false };
-              } else {
-                return {
-                  error: true,
-                  mensaje:
-                    "Backend: Error en instalador/pedirDatos > setParametros",
-                };
-              }
-            })
-            .catch((err) => {
-              logger.Error(93, err);
-              return {
-                error: true,
-                mensaje: "Backend: No se ha podido setear parametros",
-              };
-            });
-        } else {
-          return { error: true, mensaje: res.data.mensaje };
+          return await parametrosInstance.setParametros(objParams);
         }
-      })
-      .catch((err) => {
-        logger.Error(94, err);
-        return {
-          error: true,
-          mensaje: "Error en pedir parametros/instaladorLicencia de sanPedro",
-        };
-      });
+        throw Error("Error: San Pedro no puede autentificar esta petición");
+      }
+      throw Error("Faltan datos en instalador/pedirDatos controller");
+    } catch (err) {
+      logger.Error(93, err);
+    }
   }
 
+  /* Eze 4.0 */
   @Post("descargarTodo")
   async descargarTodo() {
-    const parametros = await parametrosInstance.getParametros();
-    return axios
-      .post("datos/cargarTodo", {
+    try {
+      const parametros = await parametrosInstance.getParametros();
+      const res: any = await axios.post("datos/cargarTodo", {
         database: parametros.database,
         codigoTienda: parametros.codigoTienda,
         licencia: parametros.licencia,
-      })
-      .then(async (res: any) => {
-        if (res.data.error === false) {
-          const info1 = await trabajadoresInstance.insertarTrabajadores(
-            res.data.info.dependientas
-          );
-          const info2 = await articulosInstance.insertarArticulos(
-            res.data.info.articulos
-          );
-          const info3 = await clienteInstance.insertarClientes(
-            res.data.info.clientes
-          );
-          const info4 = await familiasInstance.insertarFamilias(
-            res.data.info.familias
-          );
-          const info5 = await nuevaInstancePromociones.insertarPromociones(
-            res.data.info.promociones
-          );
-          const info6 = await paramsTicketInstance.insertarParametrosTicket(
-            res.data.info.parametrosTicket
-          );
-          const info7 = await menusInstance.insertarMenus(res.data.info.menus);
-          const info8 = await tecladoInstance.insertarTeclas(
-            res.data.info.teclas
-          );
-          const info9 = true; // await cestas.insertarCestas(res.data.info.cestas);
-          const info10 = await dobleMenusInstance.insertarMenus(
-            res.data.info.dobleMenus
-          );
-          if (
-            info1 &&
-            info2 &&
-            info3 &&
-            info4 &&
-            info5 &&
-            info6 &&
-            info7 &&
-            info8 &&
-            info9 &&
-            info10
-          ) {
-            return { error: false };
-          } else {
-            return {
-              error: true,
-              mensaje: `Backend: res1: ${info1}, res2: ${info2}, res3: ${info3}, res4: ${info4}, res5: ${info5}, res6: ${info6}, res7: ${info7}, res8: ${info8}`,
-            };
-          }
-        } else {
-          return { error: true, mensaje: res.data.mensaje };
-        }
-      })
-      .catch((err) => {
-        logger.Error(95, err);
-        return {
-          error: true,
-          mensaje: "Backend: Errro en instalador/descargarTodo. Mirar log",
-        };
       });
+
+      if (res.data) {
+        const info1 = await trabajadoresInstance.insertarTrabajadores(
+          res.data.dependientas
+        );
+        const info2 = await articulosInstance.insertarArticulos(
+          res.data.articulos
+        );
+        const info3 = await clienteInstance.insertarClientes(
+          res.data.clientes
+        );
+        const info4 = await familiasInstance.insertarFamilias(
+          res.data.familias
+        );
+        const info5 = await nuevaInstancePromociones.insertarPromociones(
+          res.data.promociones
+        );
+        const info6 = await paramsTicketInstance.insertarParametrosTicket(
+          res.data.parametrosTicket
+        );
+        const info7 = await menusInstance.insertarMenus(res.data.menus);
+        const info8 = await tecladoInstance.insertarTeclas(
+          res.data.teclas
+        );
+        const info9 = true; // await cestas.insertarCestas(res.data.info.cestas);
+        const info10 = await dobleMenusInstance.insertarMenus(
+          res.data.dobleMenus
+        );
+        if (
+          info1 &&
+          info2 &&
+          info3 &&
+          info4 &&
+          info5 &&
+          info6 &&
+          info7 &&
+          info8 &&
+          info9 &&
+          info10
+        ) {
+          return true;
+        }
+        throw Error(
+          `Backend: res1: ${info1}, res2: ${info2}, res3: ${info3}, res4: ${info4}, res5: ${info5}, res6: ${info6}, res7: ${info7}, res8: ${info8}`
+        );
+      }
+      throw Error("Error de autenticación en SanPedro");
+    } catch (err) {
+      logger.Error(95, err);
+      return false;
+    }
   }
 }

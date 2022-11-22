@@ -127,6 +127,10 @@ export class TrabajadoresClase {
     await schTrabajadores.getFichajeMasAntiguo();
 
   /* Eze 4.0 */
+  getTrabajadoresDescansando = async () =>
+    await schTrabajadores.getTrabajadoresDescansando();
+
+  /* Eze 4.0 */
   actualizarEstadoFichaje = async (fichaje: SincroFichajesInterface) =>
     await schTrabajadores.actualizarEstadoFichaje(fichaje);
 

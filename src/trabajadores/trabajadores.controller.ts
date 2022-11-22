@@ -5,7 +5,6 @@ import { logger } from "../logger";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
-
   /* Eze 4.0 */
   @Get("getTrabajadoresFichados")
   async getTrabajadoresFichados() {
@@ -18,11 +17,12 @@ export class TrabajadoresController {
   }
 
   /* Eze 4.0 */
-  @Post("hayFichados")
+  @Get("hayFichados")
   async hayFichados() {
     try {
-      const arrayFichados = await trabajadoresInstance.getTrabajadoresFichados();
-      return (arrayFichados && arrayFichados.length > 0);
+      const arrayFichados =
+        await trabajadoresInstance.getTrabajadoresFichados();
+      return arrayFichados && arrayFichados.length > 0;
     } catch (err) {
       logger.Error(110, err);
       return false;
@@ -48,7 +48,9 @@ export class TrabajadoresController {
         const idCesta = await cestasInstance.crearCesta();
         if (await trabajadoresInstance.setIdCesta(idTrabajador, idCesta))
           return trabajadoresInstance.ficharTrabajador(idTrabajador);
-        throw Error("Error, no se ha podido asignar el idCesta nuevo al trabajador. trabajadores controller");
+        throw Error(
+          "Error, no se ha podido asignar el idCesta nuevo al trabajador. trabajadores controller"
+        );
       }
       throw Error("Error, faltan datos en fichar() trabajadores controller");
     } catch (err) {
@@ -61,7 +63,8 @@ export class TrabajadoresController {
   @Post("desfichar")
   async desfichar(@Body() { idTrabajador }) {
     try {
-      if (idTrabajador) return await trabajadoresInstance.desficharTrabajador(idTrabajador);
+      if (idTrabajador)
+        return await trabajadoresInstance.desficharTrabajador(idTrabajador);
       throw Error("Error, faltan datos en desfichar() controller");
     } catch (err) {
       logger.Error(113, err);
@@ -84,7 +87,8 @@ export class TrabajadoresController {
   @Post("inicioDescanso")
   async inicioDescanso(@Body() { idTrabajador }) {
     try {
-      if (idTrabajador) return await trabajadoresInstance.inicioDescanso(idTrabajador);
+      if (idTrabajador)
+        return await trabajadoresInstance.inicioDescanso(idTrabajador);
       throw Error("Error, faltan datos en inicioDescanso() controller");
     } catch (err) {
       logger.Error(115, err);
@@ -96,9 +100,23 @@ export class TrabajadoresController {
   @Post("finDescanso")
   async finDescanso(@Body() { idTrabajador }) {
     try {
-      if (idTrabajador) return await trabajadoresInstance.finDescanso(idTrabajador);
+      if (idTrabajador)
+        return await trabajadoresInstance.finDescanso(idTrabajador);
+      else
+        throw Error("Error en trabajadores/finDescanso");
     } catch (err) {
       logger.Error(116, err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Get("descansando")
+  async getTrabajadoresDescansando() {
+    try {
+      return await trabajadoresInstance.getTrabajadoresDescansando();
+    } catch (err) {
+      logger.Error(132, err);
       return false;
     }
   }

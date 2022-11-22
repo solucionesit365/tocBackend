@@ -29,6 +29,7 @@ export async function buscar(
   return await trabajadores
     .find(
       {
+        fichado: false,
         $or: [
           { nombre: { $regex: new RegExp(busqueda, "i") } },
           { nombreCorto: { $regex: new RegExp(busqueda, "i") } },
@@ -62,13 +63,23 @@ export async function getTrabajadoresFichados(): Promise<
 }
 
 /* Eze 4.0 */
+export async function getTrabajadoresDescansando(): Promise<
+  TrabajadoresInterface[]
+> {
+  const database = (await conexion).db("tocgame");
+  const trabajadores =
+    database.collection<TrabajadoresInterface>("trabajadores");
+  return await trabajadores.find({ descansando: true }).toArray();
+}
+
+/* Eze 4.0 */
 export async function ficharTrabajador(idTrabajador: number): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const trabajadores = database.collection("trabajadores");
   return (
     await trabajadores.updateOne(
       { _id: idTrabajador },
-      { $set: { fichado: true } }
+      { $set: { fichado: true, descansando: false } }
     )
   ).acknowledged;
 }
