@@ -36,9 +36,16 @@ export class ClientesController {
   async descargarClientesFinales() {
     try {
       const parametros = await parametrosInstance.getParametros();
-      const arrayClientes = (await axios.post("clientes/getClientesFinales", { database: parametros.database })).data as ClientesInterface[];
-      if (arrayClientes) return await clienteInstance.insertarClientes(arrayClientes);
-      throw Error("Error, los clientes descargados de San Pedro son null o undefined");
+      const arrayClientes = (
+        await axios.post("clientes/getClientesFinales", {
+          database: parametros.database,
+        })
+      ).data as ClientesInterface[];
+      if (arrayClientes)
+        return await clienteInstance.insertarClientes(arrayClientes);
+      throw Error(
+        "Error, los clientes descargados de San Pedro son null o undefined"
+      );
     } catch (err) {
       logger.Error(67, err);
       return false;
@@ -50,7 +57,10 @@ export class ClientesController {
   async crearNuevoCliente(@Body() { idTarjetaCliente, nombreCliente }) {
     try {
       if (idTarjetaCliente && nombreCliente) {
-        if (idTarjetaCliente.toString().length > 5 && nombreCliente.length >= 3) {
+        if (
+          idTarjetaCliente.toString().length > 5 &&
+          nombreCliente.length >= 3
+        ) {
           const parametros = await parametrosInstance.getParametros();
           return await axios.post("clientes/crearNuevoCliente", {
             idTarjetaCliente: idTarjetaCliente,
@@ -63,6 +73,21 @@ export class ClientesController {
       throw Error("Error, faltan datos en crearNuevoCliente() controller");
     } catch (err) {
       logger.Error(68, err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Post("consultarPuntos")
+  async consultarPuntos(@Body() { idCliente }) {
+    try {
+      return (
+        await axios.post("clientes/getPuntosCliente", {
+          idClienteFinal: idCliente,
+        })
+      ).data;
+    } catch (err) {
+      logger.Error(134, err);
       return false;
     }
   }

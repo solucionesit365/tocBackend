@@ -28,8 +28,13 @@ export class Devoluciones {
       cliente: null,
     };
     await this.insertarDevolucion(objDevolucion);
-    await impresoraInstance.imprimirTicket(nuevoIdTicket, true);
-    return await cestasInstance.deleteCesta(cesta._id);
+    //await impresoraInstance.imprimirTicket(nuevoIdTicket, true); NO VA, HE CREADO UNA NUEVA FUNCIÓN .imprimirDevolucion
+    if (await cestasInstance.deleteCesta(cesta._id)) {
+      cestasInstance.actualizarCestas();
+      return true;
+    } else {
+      throw Error("No se ha podido eliminar la cesta después de la devolución");
+    }
   }
 
   /* Eze 4.0 */

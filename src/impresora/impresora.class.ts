@@ -13,6 +13,7 @@ import { CajaSincro } from "../caja/caja.interface";
 import { movimientosInstance } from '../movimientos/movimientos.clase';
 import { TicketsInterface } from '../tickets/tickets.interface';
 import { logger } from "../logger";
+import { DevolucionesInterface } from 'src/devoluciones/devoluciones.interface';
 
 const dispositivos = new Dispositivos();
 const escpos = require('escpos');
@@ -227,6 +228,65 @@ export class Impresora {
       }
     }
   }
+
+  async imprimirDevolucion(idDevolucion: DevolucionesInterface["_id"]) {
+    const paramsTicket = await paramsTicketInstance.getParamsTicket();
+    let infoTicket;
+    const infoTrabajador: TrabajadoresInterface = await trabajadoresInstance.getTrabajadorById(infoTicket.idTrabajador);
+    const parametros = await parametrosInstance.getParametros();
+    let sendObject;
+
+    if (infoTicket != null) {
+      if (infoTicket.cliente != null && infoTicket.tipoPago != 'DEUDA' && infoTicket.cliente != undefined) {
+        const infoClienteAux = await clienteInstance.getClienteByID(infoTicket.cliente);
+        const infoCliente = infoClienteAux;
+        let auxNombre = '';
+        let puntosCliente = 0;
+        if (infoCliente != null) {
+          auxNombre = infoCliente.nombre;
+          puntosCliente = await clienteInstance.getPuntosCliente(infoTicket.cliente);
+        } else {
+          auxNombre = '';
+        }
+
+        sendObject = {
+          numFactura: infoTicket._id,
+          arrayCompra: infoTicket.lista,
+          total: infoTicket.total,
+          visa: infoTicket.tipoPago,
+          tiposIva: infoTicket.tiposIva,
+          cabecera: paramsTicket[0] !== undefined ? paramsTicket[0].valorDato: '',
+          pie: paramsTicket[1] !== undefined ? paramsTicket[1].valorDato: '',
+          nombreTrabajador: (infoTrabajador.nombreCorto != null) ? (infoTrabajador.nombreCorto): (''),
+          impresora: parametros.tipoImpresora,
+          infoClienteVip: infoTicket.infoClienteVip,
+          infoCliente: {
+            nombre: auxNombre,
+            puntos: puntosCliente,
+          },
+        };
+        this._venta(sendObject, infoTicket.recibo);
+      } else {
+        sendObject = {
+          numFactura: infoTicket._id,
+          arrayCompra: infoTicket.lista,
+          total: infoTicket.total,
+          visa: infoTicket.tipoPago,
+          tiposIva: infoTicket.tiposIva,
+          cabecera: paramsTicket[0] !== undefined ? paramsTicket[0].valorDato: '',
+          pie: paramsTicket[1] !== undefined ? paramsTicket[1].valorDato: '',
+          nombreTrabajador: (infoTrabajador.nombreCorto != null) ? (infoTrabajador.nombreCorto): (''),
+          impresora: parametros.tipoImpresora,
+          infoClienteVip: infoTicket.infoClienteVip,
+          infoCliente: null,
+        };
+
+        this._venta(sendObject);
+      }
+    }
+  }
+
+
 
   private async imprimirRecibo(recibo: string) {
     logger.Error(81, 'imprimir recibo');

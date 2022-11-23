@@ -32,19 +32,29 @@ class PaytefClass {
     };
 
     if (parametros.ipTefpay) {
-      const respuestaPayef: any = (
-        await axios.post(
-          `http://${parametros.ipTefpay}:8887/transaction/start`,
-          opciones
-        )
-      ).data;
-      if (respuestaPayef.info.started)
-        await this.bucleComprobacion(idTicket, total, idTrabajador, type);
-      else
-        throw Error("Error, la transacción no ha podido empezar paytef.class");
+      axios({
+        method: "POST",
+        url: `http://${parametros.ipTefpay}:8887/transaction/start`,
+        data: opciones,
+        timeout: 30000,
+      })
+        .then(async (respuestaPayef: any) => {
+          if (respuestaPayef.info.started)
+            await this.bucleComprobacion(idTicket, total, idTrabajador, type);
+          else {
+            io.emit("consultaPaytefRefund", false);
+            logger.Error(137, "Error, la transacción no ha podido empezar paytef.class");
+          }
+        })
+        .catch((err) => {
+          logger.Error(135, err);
+          io.emit("consultaPaytefRefund", false);
+        });
     } else {
-      throw Error(
-        "Error, ticket o ipTefpay incorrectos en iniciarTransaccion() paytef.class"
+      io.emit("consultaPaytefRefund", false);
+      logger.Error(
+        136,
+        "Error, ipTefpay incorrecta en iniciarTransaccion() paytef.class"
       );
     }
   }
@@ -76,7 +86,7 @@ class PaytefClass {
           io.emit("consultaPaytef", true);
         } else if (type === "refund") {
           movimientosInstance.nuevoMovimiento(
-            total*-1,
+            total * -1,
             "Targeta",
             "TARJETA",
             idTicket,
@@ -86,7 +96,7 @@ class PaytefClass {
         } else {
           logger.Error("Error grave de devoluciones/movimientos !!!");
         }
-        
+
         ticketsInstance.actualizarTickets();
         movimientosInstance.construirArrayVentas();
       } else if (type === "sale") {

@@ -5,6 +5,7 @@ import { cestasInstance } from "./cestas/cestas.clase";
 import { logger } from "./logger";
 import { movimientosInstance } from "./movimientos/movimientos.clase";
 import { parametrosInstance } from "./parametros/parametros.clase";
+import { paytefInstance } from "./paytef/paytef.class";
 import { tecladoInstance } from "./teclado/teclado.clase";
 import { ticketsInstance } from "./tickets/tickets.clase";
 import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
@@ -18,6 +19,19 @@ const io = new Server(httpServer, {
 
 io.on("connection", (socket) => {
   console.log("CONECTADO");
+  /* Eze 4.0 */
+  socket.on("iniciarTransaccion", async ({ idTrabajador, idTicket }) => {
+    try {
+      if (idTrabajador && idTicket) {
+        const ticket = await ticketsInstance.getTicketById(idTicket);
+        paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total);
+      }
+      throw Error("Faltan datos {idTrabajador} controller");
+    } catch (err) {
+      logger.Error(131, err);
+    }
+  });
+
   /* Eze 4.0 */
   socket.on("cargarTrabajadores", async (data) => {
     try {

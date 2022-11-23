@@ -50,22 +50,22 @@ export class PaytefController {
     }
   }
 
-  @Post("cobrarConTarjeta")
-  async cobrarConTarjeta(@Body() { idTrabajador, idTicket }) {
-    try {
-      if (idTrabajador && idTicket) {
-        const ticket = await ticketsInstance.getTicketById(idTicket);
-        paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total);
-        return true;
-      }
-      throw Error("Faltan datos {idTrabajador} controller");
-    } catch (err) {
-      logger.Error(131, err);
-      return false;
-    }
-  }
+  // @Post("cobrarConTarjeta")
+  // async cobrarConTarjeta(@Body() { idTrabajador, idTicket }) {
+  //   try {
+  //     if (idTrabajador && idTicket) {
+  //       const ticket = await ticketsInstance.getTicketById(idTicket);
+  //       paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total);
+  //       return true;
+  //     }
+  //     throw Error("Faltan datos {idTrabajador} controller");
+  //   } catch (err) {
+  //     logger.Error(131, err);
+  //     return false;
+  //   }
+  // }
 
-  @Post("devoluciontTarjeta")
+  @Post("devolucionTarjeta")
   async devolucionTarjeta(@Body() { idTrabajador, idTicket }) {
     try {
       if (idTrabajador && idTicket) {
