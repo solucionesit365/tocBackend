@@ -156,7 +156,13 @@ export class CestaClase {
     let cesta = await this.getCestaById(idCesta);
     let articuloNuevo = true;
 
-    if (!await nuevaInstancePromociones.gestionarPromociones(cesta, articulo._id, unidades)) {
+    if (
+      !(await nuevaInstancePromociones.gestionarPromociones(
+        cesta,
+        articulo._id,
+        unidades
+      ))
+    ) {
       for (let i = 0; i < cesta.lista.length; i++) {
         if (
           cesta.lista[i].idArticulo === articulo._id &&
@@ -169,7 +175,7 @@ export class CestaClase {
           break;
         }
       }
-  
+
       if (articuloNuevo) {
         cesta.lista.push({
           idArticulo: articulo._id,
@@ -254,11 +260,13 @@ export class CestaClase {
       const articulo = await articulosInstance.getInfoArticulo(
         itemPromocion.promocion.idArticuloPrincipal
       );
-      
+
       const importeRealUnitario =
         itemPromocion.promocion.precioRealArticuloPrincipal;
-      const unidadesTotales =
-        (itemPromocion.promocion.cantidadArticuloPrincipal) ? itemPromocion.promocion.cantidadArticuloPrincipal : itemPromocion.promocion.cantidadArticuloSecundario * itemPromocion.unidades;
+      const unidadesTotales = itemPromocion.promocion.cantidadArticuloPrincipal
+        ? itemPromocion.promocion.cantidadArticuloPrincipal
+        : itemPromocion.promocion.cantidadArticuloSecundario *
+          itemPromocion.unidades;
       detalleIva = construirObjetoIvas(
         importeRealUnitario,
         articulo.tipoIva,
@@ -342,7 +350,8 @@ export class CestaClase {
           auxDetalleIva,
           cesta.detalleIva
         );
-        cesta.lista[i].subtotal = articulo.precioConIva*cesta.lista[i].unidades;
+        cesta.lista[i].subtotal =
+          articulo.precioConIva * cesta.lista[i].unidades;
         /* Detalle IVA de suplementos */
         if (
           cesta.lista[i].arraySuplementos &&
@@ -356,7 +365,10 @@ export class CestaClase {
             cesta.detalleIva,
             detalleDeSuplementos
           );
-          cesta.lista[i].subtotal += detalleDeSuplementos.importe1 + detalleDeSuplementos.importe2 + detalleDeSuplementos.importe3;
+          cesta.lista[i].subtotal +=
+            detalleDeSuplementos.importe1 +
+            detalleDeSuplementos.importe2 +
+            detalleDeSuplementos.importe3;
         }
       }
     }
@@ -398,8 +410,7 @@ export class CestaClase {
 
   /* Eze 4.0 */
   async borrarArticulosCesta(idCesta: CestasInterface["_id"]) {
-    const vacia = this.generarObjetoCesta(idCesta);
-    if (await this.updateCesta(vacia)) {
+    if (await schCestas.vaciarCesta(idCesta)) {
       this.actualizarCestas();
       return true;
     }

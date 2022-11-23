@@ -49,6 +49,34 @@ export async function updateCesta(cesta: CestasInterface): Promise<boolean> {
 }
 
 /* Eze 4.0 */
+export async function vaciarCesta(
+  idCesta: CestasInterface["_id"]
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const unaCesta = database.collection<CestasInterface>("cestas");
+  const resultado = await unaCesta.updateOne(
+    { _id: new ObjectId(idCesta) },
+    {
+      $set: {
+        detalleIva: {
+          base1: 0,
+          base2: 0,
+          base3: 0,
+          importe1: 0,
+          importe2: 0,
+          importe3: 0,
+          valorIva1: 0,
+          valorIva2: 0,
+          valorIva3: 0,
+        },
+        lista: [],
+      },
+    }
+  );
+  return resultado.acknowledged && resultado.matchedCount === 1;
+}
+
+/* Eze 4.0 */
 export async function createCesta(cesta: CestasInterface): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const cestasColeccion = database.collection<CestasInterface>("cestas");
