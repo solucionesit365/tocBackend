@@ -37,7 +37,7 @@ export class NuevaPromocion {
     public async gestionarPromociones(cesta: CestasInterface, idArticulo: ArticulosInterface["_id"], unidades: number): Promise<boolean> {
         let unidadesTotales = unidades;
         let index1 = null;
-        console.log("ENTRA EL ", idArticulo);
+        
         for (let i = 0; i < cesta.lista.length; i++) {
             if (cesta.lista[i].idArticulo === idArticulo) {
                 unidadesTotales += cesta.lista[i].unidades;
@@ -58,23 +58,18 @@ export class NuevaPromocion {
         /* COMBO */
         let promoComboSecundario: { indexPromo: number; cantidadPromos: number; sobran: number; } = null;
         const promoComboPrincipal = this.buscarPromocionesComboPrincipal(idArticulo, unidadesTotales);
-        console.log("TRAZA 1");
-        console.log(promoComboPrincipal);
         if (promoComboPrincipal) {
-            console.log("TRAZA 2");
+            
             // BUSCAR AHORA LOS SECUNDARIOS EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
             for (let i = 0; i < cesta.lista.length; i++) {
-                console.log("TRAZA 3");
+                
                 if (idArticulo != cesta.lista[i].idArticulo) {
-                    console.log("TRAZA 4");
+                    
                     for (let j = 0; j < this.promosCombo[promoComboPrincipal.indexPromo].secundario.length; j++) {
-                        console.log("idPromo: ", this.promosCombo[promoComboPrincipal.indexPromo]);
-                        console.log("TRAZA 5");
-                        console.log(this.promosCombo[promoComboPrincipal.indexPromo].secundario[j], cesta.lista[i].idArticulo);
                         if (this.promosCombo[promoComboPrincipal.indexPromo].secundario[j] === cesta.lista[i].idArticulo) {
-                            console.log("TRAZA 6");
+                            
                             if (cesta.lista[i].unidades >= this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario) {
-                                console.log("TRAZA 7");
+                                
                                 const cantidadPromos = Math.trunc(cesta.lista[i].unidades/this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario);
                                 const sobran = cesta.lista[i].unidades%this.promosCombo[promoComboPrincipal.indexPromo].cantidadSecundario;
                                 let aux = this.cuantasSePuedenAplicar(promoComboPrincipal, {
@@ -103,7 +98,7 @@ export class NuevaPromocion {
                                 this.aplicarPromoCombo(cesta, infoFinal, articuloPrincipal, articuloSecundario, preciosReales);
                                 if (infoFinal.sobranPrincipal > 0) this.aplicarSobraComboPrincipal(cesta, infoFinal);
                                 if (infoFinal.sobranSecundario > 0) this.aplicarSobraComboSecundario(cesta, infoFinal);
-                                console.log("TRAZA 8");
+                                
                                 return true;
                             }
                         }
@@ -111,18 +106,18 @@ export class NuevaPromocion {
                 }
             }
         } else if (promoComboSecundario = this.buscarPromocionesComboSecundario(idArticulo, unidadesTotales)) {
-            console.log("TRAZA 22");
+            
             // BUSCAR AHORA LOS SECUNDARIOS EN LA LISTA IGNORANDO EL IDARTICULO INSERTADO EN ESTE MOMENTO
             for (let i = 0; i < cesta.lista.length; i++) {
-                console.log("TRAZA 33");
+            
                 if (idArticulo != cesta.lista[i].idArticulo) {
-                    console.log("TRAZA 44");
+                    
                     for (let j = 0; j < this.promosCombo[promoComboSecundario.indexPromo].principal.length; j++) {
-                        console.log("TRAZA 55");
+                        
                         if (this.promosCombo[promoComboSecundario.indexPromo].principal[j] === cesta.lista[i].idArticulo) {
-                            console.log("TRAZA 66");
+                            
                             if (cesta.lista[i].unidades >= this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal) {
-                                console.log("TRAZA 77");
+                                
                                 const cantidadPromos = Math.trunc(cesta.lista[i].unidades/this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal);
                                 const sobran = cesta.lista[i].unidades%this.promosCombo[promoComboSecundario.indexPromo].cantidadPrincipal;
                                 let aux = this.cuantasSePuedenAplicar(promoComboSecundario, {
@@ -151,7 +146,7 @@ export class NuevaPromocion {
                                 this.aplicarPromoCombo(cesta, infoFinal, articuloPrincipal, articuloSecundario, preciosReales);
                                 if (infoFinal.sobranPrincipal > 0) this.aplicarSobraComboPrincipal(cesta, infoFinal);
                                 if (infoFinal.sobranSecundario > 0) this.aplicarSobraComboSecundario(cesta, infoFinal);
-                                console.log("TRAZA 88");
+                                
                                 return true;
                             }
                         }

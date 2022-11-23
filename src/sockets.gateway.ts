@@ -18,7 +18,6 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
-  console.log("CONECTADO");
   /* Eze 4.0 */
   socket.on("iniciarTransaccion", async ({ idTrabajador, idTicket }) => {
     try {
