@@ -19,6 +19,19 @@ export class ArticulosController {
     }
   }
 
+  @Post("buscar")
+  async buscar(@Body() { busqueda }) {
+    try {
+      if (busqueda) {
+        return await articulosInstance.buscarArticulos(busqueda);
+      }
+      throw Error("Faltan datos en articulos/buscar");
+    } catch (err) {
+      logger.Error(138, err);
+      return false;
+    }
+  }
+
   // @Post("editarArticulo")
   // editarArticulo(@Body() params) {
   //   if (

@@ -29,6 +29,20 @@ export async function borrarArticulos(): Promise<void> {
   }
 }
 
+/* Eze 4.0 */
+export async function buscar(busqueda: string): Promise<ArticulosInterface[]> {
+  const database = (await conexion).db("tocgame");
+  const articulos = database.collection<ArticulosInterface>("articulos");
+  return await articulos
+    .find(
+      {
+        nombre: { $regex: new RegExp(busqueda, "i") },
+      },
+      { limit: 20 }
+    )
+    .toArray();
+}
+
 // export async function getSuplementos(suplementos) {
 //   const database = (await conexion).db("tocgame");
 //   const articulos = database.collection("articulos");

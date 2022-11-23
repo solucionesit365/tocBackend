@@ -22,6 +22,10 @@ export class Articulos {
     await schArticulos.getInfoArticulo(idArticulo);
 
   /* Eze 4.0 */
+  buscarArticulos = async (busqueda: string) =>
+    await schArticulos.buscar(busqueda);
+
+  /* Eze 4.0 */
   async insertarArticulos(arrayArticulos: ArticulosInterface[]) {
     return await schArticulos.insertarArticulos(arrayArticulos);
   }
