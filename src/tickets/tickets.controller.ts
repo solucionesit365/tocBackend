@@ -43,13 +43,15 @@ export class TicketsController {
           idTrabajador,
           cesta
         );
+        if (tipo === "CONSUMO_PERSONAL") ticket.consumoPersonal = true;
         if (!ticket)
           throw Error(
             "Error, no se ha podido generar el objecto del ticket en crearTicket controller 3"
           );
         if (await ticketsInstance.insertarTicket(ticket)) {
           await cestasInstance.borrarArticulosCesta(idCesta);
-          if (tipo === "TARJETA") paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, total);
+          if (tipo === "TARJETA")
+            paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, total);
           ticketsInstance.actualizarTickets();
           return true;
         }

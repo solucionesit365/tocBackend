@@ -35,12 +35,8 @@ export class ClientesController {
   @Post("descargarClientesFinales")
   async descargarClientesFinales() {
     try {
-      const parametros = await parametrosInstance.getParametros();
-      const arrayClientes = (
-        await axios.post("clientes/getClientesFinales", {
-          database: parametros.database,
-        })
-      ).data as ClientesInterface[];
+      const arrayClientes = (await axios.get("clientes/getClientesFinales"))
+        .data as ClientesInterface[];
       if (arrayClientes)
         return await clienteInstance.insertarClientes(arrayClientes);
       throw Error(

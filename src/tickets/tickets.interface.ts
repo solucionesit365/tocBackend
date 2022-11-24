@@ -8,5 +8,6 @@ export interface TicketsInterface {
   cesta: CestasInterface;
   idTrabajador: number;
   idCliente: ClientesInterface["id"];
+  consumoPersonal?: boolean;
   enviado: boolean;
 }
