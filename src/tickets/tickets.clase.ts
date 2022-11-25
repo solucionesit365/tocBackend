@@ -21,21 +21,22 @@ export class TicketsClase {
 
   /* Eze 4.0 */
   async getUltimoIdTicket() {
-    const ultimoIdMongo = (await schTickets.getUltimoTicket())._id;
-    const ultimoIdParametros = (await parametrosInstance.getParametros())
-      .ultimoTicket;
-    return ultimoIdParametros > ultimoIdMongo
-      ? ultimoIdParametros
-      : ultimoIdMongo;
+    const ultimoIdMongo = (await schTickets.getUltimoTicket())?._id;
+    if (ultimoIdMongo) {
+      return ultimoIdMongo;
+    } else {
+      return (await parametrosInstance.getParametros()).ultimoTicket;
+    }
   }
 
-  getUltimoTicket = async (): Promise<TicketsInterface> => await schTickets.getUltimoTicket();
+  getUltimoTicket = async (): Promise<TicketsInterface> =>
+    await schTickets.getUltimoTicket();
 
   /* Eze 4.0 */
   async getProximoId(): Promise<number> {
     const ultimoIdTicket = await this.getUltimoIdTicket();
     if (typeof ultimoIdTicket === "number") return ultimoIdTicket + 1;
-
+    console.log(69);
     throw Error("El ultimoIdTicket no es correcto");
   }
 
@@ -53,21 +54,16 @@ export class TicketsClase {
     idTrabajador: TicketsInterface["idTrabajador"],
     cesta: CestasInterface
   ): Promise<TicketsInterface> {
-    try {
-      const nuevoTicket: TicketsInterface = {
-        _id: await this.getProximoId(),
-        timestamp: Date.now(),
-        total,
-        idCliente: cesta.idCliente,
-        idTrabajador,
-        cesta,
-        enviado: false,
-      };
-      return nuevoTicket;
-    } catch (err) {
-      logger.Error(104, err);
-      return null;
-    }
+    const nuevoTicket: TicketsInterface = {
+      _id: await this.getProximoId(),
+      timestamp: Date.now(),
+      total,
+      idCliente: cesta.idCliente,
+      idTrabajador,
+      cesta,
+      enviado: false,
+    };
+    return nuevoTicket;
   }
 
   /* Eze 4.0 */
