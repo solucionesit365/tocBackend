@@ -1,12 +1,11 @@
 import { Body, Controller, Post, Get } from "@nestjs/common";
-import { parametrosInstance } from "./parametros.clase"
+import { parametrosInstance } from "./parametros.clase";
 import axios from "axios";
 import { UtilesModule } from "src/utiles/utiles.module";
 import { logger } from "../logger";
 
 @Controller("parametros")
 export class ParametrosController {
-
   /* Eze 4.0 */
   @Get("todoInstalado")
   async todoInstalado() {
@@ -33,11 +32,7 @@ export class ParametrosController {
   @Post("actualizarParametros")
   async actualizarParametros() {
     try {
-      const licencia = (await parametrosInstance.getParametros()).licencia;
-
-      const res: any = await axios.post("parametros/getParametros", {
-        numLlicencia: licencia,
-      });
+      const res: any = await axios.get("parametros/getParametros");
 
       if (!res.data.error) {
         const paramstpv = res.data.info;
@@ -55,11 +50,7 @@ export class ParametrosController {
   async vidAndPid(@Body() { vid, pid, com }) {
     try {
       if (UtilesModule.checkVariable(vid, pid, com))
-      return await parametrosInstance.setVidAndPid(
-        vid,
-        pid,
-        com
-      );
+        return await parametrosInstance.setVidAndPid(vid, pid, com);
       throw Error("Error, faltan datos en setVidAndPid() controller");
     } catch (err) {
       logger.Error(43, err);
@@ -84,7 +75,7 @@ export class ParametrosController {
     try {
       if (UtilesModule.checkVariable(ip))
         return await parametrosInstance.setIpPaytef(ip);
-    throw Error("Error, faltan datos en setIpPaytef() controller");
+      throw Error("Error, faltan datos en setIpPaytef() controller");
     } catch (err) {
       logger.Error(45, err);
       return false;
