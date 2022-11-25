@@ -102,8 +102,7 @@ export class TrabajadoresController {
     try {
       if (idTrabajador)
         return await trabajadoresInstance.finDescanso(idTrabajador);
-      else
-        throw Error("Error en trabajadores/finDescanso");
+      else throw Error("Error en trabajadores/finDescanso");
     } catch (err) {
       logger.Error(116, err);
       return false;

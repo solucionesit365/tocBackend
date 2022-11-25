@@ -29,7 +29,7 @@ export async function buscar(
   return await trabajadores
     .find(
       {
-        fichado: false,
+        fichado: { $ne: true },
         $or: [
           { nombre: { $regex: new RegExp(busqueda, "i") } },
           { nombreCorto: { $regex: new RegExp(busqueda, "i") } },
