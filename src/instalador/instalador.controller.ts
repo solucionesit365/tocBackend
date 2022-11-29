@@ -1,15 +1,15 @@
 import { Controller, Post, Body } from "@nestjs/common";
 import axios from "axios";
 import { parametrosInstance } from "../parametros/parametros.clase";
-import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
-import { articulosInstance } from "src/articulos/articulos.clase";
-import { clienteInstance } from "src/clientes/clientes.clase";
-import { familiasInstance } from "src/familias/familias.class";
-import { nuevaInstancePromociones } from "src/promociones/promociones.clase";
-import { paramsTicketInstance } from "src/params-ticket/params-ticket.class";
-import { menusInstance } from "src/menus/menus.clase";
-import { tecladoInstance } from "src/teclado/teclado.clase";
-import { dobleMenusInstance } from "src/doble-menus/doble-menus.clase";
+import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+import { articulosInstance } from "../articulos/articulos.clase";
+import { clienteInstance } from "../clientes/clientes.clase";
+import { familiasInstance } from "../familias/familias.class";
+import { nuevaInstancePromociones } from "../promociones/promociones.clase";
+import { paramsTicketInstance } from "../params-ticket/params-ticket.class";
+import { menusInstance } from "../menus/menus.clase";
+import { tecladoInstance } from "../teclado/teclado.clase";
+import { tarifasInstance } from "../tarifas/tarifas.class";
 import { logger } from "../logger";
 
 @Controller("instalador")
@@ -35,7 +35,7 @@ export class InstaladorController {
 
         if (resAuth.data) {
           const objParams = parametrosInstance.generarObjetoParametros();
-
+          axios.defaults.headers.common["Authorization"] = resAuth.data.token;
           objParams.licencia = numLlicencia;
           objParams.tipoImpresora = tipoImpresora;
           objParams.tipoDatafono = tipoDatafono;
@@ -80,9 +80,7 @@ export class InstaladorController {
         const info2 = await articulosInstance.insertarArticulos(
           res.data.articulos
         );
-        const info3 = await clienteInstance.insertarClientes(
-          res.data.clientes
-        );
+        const info3 = await clienteInstance.insertarClientes(res.data.clientes);
         const info4 = await familiasInstance.insertarFamilias(
           res.data.familias
         );
@@ -93,13 +91,11 @@ export class InstaladorController {
           res.data.parametrosTicket
         );
         const info7 = await menusInstance.insertarMenus(res.data.menus);
-        const info8 = await tecladoInstance.insertarTeclas(
-          res.data.teclas
+        const info8 = await tecladoInstance.insertarTeclas(res.data.teclas);
+        const info9 = await tarifasInstance.guardarTarifasEspeciales(
+          res.data.tarifasEspeciales
         );
-        const info9 = true; // await cestas.insertarCestas(res.data.info.cestas);
-        const info10 = await dobleMenusInstance.insertarMenus(
-          res.data.dobleMenus
-        );
+
         if (
           info1 &&
           info2 &&
@@ -109,8 +105,7 @@ export class InstaladorController {
           info6 &&
           info7 &&
           info8 &&
-          info9 &&
-          info10
+          info9
         ) {
           return true;
         }

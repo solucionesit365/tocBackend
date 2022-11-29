@@ -14,10 +14,8 @@ export class TarifasClass {
 
   /* Eze 4.0 */
   async descargarTarifasEspeciales(): Promise<TarifaInterface[]> {
-    const parametros = await parametrosInstance.getParametros();
-    const resTarifas = (
-      await axios.post("tarifas/getTarifasEspeciales", { database: parametros.database })
-    ).data as TarifaInterface[];
+    const resTarifas = (await axios.get("tarifas/getTarifasEspeciales"))
+      .data as TarifaInterface[];
     if (resTarifas.length > 0) return resTarifas;
     return [];
   }
@@ -30,7 +28,8 @@ export class TarifasClass {
   }
 
   /* Eze 4.0 */
-  clienteTieneTarifa = async (idCliente: ClientesInterface["id"]) => await schTarifas.tieneTarifaEspecial(idCliente);
+  clienteTieneTarifa = async (idCliente: ClientesInterface["id"]) =>
+    await schTarifas.tieneTarifaEspecial(idCliente);
 }
 
 export const tarifasInstance = new TarifasClass();
