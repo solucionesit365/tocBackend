@@ -1,6 +1,5 @@
 node_modules/
 *.map
-.vscode
 dist/
 dist/tsconfig.build.tsbuildinfo
 *.log
