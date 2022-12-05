@@ -18,7 +18,8 @@ export class CajaController {
           infoDinero,
           cantidad3G,
           idDependienta
-        )
+        ) &&
+        typeof cantidad3G === "number"
       ) {
         return await cajaInstance.cerrarCaja(
           total,
@@ -30,7 +31,7 @@ export class CajaController {
       }
       throw Error("Error cerrarCaja > Faltan datos");
     } catch (err) {
-      logger.Error(52,err);
+      logger.Error(52, err);
       return false;
     }
   }
@@ -38,7 +39,14 @@ export class CajaController {
   /* Eze 4.0 */
   @Post("abrirCaja")
   async abrirCaja(@Body() { total, detalle, idDependienta }) {
-    console.log("total: ", total, " detalle: ", detalle, " idDependienta: ", idDependienta);
+    console.log(
+      "total: ",
+      total,
+      " detalle: ",
+      detalle,
+      " idDependienta: ",
+      idDependienta
+    );
     try {
       if (total != undefined && detalle != undefined)
         return await cajaInstance.abrirCaja({

@@ -52,16 +52,18 @@ export class TicketsClase {
   async generarNuevoTicket(
     total: TicketsInterface["total"],
     idTrabajador: TicketsInterface["idTrabajador"],
-    cesta: CestasInterface
+    cesta: CestasInterface,
+    tipo: CestasInterface["modo"]
   ): Promise<TicketsInterface> {
     const nuevoTicket: TicketsInterface = {
       _id: await this.getProximoId(),
       timestamp: Date.now(),
-      total,
+      total: tipo === "CONSUMO_PERSONAL" ? 0 : total,
       idCliente: cesta.idCliente,
       idTrabajador,
       cesta,
       enviado: false,
+      consumoPersonal: tipo === "CONSUMO_PERSONAL" ? true : false,
     };
     return nuevoTicket;
   }

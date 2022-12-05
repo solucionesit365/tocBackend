@@ -41,9 +41,10 @@ export class TicketsController {
         const ticket = await ticketsInstance.generarNuevoTicket(
           total,
           idTrabajador,
-          cesta
+          cesta,
+          tipo
         );
-        if (tipo === "CONSUMO_PERSONAL") ticket.consumoPersonal = true;
+
         if (!ticket)
           throw Error(
             "Error, no se ha podido generar el objecto del ticket en crearTicket controller 3"

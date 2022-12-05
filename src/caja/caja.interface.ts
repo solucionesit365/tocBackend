@@ -23,7 +23,6 @@ export interface CajaCerradaInterface {
   totalDeuda: number;
   totalTkrsSinExceso: number;
   totalTkrsConExceso: number;
-  totalConsumoPersonal: number;
   ultimoTicket: number;
   calaixFetZ: number;
   detalleCierre: DetalleMonedas;
@@ -51,7 +50,6 @@ export interface CajaSincro {
   totalDeuda: number;
   totalTkrsSinExceso: number;
   totalTkrsConExceso: number;
-  totalConsumoPersonal: number;
   ultimoTicket: number;
   calaixFetZ: number;
   detalleCierre: DetalleMonedas;

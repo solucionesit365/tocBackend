@@ -70,6 +70,8 @@ export async function vaciarCesta(
           valorIva3: 0,
         },
         lista: [],
+        idCliente: null,
+        nombreCliente: null,
       },
     }
   );
