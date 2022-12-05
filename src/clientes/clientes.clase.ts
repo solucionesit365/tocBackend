@@ -29,6 +29,15 @@ export class Clientes {
   }
 
   /* Eze 4.0 */
-  tieneTarifaEspecial = async (idCliente: ClientesInterface["id"]) => await tarifasInstance.clienteTieneTarifa(idCliente);
+  tieneTarifaEspecial = async (idCliente: ClientesInterface["id"]) =>
+    await tarifasInstance.clienteTieneTarifa(idCliente);
+
+  // async descargarClientes() {
+  //   const arrayClientes = (await axios.get("clientes/getClientesFinales"))
+  //     .data as ClientesInterface[];
+  //   if (arrayClientes)
+  //     return await clienteInstance.insertarClientes(arrayClientes);
+  //   else null;
+  // }
 }
 export const clienteInstance = new Clientes();

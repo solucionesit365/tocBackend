@@ -58,12 +58,19 @@ export class ClientesController {
           nombreCliente.length >= 3
         ) {
           const parametros = await parametrosInstance.getParametros();
-          return await axios.post("clientes/crearNuevoCliente", {
+          const resCrear = await axios.post("clientes/crearNuevoCliente", {
             idTarjetaCliente: idTarjetaCliente,
             nombreCliente: nombreCliente,
             idCliente: `CliBoti_${parametros.codigoTienda}_${Date.now()}`,
             parametros: parametros,
           });
+
+          await this.descargarClientesFinales();
+
+          if (resCrear.data) {
+            return true;
+          }
+          return false;
         }
       }
       throw Error("Error, faltan datos en crearNuevoCliente() controller");
