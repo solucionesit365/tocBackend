@@ -29,7 +29,7 @@ export class Devoluciones {
     };
     await this.insertarDevolucion(objDevolucion);
     //await impresoraInstance.imprimirTicket(nuevoIdTicket, true); NO VA, HE CREADO UNA NUEVA FUNCIÓN .imprimirDevolucion
-    if (await cestasInstance.deleteCesta(cesta._id)) {
+    if (await cestasInstance.borrarArticulosCesta(cesta._id)) {
       cestasInstance.actualizarCestas();
       return true;
     } else {

@@ -111,8 +111,14 @@ export class MovimientosClase {
     if (infoCaja) {
       const inicioCaja = infoCaja.inicioTime;
       const final = Date.now();
-      const arrayTickets = await ticketsInstance.getTicketsIntervalo(inicioCaja, final);
-      const arrayMovimientos = await this.getMovimientosIntervalo(inicioCaja, final);
+      const arrayTickets = await ticketsInstance.getTicketsIntervalo(
+        inicioCaja,
+        final
+      );
+      const arrayMovimientos = await this.getMovimientosIntervalo(
+        inicioCaja,
+        final
+      );
 
       const arrayFinalTickets = [];
 
@@ -126,10 +132,18 @@ export class MovimientosClase {
           }
         }
       }
-      
+
       for (let i = 0; i < arrayFinalTickets.length; i++) {
+        if (arrayFinalTickets[i].consumoPersonal) {
+          arrayFinalTickets[i].tipoPago = "CONSUMO PERSONAL";
+          continue;
+        }
+
         if (arrayFinalTickets[i].movimientos.length === 1) {
-          if (arrayFinalTickets[i].movimientos[0].tipo === "TARJETA" && arrayFinalTickets[i].movimientos[0].valor > 0) {
+          if (
+            arrayFinalTickets[i].movimientos[0].tipo === "TARJETA" &&
+            arrayFinalTickets[i].movimientos[0].valor > 0
+          ) {
             arrayFinalTickets[i].tipoPago = "TARJETA";
           } else {
             arrayFinalTickets[i].tipoPago = "DESCONOCIDO";
@@ -138,10 +152,13 @@ export class MovimientosClase {
           arrayFinalTickets[i].tipoPago = "EFECTIVO";
         } else if (arrayFinalTickets[i].movimientos.length > 1) {
           // CASO TARJETA ANULADA
-          if (arrayFinalTickets[i].movimientos.length === 2 && arrayFinalTickets[i].movimientos[0].tipo === "TARJETA") {
+          if (
+            arrayFinalTickets[i].movimientos.length === 2 &&
+            arrayFinalTickets[i].movimientos[0].tipo === "TARJETA"
+          ) {
             const busqueda = {
               original: false,
-              rectificativo: false
+              rectificativo: false,
             };
             for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
               if (arrayFinalTickets[i].movimientos[j].tipo === "TARJETA") {
@@ -158,19 +175,18 @@ export class MovimientosClase {
               arrayFinalTickets[i].tipoPago = "NO FUNCIONA";
             }
           } else if (arrayFinalTickets[i].movimientos.length >= 2) {
-            console.log("AQUÍ CONTROLAR EL CASO DEL TICKET RESTAURANTE => CON EXCESO, SIN EXCESO, PAGADO A MEDIAS");
+            console.log(
+              "AQUÍ CONTROLAR EL CASO DEL TICKET RESTAURANTE => CON EXCESO, SIN EXCESO, PAGADO A MEDIAS"
+            );
             arrayFinalTickets[i].tipoPago = "POSIBLE TKRS";
-          }          
+          }
         }
       }
 
       return arrayFinalTickets;
     }
     return null;
-    // const arrayTickets: TicketsInterface[] = await ticketsInstance. 
-
-
-
+    // const arrayTickets: TicketsInterface[] = await ticketsInstance.
 
     // const movimientosTicket = await schMovimientos.getMovimientosDelTicket(idTicket);
     // if (movimientosTicket.length === 1) {
@@ -184,8 +200,7 @@ export class MovimientosClase {
     //     console.log("controlar más adelante");
     //   }
     // }
-
-  }
+  };
 }
 
 export const movimientosInstance = new MovimientosClase();
