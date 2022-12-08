@@ -19,15 +19,17 @@ import { nuevaInstancePromociones } from "src/promociones/promociones.clase";
 
 export class CestaClase {
   /* Eze 4.0 */
-  actualizarCestas() {
-    cestasInstance
-      .getAllCestas()
-      .then((arrayCestas) => {
-        io.emit("cargarCestas", arrayCestas);
-      })
-      .catch((err) => {
-        logger.Error(119, err);
-      });
+  async actualizarCestas() {
+    const arrayCestas = await cestasInstance.getAllCestas();
+    io.emit("cargarCestas", arrayCestas);
+    // cestasInstance
+    //   .getAllCestas()
+    //   .then((arrayCestas) => {
+
+    //   })
+    //   .catch((err) => {
+    //     logger.Error(119, err);
+    //   });
   }
 
   /* Eze 4.0 */

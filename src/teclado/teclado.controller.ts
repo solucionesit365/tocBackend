@@ -21,7 +21,7 @@ export class TecladoController {
           unidades,
           arraySuplementos
         );
-        cestasInstance.actualizarCestas();
+        await cestasInstance.actualizarCestas();
         return resultado;
       }
       throw Error("Faltan datos en cestas (controller) > clickTeclaArticulo");

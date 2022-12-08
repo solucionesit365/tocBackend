@@ -43,3 +43,17 @@ export interface PreciosReales {
   precioRealPrincipal: number;
   precioRealSecundario: number;
 }
+
+export interface MediaPromoEncontrada {
+  indexPromo: number;
+  cantidadPromos: number;
+  sobran: number;
+  indexCesta: number;
+  tipo: "PRINCIPAL" | "SECUNDARIO";
+}
+
+export interface InfoPromoAplicar {
+  seAplican: number;
+  sobranPrincipal: number;
+  sobranSecundario: number;
+}
