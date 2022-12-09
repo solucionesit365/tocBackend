@@ -145,6 +145,10 @@ export class MovimientosClase {
             arrayFinalTickets[i].movimientos[0].valor > 0
           ) {
             arrayFinalTickets[i].tipoPago = "TARJETA";
+          } else if (
+            arrayFinalTickets[i].movimientos[0].tipo === "TKRS_SIN_EXCESO"
+          ) {
+            arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
           } else {
             arrayFinalTickets[i].tipoPago = "DESCONOCIDO";
           }
@@ -178,7 +182,20 @@ export class MovimientosClase {
             console.log(
               "AQUÍ CONTROLAR EL CASO DEL TICKET RESTAURANTE => CON EXCESO, SIN EXCESO, PAGADO A MEDIAS"
             );
-            arrayFinalTickets[i].tipoPago = "POSIBLE TKRS";
+            for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
+              if (
+                arrayFinalTickets[i].movimientos[j].tipo === "TKRS_SIN_EXCESO"
+              ) {
+                if (
+                  arrayFinalTickets[i].movimientos[j].valor >=
+                  arrayFinalTickets[i].total
+                ) {
+                  arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
+                } else {
+                  arrayFinalTickets[i].tipoPago = "TKRS + EFECTIVO";
+                }
+              }
+            }
           }
         }
       }
