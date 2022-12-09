@@ -53,17 +53,17 @@ export class TicketsClase {
     total: TicketsInterface["total"],
     idTrabajador: TicketsInterface["idTrabajador"],
     cesta: CestasInterface,
-    tipo: CestasInterface["modo"]
+    consumoPersonal: boolean
   ): Promise<TicketsInterface> {
     const nuevoTicket: TicketsInterface = {
       _id: await this.getProximoId(),
       timestamp: Date.now(),
-      total: tipo === "CONSUMO_PERSONAL" ? 0 : total,
+      total: consumoPersonal ? 0 : total,
       idCliente: cesta.idCliente,
       idTrabajador,
       cesta,
       enviado: false,
-      consumoPersonal: tipo === "CONSUMO_PERSONAL" ? true : false,
+      consumoPersonal: consumoPersonal ? true : false,
     };
     return nuevoTicket;
   }

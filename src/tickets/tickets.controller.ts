@@ -1,9 +1,11 @@
 import { Controller, Post, Body } from "@nestjs/common";
 import { ticketsInstance } from "./tickets.clase";
-import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { logger } from "../logger";
 import { cestasInstance } from "../cestas/cestas.clase";
-import { paytefInstance } from "src/paytef/paytef.class";
+import { paytefInstance } from "../paytef/paytef.class";
+import { TicketsInterface } from "./tickets.interface";
+import { FormaPago } from "../movimientos/movimientos.interface";
+import { movimientosInstance } from "../movimientos/movimientos.clase";
 
 @Controller("tickets")
 export class TicketsController {
@@ -34,7 +36,25 @@ export class TicketsController {
 
   /* Eze 4.0 */
   @Post("crearTicket")
-  async crearTicket(@Body() { total, idCesta, idTrabajador, tipo }) {
+  async crearTicket(
+    @Body()
+    {
+      total,
+      idCesta,
+      idTrabajador,
+      tipo,
+      tkrsData,
+    }: {
+      total: number;
+      idCesta: TicketsInterface["cesta"]["_id"];
+      idTrabajador: TicketsInterface["idTrabajador"];
+      tipo: FormaPago;
+      tkrsData: {
+        cantidadTkrs: number;
+        formaPago: FormaPago;
+      };
+    }
+  ) {
     try {
       if (typeof total == "number" && idCesta && idTrabajador && tipo) {
         const cesta = await cestasInstance.getCestaById(idCesta);
@@ -42,7 +62,7 @@ export class TicketsController {
           total,
           idTrabajador,
           cesta,
-          tipo
+          tipo === "CONSUMO_PERSONAL"
         );
 
         if (!ticket)
@@ -53,6 +73,47 @@ export class TicketsController {
           await cestasInstance.borrarArticulosCesta(idCesta);
           if (tipo === "TARJETA")
             paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, total);
+          else if (
+            (tipo === "TKRS" && tkrsData) ||
+            (tkrsData?.cantidadTkrs > 0 && tipo === "EFECTIVO")
+          ) {
+            if (tkrsData.cantidadTkrs > total) {
+              await movimientosInstance.nuevoMovimiento(
+                total,
+                "",
+                "TKRS_SIN_EXCESO",
+                ticket._id,
+                idTrabajador
+              );
+              await movimientosInstance.nuevoMovimiento(
+                tkrsData.cantidadTkrs - total,
+                "",
+                "TKRS_CON_EXCESO",
+                ticket._id,
+                idTrabajador
+              );
+            } else if (tkrsData.cantidadTkrs < total) {
+              await movimientosInstance.nuevoMovimiento(
+                tkrsData.cantidadTkrs,
+                "",
+                "TKRS_SIN_EXCESO",
+                ticket._id,
+                idTrabajador
+              );
+            } else if (tkrsData.cantidadTkrs === total) {
+              await movimientosInstance.nuevoMovimiento(
+                total,
+                "",
+                "TKRS_SIN_EXCESO",
+                ticket._id,
+                idTrabajador
+              );
+            }
+          } else if (tipo !== "EFECTIVO") {
+            throw Error(
+              "Falta información del tkrs o bien ninguna forma de pago es correcta"
+            );
+          }
           ticketsInstance.actualizarTickets();
           return true;
         }
