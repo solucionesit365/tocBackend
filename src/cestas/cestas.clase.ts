@@ -436,8 +436,15 @@ export class CestaClase {
 
   /* */
   async regalarItem(idCesta: CestasInterface["_id"], index: number) {
-    // El único problema será regalar un ítem que tenga más de una unidad.
-    return true;
+    const cesta = await cestasInstance.getCestaById(idCesta);
+    cesta.lista[index].regalo = true;
+    cesta.lista[index].subtotal = 0;
+    await cestasInstance.recalcularIvas(cesta);
+    if (await cestasInstance.updateCesta(cesta)) {
+      await this.actualizarCestas();
+      return true;
+    }
+    return false;
   }
 }
 
