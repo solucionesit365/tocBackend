@@ -11,11 +11,7 @@ export class MovimientosController {
     try {
       if (
         cantidad != undefined &&
-        UtilesModule.checkVariable(
-          concepto,
-          idTrabajador,
-          tipo
-        )
+        UtilesModule.checkVariable(concepto, idTrabajador, tipo)
       ) {
         return movimientosInstance.nuevoMovimiento(
           cantidad,
@@ -28,6 +24,18 @@ export class MovimientosController {
       throw Error("Error, faltan datos en nuevoMovimiento() controller");
     } catch (err) {
       logger.Error(99, err);
+      return false;
+    }
+  }
+
+  @Post("getMovimientosIntervalo")
+  async getMovimientosIntervalo(@Body() { inicio, final }) {
+    try {
+      if (inicio && final)
+        return await movimientosInstance.getMovimientosIntervalo(inicio, final);
+      else throw Error("Faltan datos en movimientos/getMovimientosIntervalo");
+    } catch (err) {
+      logger.Error(142, err);
       return false;
     }
   }

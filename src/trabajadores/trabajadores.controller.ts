@@ -119,4 +119,17 @@ export class TrabajadoresController {
       return false;
     }
   }
+
+  @Post("getTrabajadorById")
+  async getTrabajadorById(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) {
+        return await trabajadoresInstance.getTrabajadorById(idTrabajador);
+      }
+      throw Error("Faltan datos en trabajadores/getTrabajadorById");
+    } catch (err) {
+      logger.Error(141, err);
+      return false;
+    }
+  }
 }

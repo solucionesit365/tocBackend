@@ -83,4 +83,15 @@ export class CajaController {
       return null;
     }
   }
+
+  /* Eze 4.0 */
+  @Get("getUltimoCierre")
+  async getUltimoCierre() {
+    try {
+      return await cajaInstance.getUltimoCierre();
+    } catch (err) {
+      logger.Error(140, err);
+      return false;
+    }
+  }
 }
