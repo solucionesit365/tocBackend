@@ -70,7 +70,7 @@ export class TicketsController {
             "Error, no se ha podido generar el objecto del ticket en crearTicket controller 3"
           );
         if (await ticketsInstance.insertarTicket(ticket)) {
-          await cestasInstance.borrarArticulosCesta(idCesta);
+          await cestasInstance.borrarArticulosCesta(idCesta, true);
           if (tipo === "TARJETA")
             paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, total);
           else if (

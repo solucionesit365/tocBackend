@@ -6,6 +6,7 @@ import { io } from "../sockets.gateway";
 import { movimientosInstance } from "../movimientos/movimientos.clase";
 import axios from "axios";
 import { convertirDineroEnPuntos } from "../funciones/funciones";
+import { articulosInstance } from "src/articulos/articulos.clase";
 
 export class TicketsClase {
   /* Eze 4.0 */
@@ -45,10 +46,15 @@ export class TicketsClase {
       throw Error("Error al insertar ticket: la lista está vacía");
 
     let cantidadRegalada = 0;
-    
+
     for (let i = 0; i < ticket.cesta.lista.length; i++) {
       if (ticket.cesta.lista[i].regalo === true) {
-        cantidadRegalada += ticket.cesta.lista[i].subtotal;
+        cantidadRegalada +=
+          (
+            await articulosInstance.getInfoArticulo(
+              ticket.cesta.lista[i].idArticulo
+            )
+          ).precioConIva * ticket.cesta.lista[i].unidades;
       }
     }
 
