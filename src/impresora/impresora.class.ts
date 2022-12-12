@@ -181,7 +181,7 @@ export class Impresora {
 
     if (infoTicket != null) {
       if (infoTicket.cliente != null && infoTicket.tipoPago != 'DEUDA' && infoTicket.cliente != undefined) {
-        const infoClienteAux = await clienteInstance.getClienteByID(infoTicket.cliente);
+        const infoClienteAux = await clienteInstance.getClienteById(infoTicket.cliente);
         const infoCliente = infoClienteAux;
         let auxNombre = '';
         let puntosCliente = 0;
@@ -238,7 +238,7 @@ export class Impresora {
 
     if (infoTicket != null) {
       if (infoTicket.cliente != null && infoTicket.tipoPago != 'DEUDA' && infoTicket.cliente != undefined) {
-        const infoClienteAux = await clienteInstance.getClienteByID(infoTicket.cliente);
+        const infoClienteAux = await clienteInstance.getClienteById(infoTicket.cliente);
         const infoCliente = infoClienteAux;
         let auxNombre = '';
         let puntosCliente = 0;

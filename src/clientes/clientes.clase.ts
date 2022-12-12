@@ -9,8 +9,8 @@ export class Clientes {
   buscar = async (cadena: string) => await schClientes.buscar(cadena);
 
   /* Eze 4.0 */
-  getClienteByID = async (idCliente: string): Promise<ClientesInterface> =>
-    await schClientes.getClienteByID(idCliente);
+  getClienteById = async (idCliente: string): Promise<ClientesInterface> =>
+    await schClientes.getClienteById(idCliente);
 
   /* Eze 4.0 */
   insertarClientes = async (arrayClientes: ClientesInterface[]) =>

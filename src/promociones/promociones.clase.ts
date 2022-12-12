@@ -57,7 +57,7 @@ export class NuevaPromocion {
     let unidadesTotales = unidades;
     let index1 = null;
     if (cesta.idCliente) {
-      const cliente = await clienteInstance.getClienteByID(cesta.idCliente);
+      const cliente = await clienteInstance.getClienteById(cesta.idCliente);
       if (cliente.albaran === true) {
         // No se les hace promociones a estos clientes
         return false;

@@ -20,11 +20,11 @@ export class ClientesController {
   }
 
   /* Eze 4.0 */
-  @Post("getClienteByID")
-  async getClienteByID(@Body() { idCliente }) {
+  @Post("getClienteById")
+  async getClienteById(@Body() { idCliente }) {
     try {
-      if (idCliente) return await clienteInstance.getClienteByID(idCliente);
-      throw Error("Error, faltan datos en getClienteByID");
+      if (idCliente) return await clienteInstance.getClienteById(idCliente);
+      throw Error("Error, faltan datos en getClienteById");
     } catch (err) {
       logger.Error(66, err);
       return null;

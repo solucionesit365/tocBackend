@@ -459,7 +459,7 @@ export class CestaClase {
   async regalarItem(idCesta: CestasInterface["_id"], index: number) {
     const cesta = await cestasInstance.getCestaById(idCesta);
     if (cesta && cesta.idCliente) {
-      const cliente = await clienteInstance.getClienteByID(cesta.idCliente);
+      const cliente = await clienteInstance.getClienteById(cesta.idCliente);
       if (cliente.albaran) return false;
     } else {
       return false;
