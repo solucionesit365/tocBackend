@@ -15,7 +15,9 @@ import { ClientesInterface } from "../clientes/clientes.interface";
 import { ObjectId } from "mongodb";
 import { logger } from "../logger";
 import { io } from "../sockets.gateway";
-import { nuevaInstancePromociones } from "src/promociones/promociones.clase";
+import { nuevaInstancePromociones } from "../promociones/promociones.clase";
+import { clienteInstance } from "../clientes/clientes.clase";
+import axios from "axios";
 
 export class CestaClase {
   /* Eze 4.0 */
@@ -412,9 +414,25 @@ export class CestaClase {
 
   /* Eze 4.0 */
   async borrarArticulosCesta(idCesta: CestasInterface["_id"]) {
-    if (await schCestas.vaciarCesta(idCesta)) {
-      this.actualizarCestas();
-      return true;
+    const cesta = await this.getCestaById(idCesta);
+
+    if (cesta) {
+      cesta.lista = [];
+      cesta.detalleIva = {
+        base1: 0,
+        base2: 0,
+        base3: 0,
+        importe1: 0,
+        importe2: 0,
+        importe3: 0,
+        valorIva1: 0,
+        valorIva2: 0,
+        valorIva3: 0,
+      };
+      if (await this.updateCesta(cesta)) {
+        this.actualizarCestas();
+        return true;
+      }
     }
     throw Error("Error en updateCesta borrarArticulosCesta()");
   }
@@ -434,17 +452,25 @@ export class CestaClase {
   updateCesta = async (cesta: CestasInterface) =>
     await schCestas.updateCesta(cesta);
 
-  /* */
+  /* Eze 4.0 */
   async regalarItem(idCesta: CestasInterface["_id"], index: number) {
     const cesta = await cestasInstance.getCestaById(idCesta);
+    if (cesta && cesta.idCliente) {
+      const cliente = await clienteInstance.getClienteByID(cesta.idCliente);
+      if (cliente.albaran) return false;
+    } else {
+      return false;
+    }
+
     cesta.lista[index].regalo = true;
     cesta.lista[index].subtotal = 0;
     await cestasInstance.recalcularIvas(cesta);
+
     if (await cestasInstance.updateCesta(cesta)) {
       await this.actualizarCestas();
       return true;
     }
-    return false;
+    throw Error("No se ha podido actualizar la cesta");
   }
 }
 

@@ -10,7 +10,7 @@ export class Clientes {
 
   /* Eze 4.0 */
   getClienteByID = async (idCliente: string): Promise<ClientesInterface> =>
-    await schClientes.getClieneteByID(idCliente);
+    await schClientes.getClienteByID(idCliente);
 
   /* Eze 4.0 */
   insertarClientes = async (arrayClientes: ClientesInterface[]) =>
@@ -31,13 +31,5 @@ export class Clientes {
   /* Eze 4.0 */
   tieneTarifaEspecial = async (idCliente: ClientesInterface["id"]) =>
     await tarifasInstance.clienteTieneTarifa(idCliente);
-
-  // async descargarClientes() {
-  //   const arrayClientes = (await axios.get("clientes/getClientesFinales"))
-  //     .data as ClientesInterface[];
-  //   if (arrayClientes)
-  //     return await clienteInstance.insertarClientes(arrayClientes);
-  //   else null;
-  // }
 }
 export const clienteInstance = new Clientes();

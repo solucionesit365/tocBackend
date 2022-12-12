@@ -128,7 +128,7 @@ export class CestasController {
   @Post("regalarProducto")
   async regalarProducto(@Body() { idCesta, indexLista }) {
     try {
-      if (idCesta && indexLista)
+      if (idCesta && typeof indexLista === "number")
         return await cestasInstance.regalarItem(idCesta, indexLista);
       throw Error("Error, faltan datos en regalarProducto controller");
     } catch (err) {

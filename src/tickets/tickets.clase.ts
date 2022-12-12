@@ -1,12 +1,11 @@
 import { TicketsInterface } from "./tickets.interface";
 import * as schTickets from "./tickets.mongodb";
-import { cestasInstance } from "../cestas/cestas.clase";
 import { parametrosInstance } from "../parametros/parametros.clase";
 import { CestasInterface } from "../cestas/cestas.interface";
-import { logger } from "../logger";
-import { cajaInstance } from "../caja/caja.clase";
 import { io } from "../sockets.gateway";
-import { movimientosInstance } from "src/movimientos/movimientos.clase";
+import { movimientosInstance } from "../movimientos/movimientos.clase";
+import axios from "axios";
+import { convertirDineroEnPuntos } from "../funciones/funciones";
 
 export class TicketsClase {
   /* Eze 4.0 */
@@ -45,6 +44,24 @@ export class TicketsClase {
     if (ticket.cesta.lista.length == 0)
       throw Error("Error al insertar ticket: la lista está vacía");
 
+    let cantidadRegalada = 0;
+    
+    for (let i = 0; i < ticket.cesta.lista.length; i++) {
+      if (ticket.cesta.lista[i].regalo === true) {
+        cantidadRegalada += ticket.cesta.lista[i].subtotal;
+      }
+    }
+
+    if (cantidadRegalada > 0) {
+      const resDescuento = await axios.post("clientes/descontarPuntos", {
+        idCliente: ticket.cesta.idCliente,
+        puntos: convertirDineroEnPuntos(cantidadRegalada),
+      });
+
+      if (resDescuento.data) return await schTickets.nuevoTicket(ticket);
+
+      throw Error("No se han podido descontar los puntos");
+    }
     return await schTickets.nuevoTicket(ticket);
   }
 

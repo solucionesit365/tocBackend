@@ -19,7 +19,7 @@ export async function buscar(busqueda: string): Promise<ClientesInterface[]> {
 }
 
 /* Eze 4.0 */
-export async function getClieneteByID(
+export async function getClienteByID(
   idCliente: ClientesInterface["id"]
 ): Promise<ClientesInterface> {
   const database = (await conexion).db("tocgame");
@@ -47,3 +47,4 @@ export async function insertarClientes(arrayClientes: ClientesInterface[]): Prom
   const clientes = database.collection("clientes");
   return (await clientes.insertMany(arrayClientes)).acknowledged;
 }
+
