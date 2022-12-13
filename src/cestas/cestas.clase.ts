@@ -413,7 +413,11 @@ export class CestaClase {
   }
 
   /* Eze 4.0 */
-  async borrarArticulosCesta(idCesta: CestasInterface["_id"], borrarCliente = false) {
+  async borrarArticulosCesta(
+    idCesta: CestasInterface["_id"],
+    borrarCliente = false,
+    borrarModo = false
+  ) {
     const cesta = await this.getCestaById(idCesta);
 
     if (cesta) {
@@ -429,9 +433,9 @@ export class CestaClase {
         valorIva2: 0,
         valorIva3: 0,
       };
-      if (borrarCliente) {
-        cesta.idCliente = "";
-      }
+      if (borrarCliente) cesta.idCliente = "";
+      if (borrarModo) cesta.modo = "VENTA";
+
       if (await this.updateCesta(cesta)) {
         this.actualizarCestas();
         return true;
