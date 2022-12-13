@@ -34,6 +34,11 @@ export class ImpresoraController {
   }
   @Post("bienvenida")
   binvenidaCliente() {
-    impresoraInstance.binvenidaCliente();
+    impresoraInstance.bienvenidaCliente();
+  }
+
+  @Post("testMqtt")
+  testMqtt() {
+    impresoraInstance.testMqtt("hola hehhe");
   }
 }
