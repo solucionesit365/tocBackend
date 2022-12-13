@@ -109,6 +109,14 @@ export class TicketsController {
                 idTrabajador
               );
             }
+          } else if (tipo === "DEUDA") {
+            await movimientosInstance.nuevoMovimiento(
+              total,
+              "",
+              "DEUDA",
+              ticket._id,
+              idTrabajador
+            );
           } else if (tipo !== "EFECTIVO") {
             throw Error(
               "Falta información del tkrs o bien ninguna forma de pago es correcta"

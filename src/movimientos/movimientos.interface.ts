@@ -25,4 +25,9 @@ export interface CuentaCodigoBarras {
   ultimo: number;
 }
 
-export type FormaPago = "EFECTIVO" | "TARJETA" | "TKRS" | "CONSUMO_PERSONAL";
+export type FormaPago =
+  | "EFECTIVO"
+  | "TARJETA"
+  | "TKRS"
+  | "CONSUMO_PERSONAL"
+  | "DEUDA";

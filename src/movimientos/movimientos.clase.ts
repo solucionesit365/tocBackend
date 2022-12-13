@@ -149,6 +149,8 @@ export class MovimientosClase {
             arrayFinalTickets[i].movimientos[0].tipo === "TKRS_SIN_EXCESO"
           ) {
             arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
+          } else if (arrayFinalTickets[i].movimientos[0].tipo === "DEUDA") {
+            arrayFinalTickets[i].tipoPago = "DEUDA";
           } else {
             arrayFinalTickets[i].tipoPago = "DESCONOCIDO";
           }
@@ -179,9 +181,6 @@ export class MovimientosClase {
               arrayFinalTickets[i].tipoPago = "NO FUNCIONA";
             }
           } else if (arrayFinalTickets[i].movimientos.length >= 2) {
-            console.log(
-              "AQUÍ CONTROLAR EL CASO DEL TICKET RESTAURANTE => CON EXCESO, SIN EXCESO, PAGADO A MEDIAS"
-            );
             for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
               if (
                 arrayFinalTickets[i].movimientos[j].tipo === "TKRS_SIN_EXCESO"
