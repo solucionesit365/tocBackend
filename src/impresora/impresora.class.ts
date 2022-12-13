@@ -75,7 +75,7 @@ function dateToString2(fecha) {
 }
 
 export class Impresora {
-  async binvenidacliente() {
+  async binvenidaCliente() {
     try {
       permisosImpresora();
       //   var device = new escpos.USB('0x67b','0x2303');
@@ -136,7 +136,7 @@ export class Impresora {
     }
   }
 
-  async despedircliente() {
+  async despedirCliente() {
     try {
       permisosImpresora();
       //   var device = new escpos.USB('0x67b','0x2303');

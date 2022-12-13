@@ -13,8 +13,8 @@ import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000"
-  }
+    origin: "*", // "http://localhost:8080"
+  },
 });
 
 io.on("connection", (socket) => {
@@ -23,7 +23,11 @@ io.on("connection", (socket) => {
     try {
       if (idTrabajador && idTicket) {
         const ticket = await ticketsInstance.getTicketById(idTicket);
-        paytefInstance.iniciarTransaccion(idTrabajador, ticket._id, ticket.total);
+        paytefInstance.iniciarTransaccion(
+          idTrabajador,
+          ticket._id,
+          ticket.total
+        );
       }
       throw Error("Faltan datos {idTrabajador} controller");
     } catch (err) {
@@ -34,7 +38,10 @@ io.on("connection", (socket) => {
   /* Eze 4.0 */
   socket.on("cargarTrabajadores", async (data) => {
     try {
-      socket.emit("cargarTrabajadores", await trabajadoresInstance.getTrabajadoresFichados());
+      socket.emit(
+        "cargarTrabajadores",
+        await trabajadoresInstance.getTrabajadoresFichados()
+      );
     } catch (err) {
       logger.Error(36, err);
     }
@@ -63,8 +70,11 @@ io.on("connection", (socket) => {
     try {
       if (await cajaInstance.cajaAbierta()) {
         // const caja = await cajaInstance.getInfoCajaAbierta();
-        socket.emit("cargarVentas", (await movimientosInstance.construirArrayVentas()).reverse());
-      }      
+        socket.emit(
+          "cargarVentas",
+          (await movimientosInstance.construirArrayVentas()).reverse()
+        );
+      }
     } catch (err) {
       logger.Error(39, err);
     }
@@ -73,7 +83,10 @@ io.on("connection", (socket) => {
   /* Eze 4.0 */
   socket.on("cargarTeclado", async () => {
     try {
-      socket.emit("cargarTeclado", await tecladoInstance.generarTecladoCompleto());
+      socket.emit(
+        "cargarTeclado",
+        await tecladoInstance.generarTecladoCompleto()
+      );
     } catch (err) {
       logger.Error(118, err);
     }

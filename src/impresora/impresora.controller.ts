@@ -29,11 +29,11 @@ export class ImpresoraController {
   }
 
   @Post("despedida")
-  despedircliente() {
-    impresoraInstance.despedircliente();
+  despedirCliente() {
+    impresoraInstance.despedirCliente();
   }
   @Post("bienvenida")
-  binvenidacliente() {
-    impresoraInstance.binvenidacliente();
+  binvenidaCliente() {
+    impresoraInstance.binvenidaCliente();
   }
 }
