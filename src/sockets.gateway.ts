@@ -13,7 +13,7 @@ import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:8080"
+    origin: "http://localhost:3000"
   }
 });
 
