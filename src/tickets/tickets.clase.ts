@@ -20,6 +20,12 @@ export class TicketsClase {
     schTickets.getTicketsIntervalo(fechaInicio, fechaFinal);
 
   /* Eze 4.0 */
+  async getFormaPago(ticket: TicketsInterface) {
+    if (ticket) return await movimientosInstance.getFormaPago(ticket);
+
+    throw Error("El ticket no existe");
+  }
+  /* Eze 4.0 */
   async getUltimoIdTicket() {
     const ultimoIdMongo = (await schTickets.getUltimoTicket())?._id;
     if (ultimoIdMongo) {

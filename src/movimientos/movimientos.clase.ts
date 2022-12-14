@@ -1,5 +1,5 @@
 import { parametrosInstance } from "../parametros/parametros.clase";
-import { MovimientosInterface } from "./movimientos.interface";
+import { FormaPago, MovimientosInterface } from "./movimientos.interface";
 import * as schMovimientos from "./movimientos.mongodb";
 // import { impresoraInstance } from "../impresora/impresora.class";
 // import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
@@ -202,21 +202,78 @@ export class MovimientosClase {
       return arrayFinalTickets;
     }
     return null;
-    // const arrayTickets: TicketsInterface[] = await ticketsInstance.
-
-    // const movimientosTicket = await schMovimientos.getMovimientosDelTicket(idTicket);
-    // if (movimientosTicket.length === 1) {
-    //   if (movimientosTicket[0].valor > 0 && movimientosTicket[0].tipo === "TARJETA") {
-    //     return "TARJETA";
-    //   }
-    // } else if (movimientosTicket.length === 0) {
-    //   return "EFECTIVO";
-    // } else if (movimientosTicket.length > 1) {
-    //   for (let i = 0; i < movimientosTicket.length; i++) {
-    //     console.log("controlar más adelante");
-    //   }
-    // }
   };
+
+  /* Eze 4.0 */
+  public async getFormaPago(ticket: TicketsInterface) {
+    const arrayMovimientos = await schMovimientos.getMovimientosDelTicket(
+      ticket._id
+    );
+    if (arrayMovimientos?.length > 0) {
+      return this.calcularFormaPago(ticket, arrayMovimientos);
+    }
+    return null;
+  }
+
+  /* Eze 4.0 */
+  private calcularFormaPago(
+    ticket: TicketsInterface,
+    arrayMovimientos: MovimientosInterface[]
+  ): FormaPago {
+    if (ticket.consumoPersonal) return "CONSUMO_PERSONAL";
+
+    if (arrayMovimientos.length === 1) {
+      if (
+        arrayMovimientos[0].tipo === "TARJETA" &&
+        arrayMovimientos[0].valor > 0
+      ) {
+        return "TARJETA";
+      } else if (arrayMovimientos[0].tipo === "TKRS_SIN_EXCESO") {
+        return "TKRS";
+      } else if (arrayMovimientos[0].tipo === "DEUDA") {
+        return "DEUDA";
+      } else {
+        return "DESCONOCIDO";
+      }
+    } else if (arrayMovimientos.length === 0) {
+      return "EFECTIVO";
+    } else if (arrayMovimientos.length > 1) {
+      // CASO TARJETA ANULADA
+      if (
+        arrayMovimientos.length === 2 &&
+        arrayMovimientos[0].tipo === "TARJETA"
+      ) {
+        const busqueda = {
+          original: false,
+          rectificativo: false,
+        };
+        for (let j = 0; j < arrayMovimientos.length; j++) {
+          if (arrayMovimientos[j].tipo === "TARJETA") {
+            if (arrayMovimientos[j].valor > 0) {
+              busqueda.original = true;
+            } else if (arrayMovimientos[j].valor < 0) {
+              busqueda.rectificativo = true;
+            }
+          }
+        }
+        if (busqueda.original && busqueda.rectificativo) {
+          return "DEVUELTO";
+        } else {
+          return "DESCONOCIDO";
+        }
+      } else if (arrayMovimientos.length >= 2) {
+        for (let j = 0; j < arrayMovimientos.length; j++) {
+          if (arrayMovimientos[j].tipo === "TKRS_SIN_EXCESO") {
+            if (arrayMovimientos[j].valor >= ticket.total) {
+              return "TKRS";
+            } else {
+              return "TKRS + EFECTIVO";
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 export const movimientosInstance = new MovimientosClase();

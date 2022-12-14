@@ -30,4 +30,7 @@ export type FormaPago =
   | "TARJETA"
   | "TKRS"
   | "CONSUMO_PERSONAL"
-  | "DEUDA";
+  | "DEUDA"
+  | "TKRS + EFECTIVO"
+  | "DESCONOCIDO"
+  | "DEVUELTO";
