@@ -55,11 +55,12 @@ export class ParametrosClase {
     await schParametros.setUltimoTicket(idTicket);
 
   /* Eze 4.0 */
-  setVidAndPid = async (
-    vid: string,
-    pid: string,
-    com: string
-  ): Promise<boolean> => await schParametros.setVidAndPid(vid, pid, com);
+  setVidAndPid = async (vid: string, pid: string): Promise<boolean> =>
+    await schParametros.setVidAndPid(vid, pid);
+
+  /* Eze 4.0 */
+  setTipoImpresora = async (tipo: ParametrosInterface["tipoImpresora"]): Promise<boolean> => 
+  await schParametros.setTipoImpresora(tipo);
 
   /* Eze 4.0 */
   setIpPaytef = async (ip: string): Promise<boolean> =>

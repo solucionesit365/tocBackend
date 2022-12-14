@@ -37,17 +37,18 @@ export async function setUltimoTicket(idTicket: number): Promise<boolean> {
 }
 
 /* Eze 4.0 */
-export async function setVidAndPid(
-  vid: string,
-  pid: string,
-  com: string
-): Promise<boolean> {
+export async function setVidAndPid(vid: string, pid: string): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const parametros = database.collection("parametros");
   return (
     await parametros.updateOne(
       { _id: "PARAMETROS" },
-      { $set: { impresoraUsbInfo: { vid: vid, pid: pid }, visor: com } },
+      {
+        $set: {
+          impresoraUsbInfo: { vid: vid, pid: pid },
+          tipoImpresora: "USB",
+        },
+      },
       { upsert: true }
     )
   ).acknowledged;
@@ -61,6 +62,21 @@ export async function setIpPaytef(ip: string): Promise<boolean> {
     await parametros.updateOne(
       { _id: "PARAMETROS" },
       { $set: { ipTefpay: ip } },
+      { upsert: true }
+    )
+  ).acknowledged;
+}
+
+/* Eze 4.0 */
+export async function setTipoImpresora(
+  tipo: ParametrosInterface["tipoImpresora"]
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const parametros = database.collection("parametros");
+  return (
+    await parametros.updateOne(
+      { _id: "PARAMETROS" },
+      { $set: { tipoImpresora: tipo } },
       { upsert: true }
     )
   ).acknowledged;
