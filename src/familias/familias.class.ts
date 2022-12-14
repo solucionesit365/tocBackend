@@ -1,13 +1,16 @@
-import * as schFamilias from './familias.mongodb';
+import { FamiliasInterface } from "./familias.interface";
+import * as schFamilias from "./familias.mongodb";
+import { logger } from "../logger";
 
 export class FamiliasClass {
-  insertarFamilias(arrayFamilias) {
-    return schFamilias.insertarFamilias(arrayFamilias).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
+  /* Eze 4.0 */
+  async insertarFamilias(arrayFamilias: FamiliasInterface[]) {
+    try {
+      return await schFamilias.insertarFamilias(arrayFamilias);
+    } catch (err) {
+      logger.Error(74, err);
       return false;
-    });
+    }
   }
 }
 export const familiasInstance = new FamiliasClass();

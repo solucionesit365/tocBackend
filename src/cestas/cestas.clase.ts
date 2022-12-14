@@ -1,105 +1,49 @@
-// 100%
-import * as schCestas from './cestas.mongodb';
-import {CestasInterface} from './cestas.interface';
-import {construirObjetoIvas, crearCestaVacia} from '../funciones/funciones';
-import {articulosInstance} from '../articulos/articulos.clase';
-import {ofertas} from '../promociones/promociones.clase';
-import {cajaInstance} from '../caja/caja.clase';
-import {clienteInstance} from '../clientes/clientes.clase';
-import {impresoraInstance} from '../impresora/impresora.class';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
-import axios from 'axios';
-import {parametrosInstance} from '../parametros/parametros.clase';
+import * as schCestas from "./cestas.mongodb";
+import {
+  CestasInterface,
+  DetalleIvaInterface,
+  ItemLista,
+} from "./cestas.interface";
+import {
+  construirObjetoIvas,
+  fusionarObjetosDetalleIva,
+} from "../funciones/funciones";
+import { articulosInstance } from "../articulos/articulos.clase";
+import { cajaInstance } from "../caja/caja.clase";
+import { ArticulosInterface } from "../articulos/articulos.interface";
+import { ClientesInterface } from "../clientes/clientes.interface";
+import { ObjectId } from "mongodb";
+import { logger } from "../logger";
+import { io } from "../sockets.gateway";
+import { nuevaInstancePromociones } from "../promociones/promociones.clase";
+import { clienteInstance } from "../clientes/clientes.clase";
+import axios from "axios";
 
-/* Siempre cargar la cesta desde MongoDB */
 export class CestaClase {
-  private cesta: CestasInterface;
-  private udsAplicar: number;
-  constructor() {
-    /* CARGA DESDE MONGO UNA CESTA EN MEMORIA DE NODE */
-    schCestas.getUnaCesta().then((respuesta: CestasInterface) => {
-      if (respuesta != undefined && respuesta != null && respuesta.lista.length != 0 && respuesta._id != null) {
-        for (let i = 0; i < respuesta.lista.length; i++) {
-          respuesta.lista[i].subtotal = Number(respuesta.lista[i].subtotal.toFixed(2));
-        }
-        this.cesta = respuesta;
-      } else {
-        this.cesta = crearCestaVacia();
-      }
-    });
-    this.udsAplicar = 1;
+  /* Eze 4.0 */
+  async actualizarCestas() {
+    const arrayCestas = await cestasInstance.getAllCestas();
+    io.emit("cargarCestas", arrayCestas);
+    // cestasInstance
+    //   .getAllCestas()
+    //   .then((arrayCestas) => {
+
+    //   })
+    //   .catch((err) => {
+    //     logger.Error(119, err);
+    //   });
   }
 
-  async updateIdCestaTrabajador(id: number) {
-    return schCestas.updateIdCestaTrabajador(id).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  getCestaById = async (idCesta: CestasInterface["_id"]) =>
+    await schCestas.getCestaById(idCesta);
 
-  getCesta(idCesta: number): Promise<CestasInterface> {
-    return schCestas.getCestaConcreta(idCesta);
-  }
-
-  getCestaRandom(): Promise<CestasInterface> {
-    return schCestas.getUnaCesta().then((cesta) => {
-      if (cesta != null) {
-        return cesta;
-      } else {
-        // No hay ninguna cesta. Crear una.
-        const nueva = this.nuevaCestaVacia();
-        return this.setCesta(nueva).then((resultado) => {
-          if (resultado) {
-            return nueva;
-          } else {
-            throw 'Error al crear nueva cesta vacía (por que no hay ninguna)';
-          }
-        }).catch((err) => {
-          throw err;
-        });
-      }
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
-  }
-
-  // getCurrentId() {
-  //   return this.cesta._id;
-  // }
-
-  reiniciarCesta(idCestaBorrar) {
-    return this.borrarCesta(idCestaBorrar).then(() => {
-      return this.getTodasCestas().then((res) => {
-        if (res.length > 0) { // Hay alguna cesta
-          return res[0]; // Devuelvo la primera que encuentro.
-        } else { // No quedan cestas
-          const nuevaCesta = this.nuevaCestaVacia();
-          this.setCesta(nuevaCesta);
-          return nuevaCesta;
-        }
-      });
-    });
-  }
-
-  /* La cesta activa es la del trabajador activo */
-  borrarCestaActiva() {
-    return parametrosInstance.getEspecialParametros().then((parametros) => {
-      return schCestas.eliminarCestaByIdTrabajador(parametros.idCurrentTrabajador).then((res) => {
-        return res.acknowledged;
-      }).catch((err) => {
-        console.log(err.message);
-        return false;
-      });
-    });
-  }
-
-  nuevaCestaVacia() {
-    const nuevaCesta: CestasInterface = {
-      _id: Date.now(),
-      tiposIva: {
+  /* Eze 4.0 */
+  private generarObjetoCesta(nuevoId: CestasInterface["_id"]): CestasInterface {
+    return {
+      _id: nuevoId,
+      timestamp: Date.now(),
+      detalleIva: {
         base1: 0,
         base2: 0,
         base3: 0,
@@ -111,156 +55,76 @@ export class CestaClase {
         importe3: 0,
       },
       lista: [],
-      nombreCesta: 'PRINCIPAL',
-      idTrabajador: parametrosInstance.getParametros().idCurrentTrabajador,
+      modo: "VENTA",
+      idCliente: null,
+      indexMesa: null,
     };
-    return nuevaCesta;
-  }
-  async insertarCestas(cestas) {
-    cestas.info = [];
-    for (let i = 1; i <= 100; i++) {
-      await this.crearNuevaCesta(`Mesa ${i}`, `Mesa ${i}`);
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-    if (cestas.info.length <= 0) return [];
-    return cestas.info.map(async (item) => await this.crearNuevaCesta(item.valor, item.variable));
-    return true;
   }
 
-  getTodasCestas(): Promise<CestasInterface[]> {
-    return schCestas.getAllCestas();
-  }
-  cerarCestaMesas(idTrabajador: number, nombreMesa: string) {
-    this.crearNuevaCesta(nombreMesa);
-  }
-  borrarCesta(idCestaBorrar): Promise<boolean> {
-    return schCestas.borrarCesta(idCestaBorrar).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-  borrarCestaTrabajador(idTrabajador) {
-    return schCestas.borrarCestaTrabajador(idTrabajador).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze 4.0 */
+  getAllCestas = async () => await schCestas.getAllCestas();
+
+  /* Eze 4.0 */
+  deleteCesta = async (idCesta: CestasInterface["_id"]) =>
+    await schCestas.deleteCesta(idCesta);
+
+  /* Eze 4.0 */
+  async crearCesta(indexMesa = null): Promise<CestasInterface["_id"]> {
+    const nuevaCesta = this.generarObjetoCesta(new ObjectId());
+    nuevaCesta.indexMesa = indexMesa;
+    if (await schCestas.createCesta(nuevaCesta)) return nuevaCesta._id;
+    throw Error("Error, no se ha podido crear la cesta");
   }
 
-  /* Eliminar cesta por nombre, versión de Santi */
-  eliminarCesta(nombreCesta): Promise<boolean> {
-    return schCestas.eliminarCesta(nombreCesta).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  getTotalCesta = (cesta: CestasInterface) =>
+    cesta.detalleIva.importe1 +
+    cesta.detalleIva.importe2 +
+    cesta.detalleIva.importe3;
 
-  /* Guarda la cesta en Mongo */
-  setCesta(cesta: CestasInterface): Promise<boolean> {
-    for (let i = 0; i < cesta.lista.length; i++) {
-      cesta.lista[i].subtotal = Number(cesta.lista[i].subtotal.toFixed(2));
-    }
-    return schCestas.setCesta(cesta).then((res) => {
-      if (res.acknowledged) {
+  /* Eze 4.0 */
+  async borrarItemCesta(
+    idCesta: CestasInterface["_id"],
+    index: number
+  ): Promise<boolean> {
+    try {
+      let cesta = await this.getCestaById(idCesta);
+
+      cesta.lista.splice(index, 1);
+
+      // Enviar por socket
+      await this.recalcularIvas(cesta);
+      if (await this.updateCesta(cesta)) {
+        this.actualizarCestas();
         return true;
-      } else {
-        return false;
       }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  async crearNuevaCesta(nombreCesta: string, idCestaSincro = null) {
-    const nuevaCesta = this.nuevaCestaVacia();
-    nuevaCesta.nombreCesta = nombreCesta;
-    if (idCestaSincro !== null) nuevaCesta.idCestaSincro = idCestaSincro;
-    return this.setCesta(nuevaCesta).then((res) => {
-      if (res) {
-        return nuevaCesta;
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-
-  async crearCestaParaTrabajador(idTrabajador: number) {
-    if (typeof idTrabajador == 'number') {
-      const nuevaCesta = this.nuevaCestaVacia();
-      nuevaCesta.idTrabajador = idTrabajador;
-      console.log(idTrabajador);
-      return this.setCesta(nuevaCesta).then((res) => {
-        if (res) {
-          return nuevaCesta;
-        } else {
-          return false;
-        }
-      }).catch((err) => {
-        console.log(err);
-        return false;
-      });
-    } else {
+      throw Error(
+        "Error, no se ha podido actualizar la cesta borrarItemCesta()"
+      );
+    } catch (err) {
+      logger.Error(57, err);
       return false;
     }
   }
 
-  /* Obtiene la cesta, borra el  item y devuelve la cesta final */
-  borrarItemCesta(idCesta: number, idArticulo: number) {
-    return this.getCesta(idCesta).then((cesta) => {
-      for (let i = 0; i < cesta.lista.length; i++) {
-        if (cesta.lista[i]._id == idArticulo) {
-          cesta.lista.splice(i, 1);
-          break;
-        }
-      }
-      return this.recalcularIvas(cesta).then((cestaRecalculada) => {
-        return this.setCesta(cestaRecalculada).then((result) => {
-          if (result) {
-            return cestaRecalculada;
-          } else {
-            return false;
-          }
-        }).catch((err) => {
-          console.log(err);
-          return false;
-        });
-      }).catch((err) => {
-        console.log(err);
-        return false;
-      });
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  // cambiarCurrentCesta(data: CestasInterface) {
-  //   for(let i = 0; i < data.lista.length; i++) {
-  //       data.lista[i].subtotal = Number(data.lista[i].subtotal.toFixed(2));
-  //   }
-  //   this.cesta = data;
-  // }
-
-  // getCurrentCesta() {
-  //   return this.cesta;
-  // }
-
-  async limpiarCesta(unaCesta: CestasInterface, posicionPrincipal: number, posicionSecundario: number, sobraCantidadPrincipal: number, sobraCantidadSecundario: number, pideDelA: number, pideDelB: number) {
+  /* Eze: este nombre no vale, hace otra cosa */
+  async limpiarCesta(
+    unaCesta: CestasInterface,
+    posicionPrincipal: number,
+    posicionSecundario: number,
+    sobraCantidadPrincipal: number,
+    sobraCantidadSecundario: number,
+    pideDelA: number,
+    pideDelB: number
+  ) {
     if (pideDelA != -1) {
       if (sobraCantidadPrincipal > 0) {
-        const datosArticulo = await articulosInstance.getInfoArticulo(unaCesta.lista[posicionPrincipal]._id);
+        const datosArticulo = await articulosInstance.getInfoArticulo(
+          unaCesta.lista[posicionPrincipal].idArticulo
+        );
         unaCesta.lista[posicionPrincipal].unidades = sobraCantidadPrincipal;
-        unaCesta.lista[posicionPrincipal].subtotal = sobraCantidadPrincipal*datosArticulo.precioConIva;
+        unaCesta.lista[posicionPrincipal].subtotal =
+          sobraCantidadPrincipal * datosArticulo.precioConIva;
       } else {
         unaCesta.lista.splice(posicionPrincipal, 1);
       }
@@ -268,12 +132,15 @@ export class CestaClase {
 
     if (pideDelB != -1) {
       if (sobraCantidadSecundario > 0) {
-        const datosArticulo = await articulosInstance.getInfoArticulo(unaCesta.lista[posicionSecundario]._id);
+        const datosArticulo = await articulosInstance.getInfoArticulo(
+          unaCesta.lista[posicionSecundario].idArticulo
+        );
         unaCesta.lista[posicionSecundario].unidades = sobraCantidadSecundario;
-        unaCesta.lista[posicionSecundario].subtotal = sobraCantidadSecundario*datosArticulo.precioConIva;
+        unaCesta.lista[posicionSecundario].subtotal =
+          sobraCantidadSecundario * datosArticulo.precioConIva;
       } else {
         if (posicionSecundario > posicionPrincipal) {
-          unaCesta.lista.splice(posicionSecundario-1, 1);
+          unaCesta.lista.splice(posicionSecundario - 1, 1);
         } else {
           unaCesta.lista.splice(posicionSecundario, 1);
         }
@@ -281,113 +148,107 @@ export class CestaClase {
     }
     return unaCesta;
   }
-  async insertarArticuloCesta(infoArticulo, unidades: number, idCesta: number, infoAPeso = null) {
-    const miCesta = await this.getCesta(idCesta);
-    if (miCesta.lista.length > 0) {
-      let encontrado = false;
-      if (!infoArticulo.suplementos) {
-        for (let i = 0; i < miCesta.lista.length; i++) {
-          if (miCesta.lista[i]._id === infoArticulo._id) {
-            var viejoIva = miCesta.tiposIva;
-            if (infoAPeso == null) {
-              miCesta.lista[i].unidades += unidades;
-              miCesta.lista[i].subtotal += unidades*infoArticulo.precioConIva;
-              miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, viejoIva);
-            } else {
-              miCesta.lista[i].subtotal += infoAPeso.precioAplicado;
-              miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, viejoIva, infoAPeso);
-            }
 
-            encontrado = true;
-            break;
-          }
+  /* Eze 4.0 => la información del artículo "articulo" debe estar masticada (tarifas especiales) */
+  async insertarArticulo(
+    articulo: ArticulosInterface,
+    unidades: number,
+    idCesta: CestasInterface["_id"],
+    arraySuplementos: ItemLista["arraySuplementos"], // Los suplentos no deben tener tarifa especial para simplificar.
+    gramos: ItemLista["gramos"]
+  ): Promise<CestasInterface> {
+    let cesta = await this.getCestaById(idCesta);
+    let articuloNuevo = true;
+
+    if (
+      !(await nuevaInstancePromociones.gestionarPromociones(
+        cesta,
+        articulo._id,
+        unidades
+      ))
+    ) {
+      for (let i = 0; i < cesta.lista.length; i++) {
+        if (
+          cesta.lista[i].idArticulo === articulo._id &&
+          !cesta.lista[i].promocion &&
+          !cesta.lista[i].regalo
+        ) {
+          cesta.lista[i].unidades += unidades;
+          cesta.lista[i].subtotal += unidades * articulo.precioConIva;
+          articuloNuevo = false;
+          break;
         }
       }
-      if (!encontrado) {
-        if (infoAPeso == null) {
-          miCesta.lista.push({_id: infoArticulo._id, nombre: infoArticulo.nombre, unidades: unidades, promocion: {esPromo: false, _id: null}, subtotal: unidades*infoArticulo.precioConIva});
-          miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, miCesta.tiposIva);
-        } else {
-          miCesta.lista.push({_id: infoArticulo._id, nombre: infoArticulo.nombre, unidades: unidades, promocion: {esPromo: false, _id: null}, subtotal: infoAPeso.precioAplicado});
-          miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, miCesta.tiposIva, infoAPeso);
-        }
-      }
-    } else {
-      if (infoAPeso == null) {
-        miCesta.lista.push({_id: infoArticulo._id, nombre: infoArticulo.nombre, unidades: unidades, promocion: {esPromo: false, _id: null}, subtotal: unidades*infoArticulo.precioConIva});
-        miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, miCesta.tiposIva);
-      } else {
-        miCesta.lista.push({_id: infoArticulo._id, nombre: infoArticulo.nombre, unidades: unidades, promocion: {esPromo: false, _id: null}, subtotal: infoAPeso.precioAplicado});
-        miCesta.tiposIva = construirObjetoIvas(infoArticulo, unidades, miCesta.tiposIva, infoAPeso);
+
+      if (articuloNuevo) {
+        cesta.lista.push({
+          idArticulo: articulo._id,
+          nombre: articulo.nombre,
+          arraySuplementos: arraySuplementos,
+          promocion: null,
+          regalo: false,
+          subtotal: unidades * articulo.precioConIva,
+          unidades: unidades,
+          gramos: gramos,
+        });
       }
     }
 
+    await this.recalcularIvas(cesta);
 
-    const temporal = await ofertas.buscarOfertas(miCesta, viejoIva);
-    return temporal; // await ofertas.buscarOfertas(miCesta, viejoIva);
+    if (await schCestas.updateCesta(cesta)) return cesta;
+
+    throw Error("Error updateCesta() - cesta.clase.ts");
   }
 
-  async addItem(idArticulo: number, idBoton: string, aPeso: boolean, infoAPeso: any, idCesta: number, unidades: number = 1) {
-    let cestaRetornar: CestasInterface = null;
-    let infoArticulo;
-    if (cajaInstance.cajaAbierta()) {
-      try {
-        if (!aPeso) { // TIPO NORMAL
-          infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-          if (infoArticulo) { // AQUI PENSAR ALGUNA COMPROBACIÓN CUANDO NO EXISTA O FALLE ESTE GET
-            if (infoArticulo.suplementos) {
-              await this.insertarArticuloCesta(infoArticulo, unidades, idCesta);
-              return {
-                suplementos: true,
-                data: await articulosInstance.getSuplementos(infoArticulo.suplementos),
-              };
-            } else {
-              cestaRetornar = await this.insertarArticuloCesta(infoArticulo, unidades, idCesta);
-            }
-          } else {
+  /* Eze 4.0 */
+  async clickTeclaArticulo(
+    idArticulo: ArticulosInterface["_id"],
+    gramos: ItemLista["gramos"],
+    idCesta: CestasInterface["_id"],
+    unidades: number,
+    arraySuplementos: ItemLista["arraySuplementos"]
+  ) {
+    if (await cajaInstance.cajaAbierta()) {
+      let articulo = await articulosInstance.getInfoArticulo(idArticulo);
+      const cesta = await cestasInstance.getCestaById(idCesta);
 
-            // vueToast.abrir('error', 'Este artículo tiene errores');
-          }
-        } else { // TIPO PESO
-          infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-          cestaRetornar = await this.insertarArticuloCesta(infoArticulo, 1, idCesta, infoAPeso);
-        }
-
-        if (cestaRetornar != undefined && cestaRetornar != null) {
-          if (cestaRetornar.tiposIva != undefined && cestaRetornar.tiposIva != null) {
-            trabajadoresInstance.getCurrentTrabajador().then((data) => {
-              try {
-                impresoraInstance.mostrarVisor({
-                  dependienta: data.nombre,
-                  total: (cestaRetornar.tiposIva.importe1 + cestaRetornar.tiposIva.importe2 + cestaRetornar.tiposIva.importe3).toFixed(2),
-                  precio: infoArticulo.precioConIva.toString(),
-                  texto: infoArticulo.nombre,
-                });
-              } catch (err) {
-                console.log(err);
-              }
-            });
-          }
-        }
-      } catch (err) {
-        console.log(err);
-        // vueToast.abrir('error', 'Error al añadir el articulo');
-        this.udsAplicar = 1;
+      if (cesta.idCliente) {
+        articulo = await articulosInstance.getPrecioConTarifa(
+          articulo,
+          cesta.idCliente
+        );
       }
-    } else {
-      console.log('Error: La caja está cerrada, no se puede insertar un articulo en la cesta');
-      // vueToast.abrir('danger', 'Se requiere una caja abierta para cobrar');
-    }
-    this.udsAplicar = 1;
 
-    return cestaRetornar;
+      // Va a peso. 1 unidad son 1000 gramos. Los precios son por kilogramo.
+      if (gramos > 0)
+        return await this.insertarArticulo(
+          articulo,
+          gramos / 1000,
+          idCesta,
+          arraySuplementos,
+          gramos
+        );
+
+      // Modo por unidad
+      return await this.insertarArticulo(
+        articulo,
+        unidades,
+        idCesta,
+        arraySuplementos,
+        null
+      );
+    }
+    throw Error(
+      "Error, la caja está cerrada. cestas.clase > clickTeclaArticulo()"
+    );
   }
-  setUnidadesAplicar(unidades: number) {
-    this.udsAplicar = unidades;
-  }
-  async recalcularIvas(cesta: CestasInterface) {
-    const cestainicial = cesta;
-    cesta.tiposIva = {
+
+  /* Eze 4.0 */
+  async getDetalleIvaPromocion(
+    itemPromocion: ItemLista
+  ): Promise<DetalleIvaInterface> {
+    let detalleIva: DetalleIvaInterface = {
       base1: 0,
       base2: 0,
       base3: 0,
@@ -398,204 +259,226 @@ export class CestaClase {
       importe2: 0,
       importe3: 0,
     };
-    for (let i = 0; i < cesta.lista.length; i++) {
-      if (cesta.lista[i].promocion.esPromo === false) {
-        if (cesta.lista[i].suplementosId) {
-          for (let index = 0; index < cesta.lista[i].suplementosId.length; index++) {
-            const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[i].suplementosId[index]);
-            cesta.tiposIva = construirObjetoIvas( infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
-          }
-        }
-        const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[i]._id);
-        const gramos = cestainicial.lista[i].subtotal/(infoArticulo.precioConIva );
-        if (infoArticulo.esSumable == false && !cesta.lista[i].suplementosId && cesta.lista[i].unidades == 1 ) {
-          const precioAplicado = infoArticulo.precioConIva * gramos;
-          cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva, {precioAplicado: precioAplicado});
-        } else if (cesta.lista[i].subtotal > 0) {
-          cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
-        } else {
-          infoArticulo.precioConIva = 0;
-          cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].unidades, cesta.tiposIva);
-        }
-        trabajadoresInstance.getCurrentTrabajador().then((data) => {
-          try {
-            impresoraInstance.mostrarVisor({
-              dependienta: data.nombre,
-              total: (cesta.tiposIva.importe1 + cesta.tiposIva.importe2 + cesta.tiposIva.importe3).toFixed(2),
-              precio: infoArticulo.precioConIva.toString(),
-              texto: infoArticulo.nombre,
-            });
-          } catch (err) {
-            console.log(err);
-          }
-        });
-      } else if (cesta.lista[i].promocion.esPromo === true) {
-        if (cesta.lista[i].nombre == 'Oferta combo') {
-          const infoArticuloPrincipal = await articulosInstance.getInfoArticulo(cesta.lista[i].promocion.infoPromo.idPrincipal);
-          infoArticuloPrincipal.precioConIva = cesta.lista[i].promocion.infoPromo.precioRealPrincipal; // /(cesta.lista[i].promocion.infoPromo.unidadesOferta*cesta.lista[i].promocion.infoPromo.cantidadPrincipal);
-          cesta.tiposIva = construirObjetoIvas(infoArticuloPrincipal, cesta.lista[i].promocion.infoPromo.unidadesOferta*cesta.lista[i].promocion.infoPromo.cantidadPrincipal, cesta.tiposIva);
 
-          const infoArticuloSecundario = await articulosInstance.getInfoArticulo(cesta.lista[i].promocion.infoPromo.idSecundario);
-          infoArticuloSecundario.precioConIva = cesta.lista[i].promocion.infoPromo.precioRealSecundario; // /(cesta.lista[i].promocion.infoPromo.unidadesOferta*cesta.lista[i].promocion.infoPromo.cantidadSecundario);
-          cesta.tiposIva = construirObjetoIvas(infoArticuloSecundario, cesta.lista[i].promocion.infoPromo.unidadesOferta*cesta.lista[i].promocion.infoPromo.cantidadSecundario, cesta.tiposIva);
-        } else {
-          if (cesta.lista[i].nombre == 'Oferta individual') {
-            const infoArticulo = await articulosInstance.getInfoArticulo(cesta.lista[i].promocion.infoPromo.idPrincipal);
-            infoArticulo.precioConIva = cesta.lista[i].promocion.infoPromo.precioRealPrincipal/(cesta.lista[i].promocion.infoPromo.unidadesOferta*cesta.lista[i].promocion.infoPromo.cantidadPrincipal);
-            cesta.tiposIva = construirObjetoIvas(infoArticulo, cesta.lista[i].promocion.infoPromo.unidadesOferta*cesta.lista[i].promocion.infoPromo.cantidadPrincipal, cesta.tiposIva);
-          }
-        }
-      }
+    if (itemPromocion.promocion.tipoPromo === "INDIVIDUAL") {
+      const articulo = await articulosInstance.getInfoArticulo(
+        itemPromocion.promocion.idArticuloPrincipal
+      );
+
+      const importeRealUnitario =
+        itemPromocion.promocion.precioRealArticuloPrincipal;
+      const unidadesTotales = itemPromocion.promocion.cantidadArticuloPrincipal
+        ? itemPromocion.promocion.cantidadArticuloPrincipal
+        : itemPromocion.promocion.cantidadArticuloSecundario *
+          itemPromocion.unidades;
+      detalleIva = construirObjetoIvas(
+        importeRealUnitario,
+        articulo.tipoIva,
+        unidadesTotales
+      );
+    } else if (itemPromocion.promocion.tipoPromo === "COMBO") {
+      const articuloPrincipal = await articulosInstance.getInfoArticulo(
+        itemPromocion.promocion.idArticuloPrincipal
+      );
+      const articuloSecundario = await articulosInstance.getInfoArticulo(
+        itemPromocion.promocion.idArticuloSecundario
+      );
+
+      const importeRealUnitarioPrincipal =
+        itemPromocion.promocion.precioRealArticuloPrincipal;
+      const importeRealUnitarioSecundario =
+        itemPromocion.promocion.precioRealArticuloSecundario;
+      const unidadesTotalesPrincipal =
+        itemPromocion.promocion.cantidadArticuloPrincipal *
+        itemPromocion.unidades;
+      const unidadesTotalesSecundario =
+        itemPromocion.promocion.cantidadArticuloSecundario *
+        itemPromocion.unidades;
+      const detalleIva1 = construirObjetoIvas(
+        importeRealUnitarioPrincipal,
+        articuloPrincipal.tipoIva,
+        unidadesTotalesPrincipal
+      );
+      const detalleIva2 = construirObjetoIvas(
+        importeRealUnitarioSecundario,
+        articuloSecundario.tipoIva,
+        unidadesTotalesSecundario
+      );
+      detalleIva = fusionarObjetosDetalleIva(detalleIva1, detalleIva2);
+    } else {
+      throw Error(
+        "Error cestas.clase > getDetalleIvaPromocion. El tipo de oferta no corresponde con ningún tipo conocido"
+      );
     }
-    return await cesta;
+    return detalleIva;
   }
 
-  async borrarArticulosCesta(idCesta: number) {
-    const cestaActual = await this.getCesta(idCesta);
-    const vacia = this.nuevaCestaVacia();
-    cestaActual.lista = vacia.lista;
-    cestaActual.regalo = false;
-    cestaActual.tiposIva = vacia.tiposIva;
-    return this.setCesta(cestaActual).then((res) => {
-      if (res) {
-        return cestaActual;
-      }
-      return false;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  async addSuplemento(idCesta, suplementos, idArticulo, posArticulo = -100) {
-    suplementos = suplementos.map((o) => o.suplemento);
-    const cestaActual = await this.getCesta(idCesta);
-    cestaActual.lista = cestaActual.lista.reverse();
-    let indexArticulo = posArticulo;
-    if (posArticulo === -100) indexArticulo = cestaActual.lista.findIndex((i) => i._id === idArticulo);
-    cestaActual.lista[indexArticulo].suplementosId = suplementos;
-    for (const i in suplementos) {
-      const idSuplemento = suplementos[i];
-      const infoSuplemento = await articulosInstance.getInfoArticulo(idSuplemento);
-      cestaActual.lista[indexArticulo].subtotal += infoSuplemento.precioConIva * cestaActual.lista[indexArticulo].unidades;
-      cestaActual.lista[indexArticulo].nombre += ` + ${infoSuplemento.nombre}`;
-    }
-
-    cestaActual.lista = cestaActual.lista.reverse();
-    const cestaDef = await this.recalcularIvas(cestaActual);
-
-    return this.setCesta(await cestaDef).then((res) => {
-      if (res) return cestaDef;
-      return false;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  async modificarSuplementos(cestaId, idArticulo, posArticulo) {
-    const cestaActual = await this.getCesta(cestaId);
-    // const indexArticulo = cestaActual.lista.findIndex(i => i._id === idArticulo);
-    cestaActual.lista = cestaActual.lista.reverse();
-    const indexArticulo = posArticulo;
-    const suplementos = cestaActual.lista[indexArticulo].suplementosId;
-    const infoArticulo = await articulosInstance.getInfoArticulo(idArticulo);
-    const suplementosArticulo = await articulosInstance.getSuplementos(infoArticulo.suplementos);
-    cestaActual.lista[indexArticulo].nombre = cestaActual.lista[indexArticulo].nombre.split('+')[0];
-    cestaActual.lista[indexArticulo].suplementosId = [];
-    for (let i = 0; i < suplementos.length; i++) {
-      const dataArticulo = await articulosInstance.getInfoArticulo(suplementos[i]);
-      cestaActual.lista[indexArticulo].subtotal -= dataArticulo.precioConIva;
-    }
-    cestaActual.lista = cestaActual.lista.reverse();
-    this.setCesta(cestaActual);
-    const res = {
-      suplementos: suplementosArticulo.length > 0 ? true : false,
-      suplementosData: suplementosArticulo,
-      suplementosSeleccionados: suplementos,
+  /* Eze 4.0 */
+  async recalcularIvas(cesta: CestasInterface) {
+    cesta.detalleIva = {
+      base1: 0,
+      base2: 0,
+      base3: 0,
+      valorIva1: 0,
+      valorIva2: 0,
+      valorIva3: 0,
+      importe1: 0,
+      importe2: 0,
+      importe3: 0,
     };
-    return res;
-  }
 
-  async modificarNombreCesta(cestaId, nombreArticulo) {
-  
-    const miCesta = await this.getCesta(cestaId);
+    for (let i = 0; i < cesta.lista.length; i++) {
+      if (cesta.lista[i].regalo) continue;
 
-    miCesta.lista.forEach(element => {
-      if (element.nombre.includes('Varis')){
-        element.nombre = nombreArticulo; 
+      if (cesta.lista[i].promocion) {
+        // Una promoción no puede llevar suplementos
+        cesta.detalleIva = fusionarObjetosDetalleIva(
+          cesta.detalleIva,
+          await this.getDetalleIvaPromocion(cesta.lista[i])
+        );
+      } else {
+        let articulo = await articulosInstance.getInfoArticulo(
+          cesta.lista[i].idArticulo
+        );
+        articulo = await articulosInstance.getPrecioConTarifa(
+          articulo,
+          cesta.idCliente
+        );
+
+        const auxDetalleIva = construirObjetoIvas(
+          articulo.precioConIva,
+          articulo.tipoIva,
+          cesta.lista[i].unidades
+        );
+        cesta.detalleIva = fusionarObjetosDetalleIva(
+          auxDetalleIva,
+          cesta.detalleIva
+        );
+        cesta.lista[i].subtotal =
+          articulo.precioConIva * cesta.lista[i].unidades;
+        /* Detalle IVA de suplementos */
+        if (
+          cesta.lista[i].arraySuplementos &&
+          cesta.lista[i].arraySuplementos.length > 0
+        ) {
+          const detalleDeSuplementos = await this.getDetalleIvaSuplementos(
+            cesta.lista[i].arraySuplementos,
+            cesta.idCliente
+          );
+          cesta.detalleIva = fusionarObjetosDetalleIva(
+            cesta.detalleIva,
+            detalleDeSuplementos
+          );
+          cesta.lista[i].subtotal +=
+            detalleDeSuplementos.importe1 +
+            detalleDeSuplementos.importe2 +
+            detalleDeSuplementos.importe3;
+        }
       }
-      
-    });
-    return schCestas.modificarNombreCesta(cestaId, miCesta.lista);
-
-
-  }
-
-  async enviarACocina(idCesta) {
-    const cestaActual = await this.getCesta(idCesta);
-    const nombreMesa = cestaActual.idCestaSincro ? cestaActual.idCestaSincro.split(' ')[0] === 'Taula' ? cestaActual.idCestaSincro : 'Barra' : 'Barra';
-    let articulos = '';
-    const suplementos = cestaActual.lista.map((i) => ({[i._id]: i.suplementosId ? i.suplementosId.map( (o) => o ) : []}));
-    for (const i in suplementos) {
-      const key = Object.keys(suplementos[i])[0];
-      articulos += key;
-      if (suplementos[i][key].length) {
-        articulos += suplementos[i][key].map((i) => `|${i}`).join('');
-      }
-      articulos += ',';
     }
-    articulos = articulos.slice(0, -1);
-    return axios.get(`http://gestiondelatienda.com/printer/cocina.php?id_tienda=${parametrosInstance.getParametros().codigoTienda}&pedidos=${articulos}&empresa=${parametrosInstance.getParametros().database}&mesa=${nombreMesa}`).then((res: any) => {
-      return true;
-    }).catch((err) => {
+  }
+
+  /* Eze 4.0 */
+  async getDetalleIvaSuplementos(
+    arraySuplementos: ItemLista["arraySuplementos"],
+    idCliente: ClientesInterface["id"]
+  ): Promise<DetalleIvaInterface> {
+    let objetoIva: DetalleIvaInterface = {
+      base1: 0,
+      base2: 0,
+      base3: 0,
+      valorIva1: 0,
+      valorIva2: 0,
+      valorIva3: 0,
+      importe1: 0,
+      importe2: 0,
+      importe3: 0,
+    };
+
+    for (let i = 0; i < arraySuplementos.length; i++) {
+      let articulo = await articulosInstance.getInfoArticulo(
+        arraySuplementos[i]
+      );
+      articulo = await articulosInstance.getPrecioConTarifa(
+        articulo,
+        idCliente
+      );
+      objetoIva = construirObjetoIvas(
+        articulo.precioConIva,
+        articulo.tipoIva,
+        1
+      );
+    }
+    return objetoIva;
+  }
+
+  /* Eze 4.0 */
+  async borrarArticulosCesta(
+    idCesta: CestasInterface["_id"],
+    borrarCliente = false,
+    borrarModo = false
+  ) {
+    const cesta = await this.getCestaById(idCesta);
+
+    if (cesta) {
+      cesta.lista = [];
+      cesta.detalleIva = {
+        base1: 0,
+        base2: 0,
+        base3: 0,
+        importe1: 0,
+        importe2: 0,
+        importe3: 0,
+        valorIva1: 0,
+        valorIva2: 0,
+        valorIva3: 0,
+      };
+      if (borrarCliente) cesta.idCliente = "";
+      if (borrarModo) cesta.modo = "VENTA";
+
+      if (await this.updateCesta(cesta)) {
+        this.actualizarCestas();
+        return true;
+      }
+    }
+    throw Error("Error en updateCesta borrarArticulosCesta()");
+  }
+
+  /* Eze 4.0 */
+  async addSuplementos(
+    idCesta: CestasInterface["_id"],
+    arraySuplementos: ItemLista["arraySuplementos"],
+    indexCesta: number
+  ) {
+    const cesta = await this.getCestaById(idCesta);
+    cesta.lista[indexCesta].arraySuplementos = arraySuplementos;
+    return await this.updateCesta(cesta);
+  }
+
+  /* Eze 4.0 */
+  updateCesta = async (cesta: CestasInterface) =>
+    await schCestas.updateCesta(cesta);
+
+  /* Eze 4.0 */
+  async regalarItem(idCesta: CestasInterface["_id"], index: number) {
+    const cesta = await cestasInstance.getCestaById(idCesta);
+    if (cesta && cesta.idCliente) {
+      const cliente = await clienteInstance.getClienteById(cesta.idCliente);
+      if (cliente.albaran) return false;
+    } else {
       return false;
-    });
-  }
+    }
 
-  async getCestaDiferente(id_cesta) {
-    return schCestas.getCestaDiferente(id_cesta).then((result) => {
-      return result ? result : false;
-    });
-  }
+    cesta.lista[index].regalo = true;
+    cesta.lista[index].subtotal = 0;
+    await cestasInstance.recalcularIvas(cesta);
 
-  getCestaByTrabajadorID(idTrabajador: number): Promise<CestasInterface> {
-    return schCestas.getCestaByTrabajadorID(idTrabajador).then((res) => {
-      if (res != null) {
-        return res;
-      } else { // Si la cesta no existe, crearla para este trabajador
-        return this.crearCestaParaTrabajador(idTrabajador).then((resCesta) => {
-          if (resCesta) {
-            return resCesta;
-          }
-          return null;
-        });
-      }
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
-  }
-  getCestaByID(idCesta: number): Promise<CestasInterface> {
-    return schCestas.getCestaByID(idCesta).then((res) => {
-      if (res != null) {
-        return res;
-      } else { // Si la cesta no existe, crearla para este trabajador
-        return this.crearCestaParaTrabajador(idCesta).then((resCesta) => {
-          if (resCesta) {
-            return resCesta;
-          }
-          return null;
-        });
-      }
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
+    if (await cestasInstance.updateCesta(cesta)) {
+      await this.actualizarCestas();
+      return true;
+    }
+    throw Error("No se ha podido actualizar la cesta");
   }
 }
 
-
-const cestas = new CestaClase();
-
-export {cestas};
+export const cestasInstance = new CestaClase();

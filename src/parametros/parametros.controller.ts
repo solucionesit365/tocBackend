@@ -1,136 +1,95 @@
-import {Body, Controller, Post, Get, ConsoleLogger} from '@nestjs/common';
-import {parametrosInstance} from './parametros.clase';
-import {ParametrosInterface} from './parametros.interface';
-import axios from 'axios';
-@Controller('parametros')
+import { Body, Controller, Post, Get } from "@nestjs/common";
+import { parametrosInstance } from "./parametros.clase";
+import axios from "axios";
+import { UtilesModule } from "src/utiles/utiles.module";
+import { logger } from "../logger";
+
+@Controller("parametros")
 export class ParametrosController {
-    @Post('todoInstalado')
-  todoInstalado() {
-    const res = parametrosInstance.todoInstalado();
-    if (res) {
-      const respuestaParametros = parametrosInstance.getParametros();
-      return {
-        todoInstalado: res,
-        config: respuestaParametros,
-      };
-    } else {
-      return {todoInstalado: false};
+  /* Eze 4.0 */
+  @Get("todoInstalado")
+  async todoInstalado() {
+    try {
+      return await parametrosInstance.todoInstalado();
+    } catch (err) {
+      logger.Error(40, err);
+      return false;
     }
   }
 
-    @Post('getParametros')
-    getParametros() {
-      const parametros = parametrosInstance.getParametros();
-      return {error: false, parametros};
+  /* Eze 4.0 */
+  @Post("getParametros")
+  async getParametros() {
+    try {
+      return await parametrosInstance.getParametros();
+    } catch (err) {
+      logger.Error(41, err);
+      return null;
     }
+  }
 
-    @Post('actualizarParametros')
-    async actualizarParametros() {
-      const licencia = await parametrosInstance.getlicencia();
-      // const licencia =  await parametrosInstance.getParametros().licencia;
-      return axios.post('parametros/getParametros', {
-        numLlicencia: licencia,
-      }).then((res: any) => {
-        if (!res.data.error) {
-          const paramstpv= res.data.info;
-          return parametrosInstance.setParametros(paramstpv).then((res2) => {
-            if (res2) {
-              return {error: false};
-            } else {
-              return {error: true, mensaje: 'Backend: Error en instalador/pedirDatos > setParametros'};
-            }
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: No se ha podido setear parametros'};
-          });
-        } else {
-          return {error: true, mensaje: res.data.mensaje};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Error en pedir parametros/instaladorLicencia de sanPedro'};
-      });
-    }
+  /* Eze 4.0 */
+  @Post("actualizarParametros")
+  async actualizarParametros() {
+    try {
+      const res: any = await axios.get("parametros/getParametros");
 
-    @Get('getParametrosBonito')
-    getParametrosBonito() {
-      const parametros = parametrosInstance.getParametros();
-      return {error: false, parametros};
-    }
-
-    @Post('vidAndPid')
-    vidAndPid(@Body() params) {
-      if (params != undefined || params != null) {
-        if (params.vid != undefined || params.vid != null || params.pid != undefined || params.pid != null || params.com != undefined || params.com != null) {
-          return parametrosInstance.setVidAndPid(params.vid, params.pid, params.com).then((res) => {
-            if (res) {
-              return {error: false};
-            } else {
-              return {error: true, mensaje: 'Backend: parametros/vidAndPid setVidAndPid no se ha podido guardar'};
-            }
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: parametros/vidAndPid setVidAndPid catch'};
-          });
-        } else {
-          return {error: true, mensaje: 'Backend: parametros/vidAndPid faltan datos'};
-        }
-      } else {
-        return {error: true, mensaje: 'Backend: parametros/vidAndPid faltan todos los datos'};
+      if (!res.data.error) {
+        const paramstpv = res.data.info;
+        return await parametrosInstance.setParametros(paramstpv);
       }
+      return false;
+    } catch (err) {
+      logger.Error(42, err);
+      return false;
     }
+  }
 
-    @Get('getVidAndPid')
-    getVidAndPid() {
-      return parametrosInstance.getEspecialParametros().then((res) => {
-        if (res.impresoraUsbInfo != undefined || res.impresoraUsbInfo != null) {
-          return {error: false, info: res};
-        } else {
-          return {error: false, info: {
-            impresoraUsbInfo: {
-              vid: '',
-              pid: '',
-            },
-          }};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en getVidAndPid CATCH'};
-      });
+  /* Eze 4.0 */
+  @Post("setVidAndPid")
+  async vidAndPid(@Body() { vid, pid, com }) {
+    try {
+      if (UtilesModule.checkVariable(vid, pid, com))
+        return await parametrosInstance.setVidAndPid(vid, pid, com);
+      throw Error("Error, faltan datos en setVidAndPid() controller");
+    } catch (err) {
+      logger.Error(43, err);
+      return false;
     }
-    @Post('setIpPaytef')
-    setIpPaytef(@Body() params) {
-      if (params != undefined || params != null) {
-        if (params.ip != undefined || params.ip != null) {
-          return parametrosInstance.setIpPaytef(params.ip).then((res) => {
-            if (res) {
-              return {error: false};
-            } else {
-              return {error: true, mensaje: 'Backend: parametros/setIpPaytef setIpPaytef no se ha podido guardar'};
-            }
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: parametros/setIpPaytef setIpPaytef catch'};
-          });
-        } else {
-          return {error: true, mensaje: 'Backend: parametros/setIpPaytef faltan datos'};
-        }
-      } else {
-        return {error: true, mensaje: 'Backend: parametros/setIpPaytef faltan todos los datos'};
-      }
-    }
+  }
 
-    @Get('getIpPaytef')
-    getIpPaytef() {
-      return parametrosInstance.getEspecialParametros().then((res) => {
-        if (res.ipTefpay != undefined || res.ipTefpay != null) {
-          return {error: false, info: res.ipTefpay};
-        } else {
-          return {error: false, info: ''};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en getIpPaytef CATCH'};
-      });
+  /* Eze 4.0 */
+  @Get("getVidAndPid")
+  async getVidAndPid() {
+    try {
+      return (await parametrosInstance.getParametros()).impresoraUsbInfo;
+    } catch (err) {
+      logger.Error(44, err);
+      return null;
     }
+  }
+
+  /* Eze 4.0 */
+  @Post("setIpPaytef")
+  async setIpPaytef(@Body() { ip }) {
+    try {
+      if (UtilesModule.checkVariable(ip))
+        return await parametrosInstance.setIpPaytef(ip);
+      throw Error("Error, faltan datos en setIpPaytef() controller");
+    } catch (err) {
+      logger.Error(45, err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Get("getIpPaytef")
+  async getIpPaytef() {
+    try {
+      return (await parametrosInstance.getParametros()).ipTefpay;
+    } catch (err) {
+      logger.Error(46, err);
+      return null;
+    }
+  }
 }

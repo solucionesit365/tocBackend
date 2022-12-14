@@ -17,7 +17,8 @@ export class UtilesModule {
     return uuidv4();
   }
 
+  /* Calcula 60 días antes de la fecha dada */
   static restarDiasTimestamp(fechaMilisegundos: number): number {
-    return fechaMilisegundos - (15*24*60*60*1000);
+    return fechaMilisegundos - (60*24*60*60*1000);
   }
 }

@@ -1,74 +1,98 @@
-import {ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
-import {trabajadoresInstance} from './trabajadores/trabajadores.clase';
-import {cestas} from './cestas/cestas.clase';
-import {TicketsInterface} from './tickets/tickets.interface';
-import {ticketsInstance} from './tickets/tickets.clase';
-import {movimientosInstance} from './movimientos/movimientos.clase';
-import {parametrosInstance} from './parametros/parametros.clase';
-import {Body} from '@nestjs/common';
-import axios from 'axios';
-import {UtilesModule} from './utiles/utiles.module';
-import {TransaccionesInterface} from './transacciones/transacciones.interface';
-import {transaccionesInstance} from './transacciones/transacciones.class';
-import {paytefInstance} from './paytef/paytef.class';
-import {LogsClass} from './logs/logs.class';
-import {Socket} from 'dgram';
-const net = require('net');
-const fs = require('fs');
+import { createServer } from "http";
+import { Server } from "socket.io";
+import { cajaInstance } from "./caja/caja.clase";
+import { cestasInstance } from "./cestas/cestas.clase";
+import { logger } from "./logger";
+import { movimientosInstance } from "./movimientos/movimientos.clase";
+import { parametrosInstance } from "./parametros/parametros.clase";
+import { paytefInstance } from "./paytef/paytef.class";
+import { tecladoInstance } from "./teclado/teclado.clase";
+import { ticketsInstance } from "./tickets/tickets.clase";
+import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 
-@WebSocketGateway(5051, {
+const httpServer = createServer();
+const io = new Server(httpServer, {
   cors: {
-    origin: true,
-    credentials: true,
-    transports: ['websocket'],
+    origin: "*", // "http://localhost:8080"
   },
-  allowEIO3: true,
-})
+});
 
-export class SocketGateway {
-  @WebSocketServer()
-    server: Socket;
-
-  public enviar(canal: string, data: any) {
-    this.server.emit(canal, data);
-  }
-
-  handleConnection(client: any, ...args: any[]) {
-    console.log('Nuevo cliente conectado por socket');
-  }
-  handleDisconnect() {
-    console.log('Se ha desconectado un cliente del socket');
-  }
-
-  @SubscribeMessage('test')
-  test(@MessageBody() params) {
-    this.server.emit('test', 'O Rei Ezeee');
-  }
-
-  @SubscribeMessage('consultarPuntos')
-  consultarPuntos(@MessageBody() params) {
-    if (params != undefined) {
-      if (params.idClienteFinal != undefined) {
-        this.server.emit('resConsultaPuntos', {error: false, info: 69});
-      } else {
-        this.server.emit('resConsultaPuntos', {error: true, mensaje: 'Backend: Faltan datos en socket > consultarPuntos'});
+io.on("connection", (socket) => {
+  /* Eze 4.0 */
+  socket.on("iniciarTransaccion", async ({ idTrabajador, idTicket }) => {
+    try {
+      if (idTrabajador && idTicket) {
+        const ticket = await ticketsInstance.getTicketById(idTicket);
+        paytefInstance.iniciarTransaccion(
+          idTrabajador,
+          ticket._id,
+          ticket.total
+        );
       }
-    } else {
-      this.server.emit('resConsultaPuntos', {error: true, mensaje: 'Backend: Faltan datos en socket > consultarPuntos'});
+      throw Error("Faltan datos {idTrabajador} controller");
+    } catch (err) {
+      logger.Error(131, err);
     }
-  }
+  });
 
-  /* PAYTEF */
-  @SubscribeMessage('iniciarTransaccion')
-  iniciarPaytef(@MessageBody() params, @ConnectedSocket() client: Socket) {
-    if (UtilesModule.checkVariable(params)) {
-      if (UtilesModule.checkVariable(params.idClienteFinal, params.idCesta)) {
-        paytefInstance.iniciarTransaccion(client, params.idClienteFinal, params.idCesta);
-      } else {
-        client.emit('consultaPaytef', {error: true, mensaje: 'Backend: paytef/iniciarTransaccion faltan datos idClienteFinal'});
-      }
-    } else {
-      client.emit('consultaPaytef', {error: true, mensaje: 'Backend: paytef/iniciarTransaccion faltan todos los datos'});
+  /* Eze 4.0 */
+  socket.on("cargarTrabajadores", async (data) => {
+    try {
+      socket.emit(
+        "cargarTrabajadores",
+        await trabajadoresInstance.getTrabajadoresFichados()
+      );
+    } catch (err) {
+      logger.Error(36, err);
     }
-  }
-}
+  });
+
+  /* Eze 4.0 */
+  socket.on("cargarCestas", async (data) => {
+    try {
+      socket.emit("cargarCestas", await cestasInstance.getAllCestas());
+    } catch (err) {
+      logger.Error(37, err);
+    }
+  });
+
+  /* Eze 4.0 */
+  socket.on("cargarParametros", async () => {
+    try {
+      socket.emit("cargarParametros", await parametrosInstance.getParametros());
+    } catch (err) {
+      logger.Error(38, err);
+    }
+  });
+
+  /* Eze 4.0 */
+  socket.on("cargarVentas", async () => {
+    try {
+      if (await cajaInstance.cajaAbierta()) {
+        // const caja = await cajaInstance.getInfoCajaAbierta();
+        socket.emit(
+          "cargarVentas",
+          (await movimientosInstance.construirArrayVentas()).reverse()
+        );
+      }
+    } catch (err) {
+      logger.Error(39, err);
+    }
+  });
+
+  /* Eze 4.0 */
+  socket.on("cargarTeclado", async () => {
+    try {
+      socket.emit(
+        "cargarTeclado",
+        await tecladoInstance.generarTecladoCompleto()
+      );
+    } catch (err) {
+      logger.Error(118, err);
+    }
+  });
+});
+
+httpServer.listen(5051);
+
+export { io };

@@ -1,34 +1,52 @@
-import {conexion} from '../conexion/mongodb';
-import {DevolucionesInterface} from './devoluciones.interface';
+import { ObjectId } from "mongodb";
+import { conexion } from "../conexion/mongodb";
+import { DevolucionesInterface } from "./devoluciones.interface";
 
-export async function insertarDevolucion(data: any) {
-  const database = (await conexion).db('tocgame');
-  const devoluciones = database.collection('devoluciones');
-  const resultado = await devoluciones.insertOne(data);
-  return resultado;
+/* Eze 4.0 */
+export async function insertarDevolucion(
+  devolucion: DevolucionesInterface
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const devoluciones =
+    database.collection<DevolucionesInterface>("devoluciones");
+  return (await devoluciones.insertOne(devolucion)).acknowledged;
 }
 
-export async function getDevolucionMasAntigua() {
-  const database = (await conexion).db('tocgame');
-  const devolucion = database.collection('devoluciones');
-  const resultado = await devolucion.findOne({enviado: false}, {sort: {timestamp: 1}} );
-  return resultado;
+/* Eze 4.0 */
+export async function getDevolucionMasAntigua(): Promise<DevolucionesInterface> {
+  const database = (await conexion).db("tocgame");
+  const devolucion = database.collection<DevolucionesInterface>("devoluciones");
+  return await devolucion.findOne(
+    { enviado: false },
+    { sort: { timestamp: 1 } }
+  );
 }
 
-export async function actualizarEstadoDevolucion(devolucion: DevolucionesInterface) {
-  const database = (await conexion).db('tocgame');
-  const sincroFichajes = database.collection('devoluciones');
-  const resultado = await sincroFichajes.updateOne({_id: devolucion._id}, {$set: {
-    'enviado': devolucion.enviado,
-    'intentos': devolucion.intentos,
-    'comentario': devolucion.comentario,
-  }});
-  return resultado;
+/* Eze 4.0 */
+export async function actualizarEstadoDevolucion(
+  devolucion: DevolucionesInterface
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const sincroFichajes =
+    database.collection<DevolucionesInterface>("devoluciones");
+  return (
+    await sincroFichajes.updateOne(
+      { _id: devolucion._id },
+      {
+        $set: {
+          enviado: devolucion.enviado,
+        },
+      }
+    )
+  ).acknowledged;
 }
 
-export async function getDevolucionByID(id: number) {
-  const database = (await conexion).db('tocgame');
-  const devoluciones = database.collection('devoluciones');
-  const resultado = devoluciones.findOne({_id: id});
-  return resultado;
+/* Eze 4.0 */
+export async function getDevolucionByID(
+  id: ObjectId
+): Promise<DevolucionesInterface> {
+  const database = (await conexion).db("tocgame");
+  const devoluciones =
+    database.collection<DevolucionesInterface>("devoluciones");
+  return await devoluciones.findOne({ _id: id });
 }

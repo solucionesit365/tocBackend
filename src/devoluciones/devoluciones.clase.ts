@@ -1,73 +1,57 @@
-import {impresoraInstance} from 'src/impresora/impresora.class';
-import {cestas} from '../cestas/cestas.clase';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
-import {DevolucionesInterface} from './devoluciones.interface';
-import * as schDevoluciones from './devoluciones.mongodb';
+import { ObjectId } from "mongodb";
+import { CestasInterface } from "../cestas/cestas.interface";
+import { impresoraInstance } from "../impresora/impresora.class";
+import { cestasInstance } from "../cestas/cestas.clase";
+import { DevolucionesInterface } from "./devoluciones.interface";
+import * as schDevoluciones from "./devoluciones.mongodb";
 
 export class Devoluciones {
-  private bloqueado = false;
+  /* Eze 4.0 */
+  async nuevaDevolucion(
+    total: number,
+    idCesta: CestasInterface["_id"],
+    idTrabajador: number
+  ): Promise<boolean> {
+    const nuevoIdTicket = Date.now();
+    const cesta = await cestasInstance.getCestaById(idCesta);
 
-  async nuevaDevolucion(total: number, idCesta: number): Promise<boolean> {
-    if (this.bloqueado == false) {
-      this.bloqueado = true;
-      const infoTrabajador = await trabajadoresInstance.getCurrentTrabajador();
-      const nuevoIdTicket = Date.now();
-      const cesta = await cestas.getCesta(idCesta);
+    if (cesta == null || cesta.lista.length == 0)
+      throw Error("Error, cesta rota en nuevaDevolucion() class");
 
-      if (cesta == null || cesta.lista.length == 0) {
-        this.bloqueado = false;
-        return false;
-      }
-      const objDevolucion: DevolucionesInterface = {
-        _id: nuevoIdTicket,
-        timestamp: Date.now(),
-        total: total,
-        lista: cesta.lista,
-        tipoPago: 'DEVOLUCION',
-        idTrabajador: infoTrabajador._id,
-        tiposIva: cesta.tiposIva,
-        enviado: false,
-        enTransito: false,
-        intentos: 0,
-        comentario: '',
-      };
-      if (await this.insertarDevolucion(objDevolucion)) {
-        impresoraInstance.imprimirTicket(nuevoIdTicket, true);
-        this.bloqueado = false;
-        return await cestas.borrarCesta(idCesta);
-      } else {
-        this.bloqueado = false;
-        return false;
-      }
+    const objDevolucion: DevolucionesInterface = {
+      _id: new ObjectId(),
+      timestamp: Date.now(),
+      total: total,
+      cesta,
+      idTrabajador,
+      enviado: false,
+      cliente: null,
+    };
+    await this.insertarDevolucion(objDevolucion);
+    //await impresoraInstance.imprimirTicket(nuevoIdTicket, true); NO VA, HE CREADO UNA NUEVA FUNCIÓN .imprimirDevolucion
+    if (await cestasInstance.borrarArticulosCesta(cesta._id, true, true)) {
+      cestasInstance.actualizarCestas();
+      return true;
     } else {
-      return false;
+      throw Error("No se ha podido eliminar la cesta después de la devolución");
     }
   }
 
-  getDevolucionMasAntigua() {
-    return schDevoluciones.getDevolucionMasAntigua();
-  }
+  /* Eze 4.0 */
+  getDevolucionMasAntigua = async () =>
+    await schDevoluciones.getDevolucionMasAntigua();
 
-  actualizarEstadoDevolucion(devolucion: DevolucionesInterface) {
-    return schDevoluciones.actualizarEstadoDevolucion(devolucion).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  actualizarEstadoDevolucion = async (devolucion: DevolucionesInterface) =>
+    await schDevoluciones.actualizarEstadoDevolucion(devolucion);
 
-  private insertarDevolucion(data: DevolucionesInterface): Promise<boolean> {
-    return schDevoluciones.insertarDevolucion(data).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  private insertarDevolucion = async (
+    devolucion: DevolucionesInterface
+  ): Promise<boolean> => await schDevoluciones.insertarDevolucion(devolucion);
 
-  getDevolucionByID(id: number) {
-    return schDevoluciones.getDevolucionByID(id);
-  }
+  /* Eze 4.0 */
+  getDevolucionByID = async (id: ObjectId) =>
+    await schDevoluciones.getDevolucionByID(id);
 }
 export const devolucionesInstance = new Devoluciones();

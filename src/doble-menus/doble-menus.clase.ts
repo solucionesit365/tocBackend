@@ -1,4 +1,5 @@
 import * as schDobleMenus from './doble-menus.mongodb';
+import { logger } from "../logger";
 
 export class DobleMenusClase {
   private bloqueado: boolean;
@@ -27,7 +28,7 @@ export class DobleMenusClase {
     return schDobleMenus.insertarMenus(arrayMenus).then((res) => {
       return res.acknowledged;
     }).catch((err) => {
-      console.log(err);
+      logger.Error(70, err);
       return false;
     });
   }

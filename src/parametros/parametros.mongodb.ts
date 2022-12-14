@@ -1,89 +1,67 @@
 import { conexion } from "../conexion/mongodb";
 import { ParametrosInterface } from "./parametros.interface";
 
+/* Eze 4.0 */
 export async function getParametros(): Promise<ParametrosInterface> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const parametros = database.collection<ParametrosInterface>("parametros");
-    return await parametros.findOne({ _id: "PARAMETROS" });
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
+  const database = (await conexion).db("tocgame");
+  const parametros = database.collection<ParametrosInterface>("parametros");
+  return await parametros.findOne({ _id: "PARAMETROS" });
 }
-// codigoTienda: number,
-// database: string,
-// licencia: number,
-// nombreEmpresa: string,
-// nombreTienda: string,
-// tipoDatafono: string,
-// tipoImpresora: string,
-// impresoraCafeteria: string,
-// clearOneCliente?: number,
-// clearOneTienda?: number,
-// clearOneTpv?: number,
-// botonesConPrecios: string,
-// prohibirBuscarArticulos: string,
-// ultimoTicket: number,
-// idCurrentTrabajador: number,
-// token: string
-export async function setParametros(params: ParametrosInterface) {
+
+/* Eze 4.0 */
+export async function setParametros(
+  params: ParametrosInterface
+): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const parametros = database.collection("parametros");
-
-  const resultado = await parametros.updateOne(
-    { _id: "PARAMETROS" },
-    { $set: params },
-    { upsert: true }
-  );
-
-  return resultado;
+  return (
+    await parametros.updateOne(
+      { _id: "PARAMETROS" },
+      { $set: params },
+      { upsert: true }
+    )
+  ).acknowledged;
 }
 
-export async function getLicencia() {
-  const database = (await conexion).db("tocgame");
-  const parametros = database.collection("parametros");
-  const resultado = await parametros.findOne({ _id: "PARAMETROS" });
-
-  return resultado;
-}
-
+/* Eze 4.0 */
 export async function setUltimoTicket(idTicket: number): Promise<boolean> {
-  try {
-    const database = (await conexion).db("tocgame");
-    const parametros = database.collection("parametros");
-    return (
-      await parametros.updateOne(
-        { _id: "PARAMETROS" },
-        { $set: { ultimoTicket: idTicket } },
-        { upsert: true }
-      )
-    ).acknowledged;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-}
-
-export async function setVidAndPid(vid: string, pid: string, com: string) {
   const database = (await conexion).db("tocgame");
   const parametros = database.collection("parametros");
-  const resultado = await parametros.updateOne(
-    { _id: "PARAMETROS" },
-    { $set: { impresoraUsbInfo: { vid: vid, pid: pid }, visor: com } },
-    { upsert: true }
-  );
-
-  return resultado;
+  return (
+    await parametros.updateOne(
+      { _id: "PARAMETROS" },
+      { $set: { ultimoTicket: idTicket } },
+      { upsert: true }
+    )
+  ).acknowledged;
 }
 
-export async function setIpPaytef(ip: string) {
+/* Eze 4.0 */
+export async function setVidAndPid(
+  vid: string,
+  pid: string,
+  com: string
+): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const parametros = database.collection("parametros");
-  const resultado = await parametros.updateOne(
-    { _id: "PARAMETROS" },
-    { $set: { ipTefpay: ip } },
-    { upsert: true }
-  );
-  return resultado;
+  return (
+    await parametros.updateOne(
+      { _id: "PARAMETROS" },
+      { $set: { impresoraUsbInfo: { vid: vid, pid: pid }, visor: com } },
+      { upsert: true }
+    )
+  ).acknowledged;
+}
+
+/* Eze 4.0 */
+export async function setIpPaytef(ip: string): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const parametros = database.collection("parametros");
+  return (
+    await parametros.updateOne(
+      { _id: "PARAMETROS" },
+      { $set: { ipTefpay: ip } },
+      { upsert: true }
+    )
+  ).acknowledged;
 }

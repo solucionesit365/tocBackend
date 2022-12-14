@@ -1,400 +1,151 @@
-import {Controller, Post, Body, Get} from '@nestjs/common';
-import {Console} from 'console';
-import {UtilesModule} from 'src/utiles/utiles.module';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
-import {cestas} from './cestas.clase';
+import { Controller, Post, Body, Get } from "@nestjs/common";
+import { trabajadoresInstance } from "src/trabajadores/trabajadores.clase";
+import { cestasInstance } from "./cestas.clase";
+import { logger } from "../logger";
+import { UtilesModule } from "src/utiles/utiles.module";
 
-@Controller('cestas')
+@Controller("cestas")
 export class CestasController {
-    @Post('borrarCesta')
-  borrarCesta(@Body() params) {
-    return cestas.borrarCesta(params.id).then((res) => {
-      if (res) {
-        return cestas.getTodasCestas().then((listaCestas) => {
-          if (listaCestas.length > 0) {
-            return {
-              okey: true,
-              cestaNueva: listaCestas[0],
-            };
-          } else {
-            const nueva = cestas.nuevaCestaVacia();
-            return cestas.setCesta(nueva).then((resultado) => {
-              if (resultado) {
-                return {
-                  okey: true,
-                  cestaNueva: nueva,
-                };
-              } else {
-                return {
-                  okey: false,
-                  error: 'Error en crear nueva cesta',
-                };
-              }
-            });
-          }
-        }).catch((err) => {
-          return {
-            okey: false,
-            error: 'Error en getTodasCestas',
-          };
-        });
-      } else {
-        return {
-          okey: false,
-          error: 'Error borrando cesta',
-        };
+  /* Eze 4.0 */
+  @Post("borrarCesta")
+  async borrarCesta(@Body() { idCesta }) {
+    try {
+      if (idCesta) return await cestasInstance.borrarArticulosCesta(idCesta);
+
+      throw Error("Error, faltan datos en borrarCesta controller");
+    } catch (err) {
+      logger.Error(58, err);
+      return false;
+    }
+  }
+  /* Eze 4.0 */
+  @Post("fulminarCesta")
+  async fulminarCesta(@Body() { idCesta }) {
+    try {
+      if (idCesta) {
+        if (await cestasInstance.deleteCesta(idCesta)) {
+          cestasInstance.actualizarCestas();
+          return true;
+        }
       }
-    }).catch((err) => {
-      return {
-        okey: false,
-        error: 'Error en borrarCesta',
-      };
-    });
+
+      throw Error("Error, faltan datos en fulminarCesta controller");
+    } catch (err) {
+      logger.Error(121, err);
+      return false;
+    }
   }
 
-    @Post('borrarItemCesta')
-    borrarItemCesta(@Body() params) {
-      return cestas.borrarItemCesta(params._id, params.idArticulo).then((res) => {
-        return {
-          okey: true,
-          cestaNueva: res,
-        };
-      }).catch((err) => {
-        return {
-          okey: false,
-          error: 'Error en borrarItemCesta',
-        };
-      });
+  /* Eze 4.0 */
+  @Post("borrarItemCesta")
+  async borrarItemCesta(@Body() { idCesta, index }) {
+    try {
+      if (UtilesModule.checkVariable(index, idCesta))
+        return await cestasInstance.borrarItemCesta(idCesta, index);
+      throw Error("Error, faltan datos en borrarItemCesta controller");
+    } catch (err) {
+      logger.Error(59, err);
+      return false;
     }
+  }
 
-    @Post('borrarArticulosCesta')
-    borrarArticulosCesta(@Body() params) {
-      if (params.idCesta != undefined && params.idCesta != null) {
-        return cestas.borrarArticulosCesta(params.idCesta).then((res) => {
-          if (res) {
-            return {error: false, info: res};
-          }
-          return {error: true, mensaje: 'Backend: Error en cestas/borrarArticulosCesta >'};
-        });
-      } else {
-        return {error: true, mensaje: 'Backend: Error cestas/borrarArticulosCesta faltan datos'};
-      }
+  /* Eze 4.0  (probablemente no se usará porque irá por socket)*/
+  @Post("getCestaById")
+  async getCestaByID(@Body() { idCesta }) {
+    try {
+      if (idCesta) return await cestasInstance.getCestaById(idCesta);
+
+      throw Error("Error, faltan datos en getCestaById() controller");
+    } catch (err) {
+      logger.Error(60, err);
+      return null;
     }
+  }
 
-    @Post('getCesta')
-    getCesta() {
-      // params.id = 1631781881687; // para postman
-      // params.idArticulo = 8571;
-
-      return cestas.getCestaRandom().then((res) => {
-        return res;
-      }).catch((err) => {
-        return {
-          okey: false,
-          error: 'Error en borrarItemCesta',
-        };
-      });
-    }
-
-    @Post('getCestaDiferente')
-    getCestaDiferent(@Body() params) {
-      // params.id = 1631781881687; // para postman
-      // params.idArticulo = 8571;
-      if (params.id_cesta) {
-        return cestas.getCestaDiferente(params.id_cesta).then((res) => {
-          return res;
-        }).catch((err) => {
-          return {
-            okey: false,
-            error: 'Error en borrarItemCesta',
-          };
-        });
-      }
-    }
-    @Post('getCestaCurrent')
-    PostCestaCurrent(@Body() params) {
-      return cestas.getCestaByID(params.idCesta).then((res) => {
-        if (res) {
-          return {error: false, info: res};
+  /* Eze 4.0 */
+  @Post("crearCesta")
+  async crearCesta(@Body() { idTrabajador }) {
+    try {
+      if (idTrabajador) {
+        const idCesta = await cestasInstance.crearCesta();
+        if (await trabajadoresInstance.setIdCesta(idTrabajador, idCesta)) {
+          cestasInstance.actualizarCestas();
+          trabajadoresInstance.actualizarTrabajadoresFrontend();
+          return true;
         }
-        return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID'};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH'};
-      });
+      }
+      throw Error("Error, faltan datos en crearCesta controller");
+    } catch (err) {
+      logger.Error(61, err);
+      return false;
     }
+  }
+  /* Eze 4.0 */
+  @Post("onlyCrearCestaParaMesa")
+  async onlyCrearCesta(@Body() { indexMesa }) {
+    try {
+      if (indexMesa) {
+        const idCesta = await cestasInstance.crearCesta(indexMesa);
+        cestasInstance.actualizarCestas();
+        return idCesta;
+      }
+      throw Error("Error, faltan datos en crearCesta controller");
+    } catch (err) {
+      logger.Error(61, err);
+      return false;
+    }
+  }
 
-    @Post('getCestaByID')
-    getCestaByID(@Body() params) {
-      if (params.idCesta != undefined && params.idCesta != null) {
-        if (params.idCesta == -1) {
-          return trabajadoresInstance.getCurrentTrabajador().then((res) => {
-            return cestas.getCesta(res._id).then((res) => {
-              if (res) {
-                return {error: false, info: res};
-              }
-
-              return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID'};
-            }).catch((err) => {
-              console.log(err);
-              return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH'};
-            });
-          });
-          // return cestas.getCestaRandom().then((res) => {
-          //     return { error: false, info: res };
-          // }).catch((err) => {
-          //     console.log(err);
-          //     return { error: true, mensaje: 'Backend: Error en cestas/getCestaByID > getCestaRandom CATCH' };
-          // });
-        } else {
-          return cestas.getCesta(params.idCesta).then((res) => {
-            if (res) {
-              return {error: false, info: res};
-            }
-
-
-            return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID'};
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH'};
-          });
+  /* Eze 4.0 */
+  @Post("cambiarCestaTrabajador")
+  async cambiarCestaTrabajador(@Body() { idTrabajador, idCesta }) {
+    try {
+      if (idCesta && idTrabajador)
+        if (await trabajadoresInstance.setIdCesta(idTrabajador, idCesta)) {
+          cestasInstance.actualizarCestas();
+          trabajadoresInstance.actualizarTrabajadoresFrontend();
+          return true;
         }
-      } else {
-        return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID FALTAN DATOS'};
+      throw Error("Error, faltan datos en cambiarCestaTrabajador controller");
+    } catch (err) {
+      logger.Error(62, err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 => Tampoco creo que se utilice con el método de los sockets */
+  @Get("getCestas")
+  async getCestas() {
+    try {
+      return await cestasInstance.getAllCestas();
+    } catch (err) {
+      logger.Error(63, err);
+      return null;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Post("regalarProducto")
+  async regalarProducto(@Body() { idCesta, indexLista }) {
+    try {
+      if (idCesta && typeof indexLista === "number")
+        return await cestasInstance.regalarItem(idCesta, indexLista);
+      throw Error("Error, faltan datos en regalarProducto controller");
+    } catch (err) {
+      logger.Error(64, err);
+      return false;
+    }
+  }
+
+  @Post("updateCestaInverso")
+  async updateCestaInverso(@Body() { cesta }) {
+    try {
+      if (cesta) {
+        return await cestasInstance.updateCesta(cesta);
       }
+      throw Error("Error, faltan datos en cestas/updateCestaInverso");
+    } catch (err) {
+      logger.Error(133, err);
     }
-
-    @Get('getCestaCurrentTrabajador')
-    getCestaCurrentTrabajador() {
-      return trabajadoresInstance.getCurrentTrabajador().then((res) => {
-        if (res != null) {
-          return cestas.getCestaByTrabajadorID(res._id).then((res) => {
-            if (res) {
-              return {error: false, info: res};
-            }
-            return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID'};
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: Error en cestas/getCestaByID CATCH'};
-          });
-        } else {
-          return {error: true, mensaje: 'Backend: Error, no hay ningún trabajador activo'};
-        }
-      });
-    }
-
-    @Post('crearCesta')
-    crearCesta(@Body() params) {
-      if (params.nombreCesta != undefined && params.nombreCesta != null) {
-        return cestas.crearNuevaCesta(params.nombreCesta).then((res) => {
-          if (res) {
-            return {error: false, info: res};
-          } else {
-            return {error: true, mensaje: 'Backend: Error en cestas/crearCesta. No se ha podido crear la nueva cesta'};
-          }
-        });
-      } else {
-        return {error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS'};
-      }
-    }
-
-    @Post('cambiarCestaTrabajador')
-    cambiarCestaTrabajador(@Body() params) {
-      if (params.id_cesta != undefined && params.id_cesta != null) {
-        return cestas.updateIdCestaTrabajador(params.id).then((res) => {
-          if (res) {
-            return {error: false, info: res};
-          } else {
-            return {error: true, mensaje: 'Backend: Error en cestas/crearCesta. No se ha podido crear la nueva cesta'};
-          }
-        });
-      } else {
-        return {error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS'};
-      }
-    }
-    @Post('cerarCestaMesas')
-    cerarCestaMesas(@Body() params) {
-      if (params.id_cesta != undefined && params.id_cesta != null) {
-        return cestas.cerarCestaMesas(params.idTrabajador, params.nombreMesa);
-      } else {
-        return {error: true, mensaje: 'Backend: Error en cestas/crearCesta FALTAN DATOS'};
-      }
-    }
-
-
-    @Get('getCestas')
-    getCestas() {
-      return cestas.getTodasCestas().then((res) => {
-        return {error: false, info: res};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en cestas/getCestas CATCH'};
-      });
-    }
-
-    @Post('setUnidadesAplicar')
-    setUnidadesAplicar(@Body() params) {
-      cestas.setUnidadesAplicar(params.unidades);
-      return {okey: true};
-    }
-
-    @Post('clickTeclaArticulo')
-    async clickTeclaArticulo(@Body() params) {
-      return await cestas.addItem(params.idArticulo, params.idBoton, params.peso, params.infoAPeso, params.idCesta, params.unidades).then((res) => {
-        return {
-          error: false,
-          bloqueado: false,
-          cesta: res,
-        };
-      }).catch((err) => {
-        return {
-          error: true,
-          bloqueado: false,
-        };
-      });
-    }
-
-
-    @Post('regalarProducto')
-    regalarProducto(@Body() params) {
-      if (params.idCesta != undefined && params.index != undefined) {
-        return cestas.getCesta(params.idCesta).then((cesta) => {
-          if (cesta != null) {
-            cesta.lista[params.index].subtotal = 0;
-            cesta['regalo'] = true;
-
-            return cestas.recalcularIvas(cesta).then((cestaOK) => {
-              return cestas.setCesta(cestaOK).then((res) => {
-                if (res) {
-                  return {error: false, cesta: cestaOK};
-                }
-                return {error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta'};
-              }).catch((err) => {
-                console.log(err);
-                return {error: true, mensaje: 'Backend: Error en cestas/regalarProductos > setCesta CATCH'};
-              });
-            });
-
-          } else {
-            return {error: true, mensaje: 'Backend: Error, cesta vacía'};
-          }
-        }).catch((err) => {
-          console.log(err);
-          return {error: true, mensaje: 'Backend: Error en cestas/regalarProducto > getCesta CATCH'};
-        });
-      } else {
-        return {error: true, mensaje: 'Backend: Error: faltan datos en cestas/regalarProducto'};
-      }
-    }
-
-    @Post('addSuplemento')
-    addSuplemento(@Body() params) {
-      if (params.idCesta && params.suplementos && params.idArticulo) {
-        return cestas.addSuplemento(params.idCesta, params.suplementos, params.idArticulo, params.posArticulo).then((res) => {
-          return {
-            error: false,
-            bloqueado: false,
-            cesta: res,
-          };
-        }).catch((err) => {
-          console.log(err);
-          return {
-            error: true,
-            bloqueado: false,
-          };
-        });
-      }
-    }
-
-    @Post('modificarSuplementos')
-    modificarSuplementos(@Body() params) {
-      if (params.cestaId && params.idArticulo) {
-        return cestas.modificarSuplementos(params.cestaId, params.idArticulo, params.posArticulo).then((res) => {
-          if (res.suplementos) {
-            return {
-              suplementos: true,
-              suplementosData: res.suplementosData,
-              suplementosSeleccionados: res.suplementosSeleccionados,
-            };
-          }
-          return {suplementos: false};
-        });
-      }
-    }
-
-    @Post('modificarNombreCesta')
-    modificarNombreCesta(@Body() params) {
-      if (params.cestaId && params.nombreArticulo) {
-        return cestas.modificarNombreCesta(params.cestaId, params.nombreArticulo).then((res) => {
-          return {
-            error: false,
-            bloqueado: false,
-            cesta: res,
-          };
-        }).catch((err) => {
-          console.log(err);
-          return {
-            error: true,
-            bloqueado: false,
-          };
-        });
-     }
-    }
-
-    @Post('enviarACocina')
-    enviarACocina(@Body() params) {
-      if (params.idCesta) {
-        return cestas.enviarACocina(params.idCesta).then((res) => {
-          return res;
-        });
-      }
-    }
-
-
-    /**
-     * Metodod que llaman desde tocgame.js en el frontend en iniciartoc()
-     * es el metodo que carga en raiz la cesta selecionada
-     * @param params
-     * @returns
-     */
-    @Post('getCestaByTrabajadorId')
-    async getCestaByTrabajadorId(@Body() params) {
-      if (UtilesModule.checkVariable(params.idCesta)) {
-        return {error: false, info: await cestas.getCestaByID(params.idCesta)};
-      } else {
-        return {error: true, mensaje: 'Backend error, faltan datos en cestas/getCestaByTrabajadorId'};
-      }
-    }
-
-
-    @Post('borrarCestaTrabajador')
-    borrarCestaTrabajador(@Body() params) {
-      return cestas.borrarCestaTrabajador(params.id).then((res) => {
-        if (res) {
-          return cestas.getTodasCestas().then((listaCestas) => {
-            if (listaCestas.length > 0) {
-              return {
-                okey: true,
-                cestaNueva: listaCestas[0],
-              };
-            }
-          }).catch((err) => {
-            return {
-              okey: false,
-              error: 'Error en getTodasCestas',
-            };
-          });
-        } else {
-          return {
-            okey: false,
-            error: 'Error borrando cesta trabajador',
-          };
-        }
-      }).catch((err) => {
-        return {
-          okey: false,
-          error: 'Error en borrarCesta',
-        };
-      });
-    }
+  }
 }

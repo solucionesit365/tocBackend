@@ -1,5 +1,7 @@
 export interface ClientesInterface {
-    id: string,
-    nombre: string,
-    tarjetaCliente: string,
+  id: string;
+  nombre: string;
+  tarjetaCliente: string;
+  albaran: boolean;
+  noPagaEnTienda: boolean;
 }

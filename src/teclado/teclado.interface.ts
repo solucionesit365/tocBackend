@@ -1,4 +1,4 @@
-export interface TecladoInterface {
+export interface TeclasInterface {
     nomMenu: string,
     idArticle: number,
     nombreArticulo: string,

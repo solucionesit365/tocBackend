@@ -1,10 +1,11 @@
-import {Controller, Get} from '@nestjs/common';
-import {parametrosInstance} from 'src/parametros/parametros.clase';
-@Controller('getInfo')
+import { Controller, Get } from "@nestjs/common";
+import { parametrosInstance } from "src/parametros/parametros.clase";
+@Controller("getInfo")
 export class VersionController {
-    @Get('tocGame')
-  getInfo() {
-    const parametros = parametrosInstance.getParametros();
+  /* Eze v23 */
+  @Get("tocGame")
+  async getInfo() {
+    const parametros = await parametrosInstance.getParametros();
     return {
       version: process.env.npm_package_version,
       nombreTienda: parametros.nombreTienda,

@@ -5,8 +5,8 @@ export interface ParametrosInterface {
     licencia: number,
     nombreEmpresa: string,
     nombreTienda: string,
-    tipoDatafono: string,
-    tipoImpresora: string,
+    tipoDatafono: TiposDatafono,
+    tipoImpresora: TiposImpresora,
     impresoraCafeteria: string,
     clearOneCliente?: number,
     clearOneTienda?: number,
@@ -15,7 +15,6 @@ export interface ParametrosInterface {
     prohibirBuscarArticulos?: string,
     ultimoTicket: number,
     visor?:string,
-    idCurrentTrabajador: number,
     token: string,
     impresoraUsbInfo: {
         vid: string,
@@ -23,3 +22,6 @@ export interface ParametrosInterface {
     },
     ipTefpay?: string
 }
+
+export type TiposImpresora = "USB" | "SERIE";
+export type TiposDatafono = "3G" | "PAYTEF" | "CLEARONE";

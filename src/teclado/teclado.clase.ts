@@ -1,98 +1,186 @@
-import axios from 'axios';
-import {menusInstance} from '../menus/menus.clase';
-import {articulosInstance} from '../articulos/articulos.clase';
-import {parametrosInstance} from '../parametros/parametros.clase';
-import {ofertas} from '../promociones/promociones.clase';
-import * as schTeclas from './teclado.mongodb';
+import axios from "axios";
+import { menusInstance } from "../menus/menus.clase";
+import { articulosInstance } from "../articulos/articulos.clase";
+import { parametrosInstance } from "../parametros/parametros.clase";
+import { nuevaInstancePromociones } from "../promociones/promociones.clase";
+import * as schTeclas from "./teclado.mongodb";
+import { logger } from "../logger";
+import { TeclasInterface } from "./teclado.interface";
 
 export class TecladoClase {
-  insertarTeclas(arrayTeclas) {
-    return schTeclas.insertarTeclas(arrayTeclas).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  insertarTeclas = async (arrayTeclas: TeclasInterface[]) =>
+    await schTeclas.insertarTeclas(arrayTeclas);
 
-  actualizarTeclado() {
-    return axios.post('articulos/descargarArticulosEspeciales', {database: parametrosInstance.getParametros().database, codigoCliente: parametrosInstance.getParametros().codigoTienda}).then((res: any) => {
-      if (res.data.error == false) {
-        return axios.post('menus/getMenus', {database: parametrosInstance.getParametros().database, codigoTienda: parametrosInstance.getParametros().codigoTienda}).then((resMenusSanPedro: any) => {
-          return menusInstance.insertarMenus(resMenusSanPedro.data.info).then((resMenus) => {
-            if (resMenus) {
-              return articulosInstance.insertarArticulos(res.data.info).then((res2) => {
-                if (res2) {
-                  return axios.post('/teclas/descargarTeclados', {database: parametrosInstance.getParametros().database, licencia: parametrosInstance.getParametros().codigoTienda}).then((infoTeclados: any) => {
-                    if (infoTeclados.data.error == false) {
-                      return tecladoInstance.insertarTeclas(infoTeclados.data.info).then((resultado) => {
-                        if (resultado) {
-                          // return { error: false, mensaje: '' };
-                          return axios.post('promociones/getPromociones', {database: parametrosInstance.getParametros().database, codigoTienda: parametrosInstance.getParametros().codigoTienda}).then((resPromociones: any) => {
-                            if (resPromociones.data.error == false) {
-                              return ofertas.insertarPromociones(resPromociones.data.info).then((resInsertPromos) => {
-                                if (resInsertPromos) {
-                                  return {error: false};
-                                } else {
-                                  return {error: true, mensaje: 'Backend: Error teclado/actualizarTeclado 5'};
-                                }
-                              }).catch((err) => {
-                                console.log(err);
-                                return {error: true, mensaje: 'Backend: Error teclado/actualizarTeclado 4 CATCH'};
-                              });
-                            } else {
-                              return {error: true, mensaje: resPromociones.data.mensaje};
-                            }
-                          }).catch((err) => {
-                            console.log(err);
-                            return {error: true, mensaje: 'Backend: Error teclado/actualizarTeclado 3'};
-                          });
-                        } else {
-                          return {error: true, mensaje: 'Backend: Error teclado/actualizarTeclado 2'};
-                        }
-                      }).catch((err) => {
-                        console.log(err);
-                        return {error: true, mensaje: 'Backend: Error teclado/actualizarTeclado try catch'};
-                      });
-                    } else {
-                      return {error: true, mensaje: infoTeclados.data.mensaje};
-                    }
-                  }).catch((err: any) => {
-                    console.log(err);
-                    return {error: true, mensaje: 'Backend: teclado/actualizarTeclado error en segundo post catch'};
-                  });
-                } else {
-                  return {error: true, mensaje: 'Error backend en actualizarTeclado/insertarArticulos'};
-                }
-              }).catch((err) => {
-                console.log(err);
-                return {error: true, mensaje: 'Error backend en actualizarTeclado/insertarArticulos CATCH'};
-              });
-            } else {
-              return {error: true, mensaje: 'Backend: Error insertar Menus teclados.clase.ts funcion'};
-            }
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: ERROR insertarMenus teclados.clase.ts'};
-          });
-        }).catch((err) => {
-          console.log(err);
-          return {error: true, mensaje: 'Error backend POST actualizar teclado123'};
-        });
-      } else {
-        return {error: true, mensaje: res.data.mensaje};
+  /* Eze v23 */
+  async actualizarTeclado(): Promise<boolean> {
+    try {
+      const parametros = await parametrosInstance.getParametros();
+      const res: any = await axios.post(
+        "articulos/descargarArticulosEspeciales",
+        {
+          database: parametros.database,
+          codigoCliente: parametros.codigoTienda,
+        }
+      );
+      const resMenusSanPedro: any = await axios.post("menus/getMenus", {
+        database: parametros.database,
+        codigoTienda: parametros.codigoTienda,
+      });
+      const resMenus: any = await menusInstance.insertarMenus(
+        resMenusSanPedro.data.info
+      );
+      const res2: any = await articulosInstance.insertarArticulos(
+        res.data.info
+      );
+
+      const infoTeclados: any = await axios.post("/teclas/descargarTeclados", {
+        database: parametros.database,
+        licencia: parametros.codigoTienda,
+      });
+      if (await tecladoInstance.insertarTeclas(infoTeclados.data.info)) {
+        const resPromociones: any = await axios.post(
+          "promociones/getPromociones",
+          {
+            database: parametros.database,
+            codigoTienda: parametros.codigoTienda,
+          }
+        );
+        if (resPromociones.data.info.lenght > 0)
+          return await nuevaInstancePromociones.insertarPromociones(
+            resPromociones.data.info
+          );
+        return true;
       }
-    }).catch((err) => {
-      console.log(err);
-      return {
-        error: true,
-        mensaje: 'Backend: Error en catch actualizarArticulos',
-      };
-    });
+      return false;
+    } catch (err) {
+      logger.Error(103, err);
+      return false;
+    }
   }
 
   async cambiarPosTecla(idArticle, nuevaPos, nombreMenu) {
     return await schTeclas.cambiarPosTecla(idArticle, nuevaPos, nombreMenu);
+  }
+
+  tienePrefijoSubmenu(x: string) {
+    if (x.includes("]")) return true;
+    return false;
+  }
+
+  getNombreMenu(stringCompleto: string) {
+    const limpio = stringCompleto.slice(
+      stringCompleto.indexOf("[") + 1,
+      stringCompleto.lastIndexOf("]")
+    );
+    return limpio.trim();
+  }
+
+  getNombreSubmenu(stringCompleto: string) {
+    const limpio = stringCompleto.slice(stringCompleto.indexOf("]") + 1);
+    return limpio.trim();
+  }
+
+  addTeclaNormal(
+    arrayMenus: any[],
+    nombreNuevo: string,
+    objTecla: any
+  ): boolean {
+    for (let i = 0; i < arrayMenus.length; i++) {
+      if (arrayMenus[i].nombre == nombreNuevo) {
+        arrayMenus[i].arrayTeclas.push(objTecla);
+        return true;
+      }
+    }
+    arrayMenus.push({
+      nombre: nombreNuevo,
+      arrayTeclas: [objTecla],
+      arraySubmenus: null,
+    });
+    return true;
+  }
+
+  addTeclaConSubmenu(
+    arrayMenus: any[],
+    nombreNuevo: string,
+    nombreNuevoSubmenu: string,
+    objTecla: any
+  ): boolean {
+    let existeMenu = false;
+
+    for (let i = 0; i < arrayMenus.length; i++) {
+      if (arrayMenus[i].nombre == nombreNuevo) {
+        existeMenu = true;
+        let existeSubmenu = false;
+
+        if (arrayMenus[i].arraySubmenus) {
+          for (let j = 0; j < arrayMenus[i].arraySubmenus.length; j++) {
+            if (arrayMenus[i].arraySubmenus[j].nombre == nombreNuevoSubmenu) {
+              existeSubmenu = true;
+              arrayMenus[i].arraySubmenus[j].arrayTeclas.push(objTecla);
+              return true;
+            }
+          }
+        } else {
+          arrayMenus[i]["arraySubmenus"] = [];
+        }
+
+        if (!existeSubmenu) {
+          arrayMenus[i].arraySubmenus.push({
+            nombre: nombreNuevoSubmenu,
+            arrayTeclas: [objTecla],
+          });
+          return true;
+        }
+        logger.Error(118, "Error, estado teclado desconocido");
+        return false;
+      }
+    }
+
+    if (!existeMenu) {
+      arrayMenus.push({
+        nombre: nombreNuevo,
+        arraySubmenus: [
+          { nombre: nombreNuevoSubmenu, arrayTeclas: [objTecla] },
+        ],
+      });
+      return true;
+    }
+
+    logger.Error(119, "Error, estado teclado desconocido");
+    return false;
+  }
+
+  async generarTecladoCompleto() {
+    const teclas = await schTeclas.getTeclas();
+    const menus = [];
+
+    for (let i = 0; i < teclas.length; i++) {
+      if (this.tienePrefijoSubmenu(teclas[i].nomMenu)) {
+        this.addTeclaConSubmenu(
+          menus,
+          this.getNombreMenu(teclas[i].nomMenu),
+          this.getNombreSubmenu(teclas[i].nomMenu),
+          {
+            idArticle: teclas[i].idArticle,
+            nombreArticulo: teclas[i].nombreArticulo,
+            pos: teclas[i].pos,
+            color: teclas[i].color,
+            esSumable: teclas[i].esSumable,
+          }
+        );
+      } else {
+        this.addTeclaNormal(menus, teclas[i].nomMenu.trim(), {
+          idArticle: teclas[i].idArticle,
+          nombreArticulo: teclas[i].nombreArticulo,
+          pos: teclas[i].pos,
+          color: teclas[i].color,
+          esSumable: teclas[i].esSumable,
+        });
+      }
+    }
+
+    return menus.sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
 }
 export const tecladoInstance = new TecladoClase();

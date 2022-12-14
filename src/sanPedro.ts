@@ -4,10 +4,11 @@ import {cajaInstance} from './caja/caja.clase';
 import {movimientosInstance} from './movimientos/movimientos.clase';
 import {trabajadoresInstance} from './trabajadores/trabajadores.clase';
 import {devolucionesInstance} from './devoluciones/devoluciones.clase';
+import { logger } from "./logger";
 
 const io = require('socket.io-client');
-const socket = io('https://sanpedro.cloud'); // NORMAL //io('http://34.78.247.153:3001'); // NORMAL
-//const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
+const socket = io('https://sanpedro.cloud');
+// const socket = io('http://localhost:3001'); // DEV SANPEDRO EN LOCAL
 
 
 function emitSocket(canal: string, datos: any = null) {
@@ -16,13 +17,13 @@ function emitSocket(canal: string, datos: any = null) {
   }
 }
 
-socket.on('resSincroTickets', async (data) => {
+socket.on("resSincroTickets", async (data) => {
   if (data.error == false) {
     if (data.ticket) {
       if (await ticketsInstance.actualizarEstadoTicket(data.ticket)) {
         sincronizarTickets(true);
       } else {
-        console.log("Error al actualizar el ticket");
+        logger.Error(19, "Error al actualizar el ticket");
       }
     }
   } else {
@@ -30,8 +31,6 @@ socket.on('resSincroTickets', async (data) => {
       if (data.mensaje == "SanPedro: Error, parámetros incorrectos") {
         data.ticket.comentario = "SanPedro: Error, parámetros incorrectos";
       }
-
-      ticketsInstance.actualizarComentario(data.ticket);
     }
   }
 });
@@ -43,25 +42,25 @@ socket.on('resCajas', (data) => {
         if (res) {
           sincronizarCajas();
         } else {
-          console.log('Error al actualizar el estado de la caja');
+          logger.Error(20, 'Error al actualizar el estado de la caja');
         }
       }).catch((err) => {
-        console.log(err);
+        logger.Error(21, err);
       });
     } else {
-      cajaInstance.confirmarCajaHabiaLlegado(data.infoCaja).then((res) => {
+      cajaInstance.confirmarCajaEnviada(data.infoCaja).then((res) => {
         if (res) {
           sincronizarCajas();
         } else {
-          console.log('Error al actualizar el estado de la caja 2');
+          logger.Error(22, 'Error al actualizar el estado de la caja 2');
         }
       }).catch((err) => {
-        console.log(err);
+        logger.Error(23, err);
       });
       // cambiar estado infoCaja en mongo (enviado + comentario)
     }
   } else {
-    console.log(data.mensaje);
+    logger.Error(24, data.mensaje);
   }
 });
 
@@ -71,13 +70,13 @@ socket.on('resMovimientos', (data) => {
       if (res) {
         sincronizarMovimientos(true);
       } else {
-        console.log('Error al actualizar el estado del movimiento');
+        logger.Error(25, 'Error al actualizar el estado del movimiento');
       }
     }).catch((err) => {
-      console.log(err);
+      logger.Error(26, err);
     });
   } else {
-    console.log(data.mensaje);
+    logger.Error(27, data.mensaje);
   }
 });
 
@@ -87,13 +86,13 @@ socket.on('resFichajes', (data) => {
       if (res) {
         sincronizarFichajes();
       } else {
-        console.log('Error al actualizar el estado del fichaje');
+        logger.Error(28, 'Error al actualizar el estado del fichaje');
       }
     }).catch((err) => {
-      console.log(err);
+      logger.Error(29, err);
     });
   } else {
-    console.log(data.mensaje);
+    logger.Error(30, data.mensaje);
   }
 });
 
@@ -103,13 +102,13 @@ socket.on('resSincroDevoluciones', (data) => {
       if (res) {
         sincronizarDevoluciones();
       } else {
-        console.log('Error al actualizar el estadio de la devolución.');
+        logger.Error(31, 'Error al actualizar el estadio de la devolución.');
       }
     }).catch((err) => {
-      console.log(err);
+      logger.Error(32, err);
     });
   } else {
-    console.log(data.mensaje);
+    logger.Error(33, data.mensaje);
   }
 });
 

@@ -1,266 +1,103 @@
-// 100%
-import {globalInstance} from '../global/global.clase';
-import {socket} from '../conexion/socket';
-import {SincroFichajesInterface, TrabajadoresInterface} from './trabajadores.interface';
-import * as schTrabajadores from './trabajadores.mongodb';
-import {parametrosInstance} from '../parametros/parametros.clase';
-import axios from 'axios';
-import {cestas} from '../cestas/cestas.clase';
+import {
+  SincroFichajesInterface,
+  TrabajadoresInterface,
+  TiposSincroFichaje,
+} from "./trabajadores.interface";
+import * as schTrabajadores from "./trabajadores.mongodb";
+import { parametrosInstance } from "../parametros/parametros.clase";
+import axios from "axios";
+import { CestasInterface } from "../cestas/cestas.interface";
+import { io } from "src/sockets.gateway";
+import { logger } from "src/logger";
 
 export class TrabajadoresClase {
-  buscar(busqueda: string) {
-    return schTrabajadores.buscar(busqueda).then((res: TrabajadoresInterface[]) => {
-      if (res.length > 0) {
-        return res;
-      } else {
-        return [];
-      }
-    }).catch((err) => {
-      console.log(err);
-      return [];
-    });
-  }
+  /* Eze 4.0 */
+  getTrabajadorById = async (idTrabajador: number) =>
+    await schTrabajadores.getTrabajador(idTrabajador);
 
-  mantenerTrabajadoresFichados(nuevoArray: TrabajadoresInterface[]) {
-    return this.getFichados().then((arrayFichados) => {
-      for (let i = 0; i < arrayFichados.length; i++) {
-        for (let j = 0; j < nuevoArray.length; j++) {
-          if (arrayFichados[i]._id == nuevoArray[j]._id) {
-            nuevoArray[j]['fichado'] = true;
-            break;
-          }
+  /* Eze 4.0 */
+  buscar = async (busqueda: string) => await schTrabajadores.buscar(busqueda);
+
+  /* Eze 4.0 */
+  async mantenerTrabajadoresFichados(
+    nuevoArray: TrabajadoresInterface[]
+  ): Promise<TrabajadoresInterface[]> {
+    const arrayFichados = await this.getTrabajadoresFichados();
+
+    for (let i = 0; i < arrayFichados.length; i++) {
+      for (let j = 0; j < nuevoArray.length; j++) {
+        if (arrayFichados[i]._id == nuevoArray[j]._id) {
+          nuevoArray[j]["fichado"] = true;
+          break;
         }
       }
-      return {error: false, info: nuevoArray};
-    }).catch((err) => {
-      console.log(err);
-      return {error: true, info: []};
+    }
+    return nuevoArray;
+  }
+
+  /* Eze OK. NO 4.0 */
+  async actualizarTrabajadores(): Promise<boolean> {
+    const params = await parametrosInstance.getParametros();
+    const res: any = await axios.post("dependientas/descargar", {
+      database: params.database,
     });
-  }
-
-  actualizarTrabajadores() {
-    // globalInstance.setStopNecesario(true);
-    const params = parametrosInstance.getParametros();
-    // socket.emit('descargar-trabajadores', { licencia: params.licencia, database: params.database, codigoTienda: params.codigoTienda});
-    return axios.post('dependientas/descargar', {database: params.database}).then((res: any) => {
-      if (res.data.error == false) {
-        if (res.data.info.length > 0) {
-          return this.mantenerTrabajadoresFichados(res.data.info).then((resKeep) => {
-            if (resKeep.error == false) {
-              return this.insertarTrabajadores(resKeep.info).then((resInsert) => {
-                if (resInsert) {
-                  return {error: false};
-                } else {
-                  return {error: true, mensaje: 'Backend: Error actualizarTrabajadores ultimo momento'};
-                }
-              }).catch((err) => {
-                console.log(err);
-                return {error: true, mensaje: 'Backend: Error actualizarTrabajadores CATCH'};
-              });
-            } else {
-              return {error: true, mensaje: 'Backend: Error en actualizarTrabajadores/mantenerTrabajadoresFichados normal'};
-            }
-          }).catch((err) => {
-            console.log(err);
-            return {error: true, mensaje: 'Backend: Error en actualizarTrabajadores/mantenerTrabajadoresFichados CATCH'};
-          });
-        } else {
-          return {error: true, mensaje: 'No hay ningún trabajador en la base de datos para añadir'};
-        }
+    if (!res.data.error && res.data.info.length > 0) {
+      const resKeep = await this.mantenerTrabajadoresFichados(res.data.info);
+      if (resKeep.length > 0) {
+        return await this.insertarTrabajadores(resKeep);
       } else {
-        return {error: true, mensaje: res.data.error};
-      }
-    });
-  }
-
-  getCurrentIdTrabajador(): Promise<number> {
-    return schTrabajadores.getCurrentIdTrabajador().then((resultado) => {
-      if (resultado != null) {
-        return resultado.idCurrentTrabajador;
-      } else {
-        return null;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    }); ;
-  }
-
-  getCurrentTrabajador(): Promise<TrabajadoresInterface> {
-    return this.getCurrentIdTrabajador().then((idCurrentTrabajador) => {
-      if (idCurrentTrabajador != null) {
-        return this.getTrabajador(idCurrentTrabajador);
-      } else {
-        return null;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
-  }
-
-  setCurrentTrabajador(idTrabajador: number): Promise<boolean> {
-    return schTrabajadores.setCurrentIdTrabajador(idTrabajador).then((res) => {
-      if (res.acknowledged) {
-        parametrosInstance.actualizarParametros();
         return true;
-      } else {
-        return false;
-      };
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  setCurrentTrabajadorPorNombre(id: any): Promise<boolean> {
-    id = parseInt(id);
-    return schTrabajadores.setCurrentIdTrabajador(id).then((res) => {
-      if (res.acknowledged) {
-        parametrosInstance.actualizarParametros();
-        return true;
-      } else {
-        return false;
-      };
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  getTrabajadoresFichados() {
-    return schTrabajadores.getTrabajadoresFichados();
-  }
-
-  getTrabajador(idTrabajador: number): Promise<TrabajadoresInterface> {
-    return schTrabajadores.getTrabajador(idTrabajador);
-  }
-
-  /* MongoDB Fichado = false + nuevo item sincro */
-  ficharTrabajador(idTrabajador: number, idPlan: string): Promise<boolean> {
-    return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
-      if (res.acknowledged) {
-        return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
-          if (resSetCurrent) {
-            return this.nuevoFichajesSincro('ENTRADA', idTrabajador, idPlan).then((res2) => {
-              if (res2.acknowledged) {
-                cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
-                  cestas.updateIdCestaTrabajador(idTrabajador);
-                });
-                return true;
-              } else {
-                return false;
-              }
-            }).catch((err) => {
-              console.log(err);
-              return false;
-            });
-          }
-          return false;
-        }).catch((err) => {
-          console.log(err);
-          return false;
-        });
-      } else {
-        return false;
       }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+    }
+    throw Error(
+      "Error, la información que llega desde San Pedro no es correcta en actualizarTrabajadores() class"
+    );
   }
 
-  /* MongoDB Fichado = false + nuevo item sincro */
-  desficharTrabajador(idTrabajador: number): Promise<boolean> {
-    return schTrabajadores.desficharTrabajador(idTrabajador).then((res) => {
-      if (res.acknowledged) {
-        return this.nuevoFichajesSincro('SALIDA', idTrabajador, '').then((res2) => {
-          if (res2.acknowledged) {
-            cestas.eliminarCesta(idTrabajador);
-            return true;
-          } else {
-            return false;
-          }
-        }).catch((err) => {
-          console.log(err);
-          return false;
-        });
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+  /* Eze 4.0 */
+  getTrabajadoresFichados = async (): Promise<TrabajadoresInterface[]> =>
+    await schTrabajadores.getTrabajadoresFichados();
+
+  /* Eze 4.0 */
+  async ficharTrabajador(idTrabajador: number): Promise<boolean> {
+    if (await schTrabajadores.ficharTrabajador(idTrabajador)) {
+      return await this.nuevoFichajesSincro("ENTRADA", idTrabajador);
+    }
+    throw Error(
+      "Error, no se ha podido fichar al trabajador ficharTrabajador() class"
+    );
   }
-  /* MongoDB Fichado = false + nuevo item sincro */
-  inicioDescanso(idTrabajador: number, idPlan: string): Promise<boolean> {
-    return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
-      if (res.acknowledged) {
-        return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
-          if (resSetCurrent) {
-            return this.nuevoFichajesSincro('DESCANSO', idTrabajador, idPlan).then((res2) => {
-              if (res2.acknowledged) {
-                cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
-                  cestas.updateIdCestaTrabajador(idTrabajador);
-                });
-                return true;
-              } else {
-                return false;
-              }
-            }).catch((err) => {
-              console.log(err);
-              return false;
-            });
-          }
-          return false;
-        }).catch((err) => {
-          console.log(err);
-          return false;
-        });
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+
+  /* Eze 4.0 */
+  async desficharTrabajador(idTrabajador: number): Promise<boolean> {
+    if (await schTrabajadores.desficharTrabajador(idTrabajador)) {
+      return await this.nuevoFichajesSincro("SALIDA", idTrabajador);
+    }
+    throw Error("No se ha podido desfichar al trabajador");
   }
-  /* MongoDB Fichado = false + nuevo item sincro */
-  finDescanso(idTrabajador: number): Promise<boolean> {
-    return schTrabajadores.ficharTrabajador(idTrabajador).then((res) => {
-      if (res.acknowledged) {
-        return this.setCurrentTrabajador(idTrabajador).then((resSetCurrent) => {
-          if (resSetCurrent) {
-            return this.nuevoFichajesSincro('FINDESCANSO', idTrabajador, '').then((res2) => {
-              if (res2.acknowledged) {
-                cestas.crearNuevaCesta(idTrabajador.toString()).then((data) => {
-                  cestas.updateIdCestaTrabajador(idTrabajador);
-                });
-                return true;
-              } else {
-                return false;
-              }
-            }).catch((err) => {
-              console.log(err);
-              return false;
-            });
-          }
-          return false;
-        }).catch((err) => {
-          console.log(err);
-          return false;
-        });
-      } else {
-        return false;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
+
+  /* Eze 4.0 */
+  async inicioDescanso(idTrabajador: number): Promise<boolean> {
+    if (await schTrabajadores.inicioDescanso(idTrabajador)) {
+      return await this.nuevoFichajesSincro("DESCANSO", idTrabajador);
+    }
+
+    throw Error("No se ha podido iniciar el descanso");
   }
-  /* Inserta en el sincro un nuevo movimiento de fichaje */
-  nuevoFichajesSincro(tipo: 'ENTRADA' | 'SALIDA' | 'DESCANSO' | 'FINDESCANSO', idTrabajador: number, idPlan: string) {
+
+  /* Eze 4.0 */
+  async finDescanso(idTrabajador: number): Promise<boolean> {
+    if (await schTrabajadores.ficharTrabajador(idTrabajador)) {
+      return await this.nuevoFichajesSincro("FINDESCANSO", idTrabajador);
+    }
+    throw Error("No se ha podido fichar al trabajador");
+  }
+
+  /* Eze 4.0 */
+  async nuevoFichajesSincro(
+    tipo: TiposSincroFichaje,
+    idTrabajador: number
+  ): Promise<boolean> {
     const auxTime = new Date();
     const objGuardar: SincroFichajesInterface = {
       _id: Date.now(),
@@ -277,116 +114,44 @@ export class TrabajadoresClase {
       },
       tipo: tipo,
       enviado: false,
-      enTransito: false,
-      intentos: 0,
-      comentario: '',
-      idPlan: idPlan,
     };
-    return schTrabajadores.insertNuevoFichaje(objGuardar);
+    return await schTrabajadores.insertNuevoFichaje(objGuardar);
   }
 
-  getFichados(): Promise<TrabajadoresInterface[]> {
-    return schTrabajadores.buscarTrabajadoresFichados().then((arrayFichados: TrabajadoresInterface[]) => {
-      return arrayFichados;
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
-  }
+  /* Eze 4.0 */
+  insertarTrabajadores = async (arrayTrabajadores: TrabajadoresInterface[]) =>
+    await schTrabajadores.insertarTrabajadores(arrayTrabajadores);
 
-  insertarTrabajadores(arrayTrabajadores) {
-    return schTrabajadores.insertarTrabajadores(arrayTrabajadores).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  getFichajeMasAntiguo = async () =>
+    await schTrabajadores.getFichajeMasAntiguo();
 
-  getFichajeMasAntiguo() {
-    return schTrabajadores.getFichajeMasAntiguo();
-  }
+  /* Eze 4.0 */
+  getTrabajadoresDescansando = async () =>
+    await schTrabajadores.getTrabajadoresDescansando();
 
-  actualizarEstadoFichaje(fichaje: SincroFichajesInterface) {
-    return schTrabajadores.actualizarEstadoFichaje(fichaje).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
+  /* Eze 4.0 */
+  actualizarEstadoFichaje = async (fichaje: SincroFichajesInterface) =>
+    await schTrabajadores.actualizarEstadoFichaje(fichaje);
 
-  existePlan(idPlan: string) {
-    return schTrabajadores.existePlan(idPlan).then((res) => {
-      if (res != null) {
-        return true;
-      }
-      return false;
-    }).catch((err) => {
-      console.log(err);
-      /* En caso de error, le devuelvo true para eliminar el plan de la lista, para que no se utilice */
-      return true;
-    });
-  }
+  /* Eze 4.0 */
+  setIdCesta = async (
+    idTrabajador: TrabajadoresInterface["_id"],
+    idCesta: CestasInterface["_id"]
+  ) => await schTrabajadores.setIdCestaTrabajador(idTrabajador, idCesta);
 
-  /* Devuelve un objeto con la fecha inicial y final del día anterior */
-  getInicioFinalDiaAnterior() {
-    const ayer = new Date(new Date().getTime() - 24*60*60*1000);
-    ayer.setHours(0, 0, 0, 0);
-    const inicioTime = ayer.getTime();
-    ayer.setHours(23, 59, 59, 999);
-    const finalTime = ayer.getTime();
-    return {inicioTime, finalTime};
-  }
-
-  async getTrabajaronAyer() {
-    const infoTime = this.getInicioFinalDiaAnterior();
-    try {
-      const idsAyer = await schTrabajadores.getTrabajaronAyer(infoTime.inicioTime, infoTime.finalTime);
-      const arrayTrabajadores = [];
-
-      for (let i = 0; i < idsAyer.length; i++) {
-        arrayTrabajadores.push({infoTrabajador: await this.getTrabajador(idsAyer[i].infoFichaje.idTrabajador), timestamp: idsAyer[i]._id});
-      }
-
-      const parametros = parametrosInstance.getParametros();
-      return axios.post('turnos/getHorasExtraCoordinacion', {
-        parametros: parametros,
-        arrayTrabajaronAyer: arrayTrabajadores,
-        ayer: infoTime.finalTime,
-      }).then((res: any) => {
-        if (res.data.error == false) {
-          return res.data.info;
-        } else {
-          throw Error(res.data.mensaje);
+  /* Eze 4.0 */
+  actualizarTrabajadoresFrontend() {
+    this.getTrabajadoresFichados()
+      .then((resTrabajadores) => {
+        if (resTrabajadores && resTrabajadores.length > 0) {
+          io.emit("cargarTrabajadores", resTrabajadores);
         }
-      }).catch((err) => {
-        console.log(err);
-        return [];
+        return null;
+      })
+      .catch((err) => {
+        logger.Error(120, err);
       });
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  }
-
-  async guardarHorasExtraCoordinacion(horasExtra: number, horasCoordinacion: number, idTrabajador: number, timestamp: number) {
-    return axios.post('turnos/guardarHorasExtraCoordinacion', {
-      horasExtra,
-      horasCoordinacion,
-      idEmpleado: idTrabajador,
-      fechaFichaje: timestamp,
-      parametros: parametrosInstance.getParametros(),
-    }).then((res: any) => {
-      if (res.data.error == false) {
-        return {error: false};
-      } else {
-        return {error: true, mensaje: res.data.mensaje};
-      }
-    }).catch((err) => {
-      console.log(err);
-      return {error: true, mensaje: 'Error Backend: trabajadores/guardarHorasExtraCoordinacion'};
-    });
   }
 }
 

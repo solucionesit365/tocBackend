@@ -1,40 +1,32 @@
-import {InsertManyResult} from 'mongodb';
-import {conexion} from '../conexion/mongodb';
+import { conexion } from "../conexion/mongodb";
+import { ParamsTicketInterface } from "./params-ticket.interface";
 
-export async function insertarParametrosTicket(data: any) {
-  if (borrarInfoTicket()) {
-    const database = (await conexion).db('tocgame');
-    const paramTickets = database.collection('parametros-tickets');
-    const resultado = await paramTickets.insertMany(data);
-    return resultado.acknowledged;
-  } else {
-    const res: InsertManyResult<any> = {
-      acknowledged: false,
-      insertedCount: 0,
-      insertedIds: null,
-    };
-    return res.acknowledged;
-  }
+/* Eze 4.0 */
+export async function insertarParametrosTicket(data: ParamsTicketInterface[]) {
+  await borrarInfoTicket();
+  const database = (await conexion).db("tocgame");
+  const paramTickets =
+    database.collection<ParamsTicketInterface>("parametros-tickets");
+  return (await paramTickets.insertMany(data)).acknowledged;
 }
 
-export async function getParamsTicket() {
-  const database = (await conexion).db('tocgame');
-  const paramTickets = database.collection('parametros-tickets');
-  const arrayResult = await (await paramTickets.find({})).toArray();
-  return arrayResult;
+/* Eze 4.0 */
+export async function getParamsTicket(): Promise<ParamsTicketInterface[]> {
+  const database = (await conexion).db("tocgame");
+  const paramTickets =
+    database.collection<ParamsTicketInterface>("parametros-tickets");
+  return await paramTickets.find({}).toArray();
 }
 
-export async function borrarInfoTicket() {
-  try {
-    const database = (await conexion).db('tocgame');
-    const paramTickets = database.collection('parametros-tickets');
-    const resultado = await paramTickets.drop();
-    return resultado;
-  } catch (err) {
-    if (err.codeName == 'NamespaceNotFound') {
-      return true;
-    } else {
-      return false;
+/* Eze 4.0 */
+export async function borrarInfoTicket(): Promise<void> {
+  const database = (await conexion).db("tocgame");
+  const collectionList = await database.listCollections().toArray();
+
+  for (let i = 0; i < collectionList.length; i++) {
+    if (collectionList[i].name === "parametros-tickets") {
+      await database.collection("parametros-tickets").drop();
+      break;
     }
   }
 }

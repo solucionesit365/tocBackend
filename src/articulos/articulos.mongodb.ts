@@ -1,71 +1,57 @@
-import {InsertManyResult} from 'mongodb';
-import {conexion} from '../conexion/mongodb';
+import { conexion } from "../conexion/mongodb";
+import { ArticulosInterface } from "./articulos.interface";
 
-export async function getInfoArticulo(idArticulo: number): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const articulos = database.collection('articulos');
-  const resultado = await articulos.findOne({_id: idArticulo});
-
-  return resultado;
+/* Eze 4.0 */
+export async function getInfoArticulo(
+  idArticulo: ArticulosInterface["_id"]
+): Promise<ArticulosInterface> {
+  const database = (await conexion).db("tocgame");
+  const articulos = database.collection<ArticulosInterface>("articulos");
+  return await articulos.findOne({ _id: idArticulo });
 }
 
-export async function insertarArticulos(arrayArticulos, esTarifaEspecial = false) {
-  const apuntoColeccion = (esTarifaEspecial == true) ? ('articulosTarifaEspecial') : ('articulos');
-  if (await borrarArticulos(esTarifaEspecial)) {
-    const database = (await conexion).db('tocgame');
-    const articulos = database.collection(apuntoColeccion);
-    const resultado = await articulos.insertMany(arrayArticulos);
-
-    return resultado;
-  } else {
-    const res: InsertManyResult<any> = {
-      acknowledged: false,
-      insertedCount: 0,
-      insertedIds: null,
-    };
-    return res;
-  }
+/* Eze 4.0 */
+export async function insertarArticulos(arrayArticulos: ArticulosInterface[]) {
+  await borrarArticulos();
+  const database = (await conexion).db("tocgame");
+  const articulos = database.collection<ArticulosInterface>("articulos");
+  return (await articulos.insertMany(arrayArticulos)).acknowledged;
 }
 
-export async function borrarArticulos(esTarifaEspecial: boolean) {
-  try {
-    const apuntoColeccion = (esTarifaEspecial == true) ? ('articulosTarifaEspecial') : ('articulos');
-    const database = (await conexion).db('tocgame');
-    const articulos = database.collection(apuntoColeccion);
-    const resultado = await articulos.drop();
-    return resultado;
-  } catch (err) {
-    if (err.codeName == 'NamespaceNotFound') {
-      return true;
-    } else {
-      return false;
+/* Eze 4.0 */
+export async function borrarArticulos(): Promise<void> {
+  const database = (await conexion).db("tocgame");
+  const collectionList = await database.listCollections().toArray();
+  for (let i = 0; i < collectionList.length; i++) {
+    if (collectionList[i].name === "articulos") {
+      await database.collection("articulos").drop();
     }
   }
 }
 
-export async function getInfoArticuloTarifaEspecial(idArticulo: number): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const articulos = database.collection('articulosTarifaEspecial');
-  const resultado = await articulos.findOne({_id: idArticulo});
-
-  return resultado;
+/* Eze 4.0 */
+export async function buscar(busqueda: string): Promise<ArticulosInterface[]> {
+  const database = (await conexion).db("tocgame");
+  const articulos = database.collection<ArticulosInterface>("articulos");
+  return await articulos
+    .find(
+      {
+        nombre: { $regex: new RegExp(busqueda, "i") },
+      },
+      { limit: 20 }
+    )
+    .toArray();
 }
 
-export async function getSuplementos(suplementos) {
-  const database = (await conexion).db('tocgame');
-  const articulos = database.collection('articulos');
-  const suplementosData = [];
-  for (const i in suplementos) {
-    const resultado = await (await articulos.find({_id: suplementos[i]})).toArray();
-    suplementosData.push(resultado[0]);
-  }
-  return suplementosData;
-}
-
-export async function editarArticulo(id, nombre, precioBase, precioConIva) {
-  const database = (await conexion).db('tocgame');
-  const articulos = database.collection('articulos');
-  const teclas = database.collection('teclas');
-  await teclas.updateMany({idArticle: id}, {$set: {'nombreArticulo': nombre}}, {upsert: true});
-  return await articulos.updateOne({_id: id}, {$set: {'nombre': nombre, 'precioBase': precioBase, 'precioConIva': precioConIva}}, {upsert: true});
-}
+// export async function getSuplementos(suplementos) {
+//   const database = (await conexion).db("tocgame");
+//   const articulos = database.collection("articulos");
+//   const suplementosData = [];
+//   for (const i in suplementos) {
+//     const resultado = await (
+//       await articulos.find({ _id: suplementos[i] })
+//     ).toArray();
+//     suplementosData.push(resultado[0]);
+//   }
+//   return suplementosData;
+// }

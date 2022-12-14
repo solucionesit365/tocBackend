@@ -1,104 +1,97 @@
-import {Controller, Post, Body} from '@nestjs/common';
-import {cajaInstance} from './caja.clase';
+import { Controller, Post, Get, Body } from "@nestjs/common";
+import { UtilesModule } from "../utiles/utiles.module";
+import { cajaInstance } from "./caja.clase";
+import { logger } from "../logger";
 
-@Controller('caja')
+@Controller("caja")
 export class CajaController {
-    @Post('cerrarCaja')
-  async cerrarCaja(@Body() params) {
-    const cajaAbierta = await cajaInstance.cajaAbierta();
-    if (params.total != undefined, params.detalle != undefined, params.infoDinero != undefined, params.cantidad3G != undefined) {
-      if (cajaAbierta) {
-        return cajaInstance.cerrarCaja(
-            params.total,
-            params.detalle,
-            params.infoDinero,
-            params.cantidad3G,
-        ).then((res) => {
-          if (res) {
-            return cajaInstance.guardarMonedas(params.infoDinero, 'CLAUSURA').then((res2) => {
-              if (res2) {
-                return {error: false};
-              }
-              return {error: true, mensaje: 'Backend: Error en caja/cerrarCaja > Comprobar log'};
-            }).catch((err) => {
-              console.log(err);
-              return {error: true, mensaje: 'Error en catch caja/cerrarCaja > guardaMonedas'};
-            });
-          } else {
-            return {error: true, mensaje: 'Backend: No se ha podido cerrar caja'};
-          }
-        }).catch((err) => {
-          console.log(err);
-          return {error: true, mensaje: 'Backend: Error CATCH caja/cerrarCaja'};
-        });
-      } else {
-        return {error: true, mensaje: 'Backend: No hay ninguna caja abierta'};
+  /* Eze 4.0 */
+  @Post("cerrarCaja")
+  async cerrarCaja(
+    @Body() { total, detalleMonedas, infoDinero, cantidad3G, idDependienta }
+  ) {
+    try {
+      if (
+        UtilesModule.checkVariable(
+          total,
+          detalleMonedas,
+          infoDinero,
+          cantidad3G,
+          idDependienta
+        ) &&
+        typeof cantidad3G === "number"
+      ) {
+        return await cajaInstance.cerrarCaja(
+          total,
+          detalleMonedas,
+          infoDinero,
+          cantidad3G,
+          idDependienta
+        );
       }
-    } else {
-      return {error: true, mensaje: 'Backend: Faltan datos en caja/cerrarCaja'};
+      throw Error("Error cerrarCaja > Faltan datos");
+    } catch (err) {
+      logger.Error(52, err);
+      return false;
     }
   }
 
-    @Post('abrirCaja')
-    abrirCaja(@Body() params) { // No probado! Se le pasa solo el array de monedas
-      if (params.total != undefined && params.detalle != undefined) {
-        return cajaInstance.abrirCaja(params).then((res) => {
-          if (res) {
-            return {error: false};
-          } else {
-            return {error: true};
-          }
-        }).catch((err) => {
-          console.log(err);
-          return {error: true};
+  /* Eze 4.0 */
+  @Post("abrirCaja")
+  async abrirCaja(@Body() { total, detalle, idDependienta }) {
+    console.log(
+      "total: ",
+      total,
+      " detalle: ",
+      detalle,
+      " idDependienta: ",
+      idDependienta
+    );
+    try {
+      if (total != undefined && detalle != undefined)
+        return await cajaInstance.abrirCaja({
+          detalleApertura: detalle,
+          idDependientaApertura: idDependienta,
+          inicioTime: Date.now(),
+          totalApertura: total,
         });
-      } else {
-        return {error: true, mensaje: 'Backend: Faltan datos en caja/abrirCaja'};
-      }
+      throw Error("Error abrirCaja > Faltan datos o son incorrectos");
+    } catch (err) {
+      logger.Error(53, err);
+      return false;
     }
+  }
 
-    @Post('estadoCaja')
-    estadoCaja() { // No probado! Se le pasa solo el array de monedas
-      return cajaInstance.cajaAbierta().then((res) => {
-        if (res) {
-          return {abierta: true, error: false};
-        } else {
-          return {abierta: false, error: false};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en caja/estadoCaja CATCH'};
-      });
+  /* Eze 4.0 */
+  @Get("estadoCaja")
+  async estadoCaja() {
+    try {
+      return await cajaInstance.cajaAbierta();
+    } catch (err) {
+      logger.Error(54, err);
+      return false;
     }
+  }
 
-    @Post('getMonedasUltimoCierre')
-    getMonedasUltimoCierre() { // No probado! Se le pasa solo el array de monedas
-      return cajaInstance.getMonedas('CLAUSURA').then((res) => {
-        return {error: false, info: res};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en caja/getMonedasUltimoCierre > CATCH'};
-      });
+  /* Eze 4.0 */
+  @Get("getMonedasUltimoCierre")
+  async getMonedasUltimoCierre() {
+    try {
+      return cajaInstance.getMonedas("CLAUSURA");
+    } catch (err) {
+      logger.Error(55, err);
+      return null;
     }
+  }
 
-    @Post('getDatosUltimoCierre')
-    getDatosUltimoCierre() { // No probado! Se le pasa solo el array de monedas
-      return cajaInstance.getDatosUltimoCierre().then((res) => {
-        return {error: false, info: res};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en caja/getDatosUltimoCierre > CATCH'};
-      });
+  /* Eze 4.0 */
+  @Get("getUltimoCierre")
+  async getUltimoCierre() {
+    try {
+      return await cajaInstance.getUltimoCierre();
+    } catch (err) {
+      logger.Error(140, err);
+      return false;
     }
-
-    @Post('getDatosMoviments')
-    getDatosMoviments(@Body() params) { // No probado! Se le pasa solo el array de monedas
-      return cajaInstance.getDatosMoviments(params.fechaInicio, params.fechaFinal).then((res) => {
-        return {error: false, info: res};
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Backend: Error en caja/getDatosMoviments > CATCH'};
-      });
-    }
-
+  }
 }

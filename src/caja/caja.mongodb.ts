@@ -1,111 +1,141 @@
-import {UtilesModule} from '../utiles/utiles.module';
-import {conexion} from '../conexion/mongodb';
-import {CajaForSincroInterface, CajaInterface} from './caja.interface';
+import { UtilesModule } from "../utiles/utiles.module";
+import { conexion } from "../conexion/mongodb";
+import {
+  CajaAbiertaInterface,
+  CajaSincro,
+  MonedasInterface,
+  TiposInfoMoneda,
+} from "./caja.interface";
+import { logger } from "../logger";
 
-export async function getInfoCaja(): Promise<any> {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('cajas');
-  const resultado = await caja.findOne({_id: 'CAJA'});
-  return resultado;
+/* Eze 4.0 */
+export async function getInfoCajaAbierta(): Promise<CajaAbiertaInterface> {
+  const database = (await conexion).db("tocgame");
+  const caja = database.collection<CajaAbiertaInterface>("caja");
+  return await caja.findOne();
 }
 
-export async function limpiezaCajas() {
-  const database = (await conexion).db('tocgame');
-  const sincroCajas = database.collection('sincro-cajas');
-  sincroCajas.deleteMany({enviado: true, _id: {$lte: UtilesModule.restarDiasTimestamp(Date.now())}});
+/* Eze 4.0 */
+export async function resetCajaAbierta(): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const caja = database.collection<CajaAbiertaInterface>("caja");
+  return (
+    await caja.updateMany(
+      {},
+      {
+        $set: {
+          inicioTime: null,
+          idDependientaApertura: null,
+          totalApertura: null,
+          detalleApertura: null,
+        },
+      }
+    )
+  ).acknowledged;
 }
 
-export async function guardarMonedas(arrayMonedas: any, tipo: 'APERTURA' | 'CLAUSURA') {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('infoMonedas');
-  const resultado = await caja.updateOne({_id: tipo}, {$set: {'array': arrayMonedas}}, {upsert: true});
-  return resultado;
+/* Eze 4.0 - Excepción */
+export async function limpiezaCajas(): Promise<boolean> {
+  try {
+    const database = (await conexion).db("tocgame");
+    const sincroCajas = database.collection("sincro-cajas");
+    return (
+      await sincroCajas.deleteMany({
+        enviado: true,
+        _id: { $lte: UtilesModule.restarDiasTimestamp(Date.now()) },
+      })
+    ).acknowledged;
+  } catch (err) {
+    logger.Error(56, err);
+    return false;
+  }
 }
 
-export async function getMonedas(tipo: 'APERTURA' | 'CLAUSURA') {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('infoMonedas');
-  const resultado = await caja.findOne({_id: tipo});
-  return resultado;
+/* Eze 4.0 */
+export async function guardarMonedas(
+  arrayMonedas: MonedasInterface["array"],
+  tipo: TiposInfoMoneda
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const infoMonedas = database.collection<MonedasInterface>("infoMonedas");
+  const resultado = await infoMonedas.updateOne(
+    { _id: tipo },
+    { $set: { array: arrayMonedas } },
+    { upsert: true }
+  );
+  return resultado.acknowledged;
 }
 
-export async function getDatosUltimoCierre() {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('sincro-cajas');
-  const resultado = await caja.find().sort({ _id: -1 }).limit(1).toArray();
-
-  return resultado;
+/* Eze 4.0 */
+export async function getUltimoCierre(): Promise<CajaSincro> {
+  const database = (await conexion).db("tocgame");
+  const sincroCajas = database.collection<CajaSincro>("sincro-cajas");
+  return await sincroCajas.findOne({ enviado: false }, { sort: { _id: 1 } });
 }
 
-export async function getDatosMoviments(inicioTime, finalTime) {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('movimientos');
-  const resultado = await caja.find({ $and: [ {_id: {$gte:inicioTime}}, {_id:{$lte:finalTime} } ] }).toArray();
-  return resultado;
+/* Eze 4.0 */
+export async function getMonedas(
+  tipo: TiposInfoMoneda
+): Promise<MonedasInterface> {
+  const database = (await conexion).db("tocgame");
+  const infoMonedas = database.collection<MonedasInterface>("infoMonedas");
+  return await infoMonedas.findOne({ _id: tipo });
 }
 
-export async function setInfoCaja(data: CajaInterface) {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('cajas');
-  const resultado = await caja.replaceOne({
-    _id: 'CAJA',
-  },
-  data,
-  {upsert: true});
-
-  return resultado;
+/* Eze 4.0 */
+export async function setInfoCaja(data: CajaAbiertaInterface) {
+  const database = (await conexion).db("tocgame");
+  const caja = database.collection<CajaAbiertaInterface>("caja");
+  const resultado = await caja.updateMany({}, { $set: data }, { upsert: true });
+  return (
+    resultado.acknowledged &&
+    (resultado.modifiedCount > 0 || resultado.upsertedCount > 0)
+  );
 }
 
-export async function borrarCaja() {
-  const database = (await conexion).db('tocgame');
-  const caja = database.collection('cajas');
-  const resultado = await caja.drop();
-  return resultado;
+/* Eze 4.0 (No se usa, pero aquí está) */
+export async function borrarCaja(): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const collectionList = await database.listCollections().toArray();
+  for (let i = 0; i < collectionList.length; i++) {
+    if (collectionList[i].name === "caja") {
+      await database.collection("caja").drop();
+      break;
+    }
+  }
+  return true;
 }
 
-export async function nuevoItemSincroCajas(unaCaja) {
-  const database = (await conexion).db('tocgame');
-  const sincroCajas = database.collection('sincro-cajas');
-  const resultado = await sincroCajas.insertOne(unaCaja);
-  return resultado;
+/* Eze 4.0 */
+export async function nuevoItemSincroCajas(caja: CajaSincro): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const sincroCajas = database.collection("sincro-cajas");
+  return (await sincroCajas.insertOne(caja)).acknowledged;
 }
 
-export async function confirmarCajaEnviada(unaCaja: CajaInterface) {
-  const database = (await conexion).db('tocgame');
-  const sincroCajas = database.collection('sincro-cajas');
-  const resultado = await sincroCajas.updateOne({_id: unaCaja._id}, {$set: {
-    'enviado': unaCaja.enviado,
-  }});
-
-  return resultado;
+/* Eze 4.0 */
+export async function confirmarCajaEnviada(
+  idCaja: CajaSincro["_id"]
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const sincroCajas = database.collection("sincro-cajas");
+  const resultado = await sincroCajas.updateOne(
+    { _id: idCaja },
+    {
+      $set: {
+        enviado: true,
+      },
+    }
+  );
+  return resultado.acknowledged && resultado.modifiedCount > 0;
 }
 
-export async function confirmarCajaHabiaLlegado(unaCaja: CajaInterface) {
-  const database = (await conexion).db('tocgame');
-  const sincroCajas = database.collection('sincro-cajas');
-  const resultado = await sincroCajas.updateOne({_id: unaCaja._id}, {$set: {
-    'enviado': unaCaja.enviado,
-    'comentario': unaCaja.comentario,
-  }});
-
-  return resultado;
+/* Eze 4.0 */
+export async function getCajaSincroMasAntigua(): Promise<CajaSincro> {
+  const database = (await conexion).db("tocgame");
+  const sincroCajas = database.collection<CajaSincro>("sincro-cajas");
+  return await sincroCajas.findOne(
+    { enviado: false },
+    { sort: { finalTime: 1 } }
+  );
 }
-
-/*  Devuelve la caja más antigua con estado enviado = false
-    para enviarla al servidor
-*/
-export async function getCajaMasAntigua() {
-  const database = (await conexion).db('tocgame');
-  const sincroCajas = database.collection('sincro-cajas');
-  const resultado = await (await sincroCajas.find({enviado: false}, {sort: {_id: 1}, limit: 1})).toArray();
-  return resultado;
-}
-
-// export async function contarClearOne(unaCaja) {
-
-//     const database = (await conexion).db('tocgame');
-//     const caja = database.collection('cajas');
-//     const resultado = await caja.insertOne(unaCaja);
-
-//     return resultado;
-// }

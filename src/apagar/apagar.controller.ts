@@ -1,9 +1,9 @@
-import {Controller, Post, Body, Get} from '@nestjs/common';
-import {apagarinstance} from './apagar.class';
+import { Controller, Get } from "@nestjs/common";
+import { apagarinstance } from "./apagar.class";
 
-@Controller('apagarEquipo')
+@Controller("controlTpv")
 export class ApagarController {
-    @Get()
+  @Get()
   apagar() {
     return apagarinstance.apagarEquipo();
   }

@@ -1,40 +1,42 @@
-import {Controller, Post, Body} from '@nestjs/common';
-import {movimientosInstance} from './movimientos.clase';
-@Controller('movimientos')
+import { Controller, Post, Body } from "@nestjs/common";
+import { UtilesModule } from "../utiles/utiles.module";
+import { movimientosInstance } from "./movimientos.clase";
+import { logger } from "../logger";
+
+@Controller("movimientos")
 export class MovimientosController {
-    @Post('nuevaSalida')
-  nuevaSalida(@Body() params) {
-    if (params.cantidad != undefined && params.concepto != undefined) {
-      return movimientosInstance.nuevaSalida(params.cantidad, params.concepto, 'SALIDA').then((res) => {
-        if (res) {
-          return {error: false};
-        } else {
-          return {error: true, mensaje: 'Error en nuevaSalida()'};
-        }
-      }).catch((err) => {
-        console.log(err);
-        return {error: true, mensaje: 'Error, ver log nest'};
-      });
-    } else {
-      return {error: true, mensaje: 'Error, faltan datos'};
+  /* Eze 4.0 */
+  @Post("nuevoMovimiento") // Solo para entradas o salidas manuales (idTicket = null)
+  nuevoMovimiento(@Body() { cantidad, concepto, idTrabajador, tipo }) {
+    try {
+      if (
+        cantidad != undefined &&
+        UtilesModule.checkVariable(concepto, idTrabajador, tipo)
+      ) {
+        return movimientosInstance.nuevoMovimiento(
+          cantidad,
+          concepto,
+          tipo,
+          null,
+          idTrabajador
+        );
+      }
+      throw Error("Error, faltan datos en nuevoMovimiento() controller");
+    } catch (err) {
+      logger.Error(99, err);
+      return false;
     }
   }
 
-    @Post('nuevaEntrada')
-    nuevaEntrada(@Body() params) {
-      if (params.cantidad != undefined && params.concepto != undefined) {
-        return movimientosInstance.nuevaEntrada(params.cantidad, params.concepto).then((res) => {
-          if (res) {
-            return {error: false};
-          } else {
-            return {error: true, mensaje: 'Error en nuevaEntrada()'};
-          }
-        }).catch((err) => {
-          console.log(err);
-          return {error: true, mensaje: 'Error, ver log nest'};
-        });
-      } else {
-        return {error: true, mensaje: 'Error, faltan datos'};
-      }
+  @Post("getMovimientosIntervalo")
+  async getMovimientosIntervalo(@Body() { inicio, final }) {
+    try {
+      if (inicio && final)
+        return await movimientosInstance.getMovimientosIntervalo(inicio, final);
+      else throw Error("Faltan datos en movimientos/getMovimientosIntervalo");
+    } catch (err) {
+      logger.Error(142, err);
+      return false;
     }
+  }
 }

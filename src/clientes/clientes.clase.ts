@@ -1,67 +1,35 @@
-import * as schClientes from './clientes.mongodb';
-import {ClientesInterface} from './clientes.interface';
-import axios from 'axios';
-import {parametrosInstance} from 'src/parametros/parametros.clase';
+import * as schClientes from "./clientes.mongodb";
+import { ClientesInterface } from "./clientes.interface";
+import axios from "axios";
+import { parametrosInstance } from "src/parametros/parametros.clase";
+import { tarifasInstance } from "src/tarifas/tarifas.class";
 
 export class Clientes {
-  private clienteVip: boolean = false;
-  /* Busca tanto nombres como tarjeta cliente */
-  buscar(cadena: string) {
-    return schClientes.buscar(cadena).then((res: ClientesInterface[]) => {
-      if (res.length > 0) {
-        console.log(res);
-        return res;
-      } else {
-        return [];
-      }
-    }).catch((err) => {
-      console.log(err);
-      return [];
-    });
+  /* Eze 4.0. Busca tanto nombres como tarjeta cliente */
+  buscar = async (cadena: string) => await schClientes.buscar(cadena);
+
+  /* Eze 4.0 */
+  getClienteById = async (idCliente: string): Promise<ClientesInterface> =>
+    await schClientes.getClienteById(idCliente);
+
+  /* Eze 4.0 */
+  insertarClientes = async (arrayClientes: ClientesInterface[]) =>
+    schClientes.insertarClientes(arrayClientes);
+
+  /* Eze 4.0 */
+  async getPuntosCliente(
+    idClienteFinal: ClientesInterface["id"]
+  ): Promise<number> {
+    return (
+      await axios.post<any>("clientes/getPuntosCliente", {
+        database: (await parametrosInstance.getParametros()).database,
+        idClienteFinal,
+      })
+    ).data.info;
   }
 
-  getClienteByID(idCliente: string): Promise<ClientesInterface> {
-    return schClientes.getClieneteByID(idCliente).then((res: ClientesInterface) => {
-      return res;
-    }).catch((err) => {
-      console.log(err);
-      return null;
-    });
-  }
-
-  insertarClientes(arrayClientes) {
-    return schClientes.insertarClientes(arrayClientes).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  getPuntosCliente(idClienteFinal: string) {
-    return axios.post('clientes/getPuntosCliente', {database: parametrosInstance.getParametros().database, idClienteFinal}).then((res: any) => {
-      if (res.data.error == false) {
-        return res.data.info;
-      } else {
-        console.log(res.data.error);
-        return 0;
-      }
-    }).catch((err) => {
-      console.log(err);
-      return 0;
-    });
-  }
-
-  setEstadoClienteVIP(nuevoEstado: boolean) {
-    try {
-      this.clienteVip = nuevoEstado;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  getEstadoClienteVIP() {
-    return this.clienteVip;
-  }
+  /* Eze 4.0 */
+  tieneTarifaEspecial = async (idCliente: ClientesInterface["id"]) =>
+    await tarifasInstance.clienteTieneTarifa(idCliente);
 }
 export const clienteInstance = new Clientes();

@@ -1,16 +1,16 @@
-import {Body, Controller, Post} from '@nestjs/common';
-import {UtilesModule} from '../utiles/utiles.module';
-import {ofertas} from './promociones.clase';
+import { Controller, Get } from "@nestjs/common";
+import { logger } from "src/logger";
+import { nuevaInstancePromociones } from "./promociones.clase";
 
-@Controller('promociones')
+@Controller("promociones")
 export class PromocionesController {
-    @Post('setEstadoPromociones')
-  setEstadoPromociones(@Body() params) {
-    if (UtilesModule.checkVariable(params.estadoPromociones)) {
-      ofertas.setEstadoPromociones(params.estadoPromociones);
-      return {error: false};
-    } else {
-      return {error: true, mensaje: 'Error, faltan datos'};
+  @Get("descargarPromociones")
+  async descargarPromociones() {
+    try {
+      return await nuevaInstancePromociones.descargarPromociones();
+    } catch (err) {
+      logger.Error(127, err);
+      return false;
     }
   }
 }

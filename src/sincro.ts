@@ -1,5 +1,5 @@
 import { ticketsInstance } from "./tickets/tickets.clase";
-import { socket, emitSocket } from "./sanPedro";
+import { emitSocket } from "./sanPedro";
 import { parametrosInstance } from "./parametros/parametros.clase";
 import { cajaInstance } from "./caja/caja.clase";
 import { movimientosInstance } from "./movimientos/movimientos.clase";
@@ -10,88 +10,62 @@ import { limpiezaTickets } from "./tickets/tickets.mongodb";
 import { limpiezaFichajes } from "./trabajadores/trabajadores.mongodb";
 import { limpiezaCajas } from "./caja/caja.mongodb";
 import { limpiezaMovimientos } from "./movimientos/movimientos.mongodb";
-import axios from "axios";
-
+import { tarifasInstance } from "./tarifas/tarifas.class";
+import { logger } from "./logger";
+import { mesasInstance } from "./mesas/mesas.class";
 let enProcesoTickets = false;
 let enProcesoMovimientos = false;
-
-async function datafonoLibre(ipPaytef: string): Promise<boolean> {
-  if (ipPaytef) {
-    try {
-      const resultado: any = (
-        await axios.post(`http://${ipPaytef}:8887/transaction/poll`, {
-          pinpad: "*",
-        })
-      ).data;
-      if (resultado.result) {
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.log(err);
-      return true;
-    }
-  }
-  return true;
-}
 
 async function sincronizarTickets(continuar: boolean = false) {
   try {
     if (!enProcesoTickets || continuar) {
       enProcesoTickets = true;
-      const parametros = await parametrosInstance.getEspecialParametros();
+      const parametros = await parametrosInstance.getParametros();
       if (parametros != null) {
         const ticket = await ticketsInstance.getTicketMasAntiguo();
         if (ticket) {
-          if (await datafonoLibre(parametros.ipTefpay)) {
-            emitSocket("sincroTicketsNueva", {
-              parametros,
-              arrayTickets: ticket,
-            });
-            return true;
-          }
+          emitSocket("sincroTicketsNueva", {
+            parametros,
+            arrayTickets: ticket,
+          });
+          return true;
         }
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error(4, "No hay parámetros definidos en la BBDD");
       }
     }
     enProcesoTickets = false;
     return false;
   } catch (err) {
     enProcesoTickets = false;
-    console.log(err);
+    logger.Error(5, err);
   }
 }
 
 function sincronizarCajas() {
   parametrosInstance
-    .getEspecialParametros()
+    .getParametros()
     .then((parametros) => {
       if (parametros != null) {
         cajaInstance
-          .getCajaMasAntigua()
-          .then((res) => {
-            if (res.length > 0) {
+          .getCajaSincroMasAntigua()
+          .then((resCaja) => {
+            if (resCaja) {
               emitSocket("sincroCajas", {
                 parametros,
-                infoCaja: res[0],
+                infoCaja: resCaja,
               });
-
-              // socket.emit('sincroCajas', {
-              //     parametros,
-              //     infoCaja: res[0]
-              // });
             }
           })
           .catch((err) => {
-            console.log(err);
+            logger.Error(6, err);
           });
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error(7, "No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      console.log(err);
+      logger.Error(8, err);
     });
 }
 
@@ -99,7 +73,7 @@ async function sincronizarMovimientos(continuar: boolean = false) {
   try {
     if (!enProcesoMovimientos || continuar) {
       enProcesoMovimientos = true;
-      const parametros = await parametrosInstance.getEspecialParametros();
+      const parametros = await parametrosInstance.getParametros();
       if (parametros != null) {
         const res = await movimientosInstance.getMovimientoMasAntiguo();
         if (res != null) {
@@ -110,19 +84,19 @@ async function sincronizarMovimientos(continuar: boolean = false) {
           return true;
         }
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error(9, "No hay parámetros definidos en la BBDD");
       }
     }
     enProcesoMovimientos = false;
   } catch (err) {
     enProcesoMovimientos = false;
-    console.log(err);
+    logger.Error(10, err);
   }
 }
 
 function sincronizarFichajes() {
   parametrosInstance
-    .getEspecialParametros()
+    .getParametros()
     .then((parametros) => {
       if (parametros != null) {
         trabajadoresInstance
@@ -133,28 +107,23 @@ function sincronizarFichajes() {
                 parametros,
                 fichaje: res,
               });
-
-              // socket.emit('sincroFichajes', {
-              //     parametros,
-              //     fichaje: res
-              // });
             }
           })
           .catch((err) => {
-            console.log(err);
+            logger.Error(11, err);
           });
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error(12, "No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      console.log(err);
+      logger.Error(13, err);
     });
 }
 
 function sincronizarDevoluciones() {
   parametrosInstance
-    .getEspecialParametros()
+    .getParametros()
     .then((parametros) => {
       if (parametros !== null) {
         devolucionesInstance
@@ -165,31 +134,42 @@ function sincronizarDevoluciones() {
                 parametros,
                 devolucion: res,
               });
-
-              // socket.emit('sincroDevoluciones', {
-              //     parametros,
-              //     devolucion: res,
-              // })
             }
           })
           .catch((err) => {
-            console.log(err);
+            logger.Error(14, err);
           });
       } else {
-        console.log("No hay parámetros definidos en la BBDD");
+        logger.Error(15, "No hay parámetros definidos en la BBDD");
       }
     })
     .catch((err) => {
-      console.log(err);
+      logger.Error(16, err);
     });
+}
+
+async function actualizarTarifas() {
+  try {
+    await tarifasInstance.actualizarTarifas();
+  } catch (err) {
+    logger.Error(17, err);
+  }
 }
 
 /* Actualiza precios, teclado y promociones (es decir, todo) */
 function actualizarTeclados() {
   tecladoInstance.actualizarTeclado().catch((err) => {
-    console.log(err);
+    logger.Error(18, err);
   });
 }
+
+// async function actualizarMesas() {
+//   try {
+//     await mesasInstance.actualizarMesasOnline();
+//   } catch (err) {
+//     logger.Error(123, err);
+//   }
+// }
 
 // Borrar datos de más de 15 días y que estén enviados.
 function limpiezaProfunda(): void {
@@ -199,13 +179,15 @@ function limpiezaProfunda(): void {
   limpiezaMovimientos();
 }
 
-setInterval(sincronizarTickets, 30000);
+setInterval(sincronizarTickets, 8000);
 setInterval(sincronizarCajas, 40000);
 setInterval(sincronizarMovimientos, 50000);
 setInterval(sincronizarFichajes, 20000);
 setInterval(sincronizarDevoluciones, 60000);
 setInterval(actualizarTeclados, 3600000);
+setInterval(actualizarTarifas, 3600000);
 setInterval(limpiezaProfunda, 60000);
+// setInterval(actualizarMesas, 3600000);
 
 export {
   sincronizarTickets,

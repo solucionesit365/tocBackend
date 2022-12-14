@@ -1,40 +1,50 @@
+import { ClientesInterface } from "../clientes/clientes.interface";
+import { ArticulosInterface } from "../articulos/articulos.interface";
+import { ObjectId } from "mongodb";
+
 export interface CestasInterface {
-    _id: number,
-    tiposIva: {
-        base1: number,
-        base2: number,
-        base3: number,
-        valorIva1: number,
-        valorIva2: number,
-        valorIva3: number,
-        importe1: number,
-        importe2: number,
-        importe3: number
-    },
-    regalo?: boolean,
-    lista: {
-        _id: number,
-        nombre: string,
-        unidades: number,
-        subtotal: number,
-        suplementosId?: number[],
-        promocion: {
-            _id: string,
-            esPromo: boolean,
-            infoPromo?: {
-                idPrincipal: number,
-                cantidadPrincipal: number,
-                idSecundario: number,
-                cantidadSecundario: number,
-                precioRealPrincipal: number,
-                precioRealSecundario: number,
-                unidadesOferta: number,
-                tipoPromo: string
-            }
-        },
-        regalo?: boolean
-    }[],
-    nombreCesta?: string;
-    idCestaSincro?: string,
-    idTrabajador: number
+  _id: ObjectId;
+  timestamp: number,
+  detalleIva: DetalleIvaInterface,
+  lista: ItemLista[],
+  modo: ModoCesta,
+  idCliente: ClientesInterface["id"],
+  nombreCliente?: string,
+  indexMesa?: boolean
 }
+
+export type ItemLista = {
+  idArticulo: number;
+  nombre: string;
+  unidades: number;
+  subtotal: number;
+  arraySuplementos: ArticulosInterface["_id"][];
+  promocion: {
+    idPromocion: string;
+    idArticuloPrincipal: number;
+    cantidadArticuloPrincipal: number;
+    idArticuloSecundario: number;
+    cantidadArticuloSecundario: number;
+    precioRealArticuloPrincipal: number;
+    precioRealArticuloSecundario: number;
+    unidadesOferta: number;
+    tipoPromo: TiposPromociones;
+  };
+  gramos: number,
+  regalo: boolean;
+};
+
+export type DetalleIvaInterface = {
+  base1: number,
+  base2: number,
+  base3: number,
+  valorIva1: number,
+  valorIva2: number,
+  valorIva3: number,
+  importe1: number,
+  importe2: number,
+  importe3: number
+}
+
+export type TiposPromociones = "COMBO" | "INDIVIDUAL";
+export type ModoCesta = "VENTA" | "CONSUMO_PERSONAL" | "DEVOLUCION";

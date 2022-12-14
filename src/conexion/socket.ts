@@ -1,35 +1,20 @@
-import {io} from 'socket.io-client';
-import {parametrosInstance} from '../parametros/parametros.clase';
+import { Socket } from "socket.io";
+import { io } from "socket.io-client";
+import { parametrosInstance } from "../parametros/parametros.clase";
 
-const SERVER_URL = 'https://sanpedroserver.com';
-// const parametros = await tocGame.parametros.getParametros();
-// let tipoEntorno = '';
-
-// // if(process.argv[2] == 'test') {
-// //     tipoEntorno = 'http://localhost:8080'
-// // } else {
-// //     tipoEntorno = 'http://34.78.247.153:8080';
-// // }
-
-// tipoEntorno = "https://sanpedroserver.com";
-
-// export const socket = (parametros == null || typeof parametros.token === 'undefined') ? io.connect(tipoEntorno) : (io.connect(tipoEntorno, {query: `token=${parametros.token}`}));
+const SERVER_URL = "https://sanpedroserver.com";
 
 class TocSockets {
-  private socket: any;
+  private socket: Socket;
 
-  iniciarSockets() {
-    const parametros = parametrosInstance.getParametros();
-    const tipoEntorno = SERVER_URL;
-    if (tipoEntorno == SERVER_URL) {
-      this.socket = (parametros == null || typeof parametros.token === 'undefined') ? io.connect(tipoEntorno) : (io.connect(tipoEntorno, {query: `token=${parametros.token}`}));
-    } else {
-      this.socket = null;
-    }
+  /* Eze 4.0 */
+  async iniciarSockets() {
+    const parametros = await parametrosInstance.getParametros();
+    this.socket = io.connect(SERVER_URL, { query: `token=${parametros.token}` });
   }
 
   emit(canal: string, data: any = null) {
-        (data == null) ? (socket.emit(canal)) : (socket.emit(canal, data));
+    data == null ? this.socket.emit(canal) : this.socket.emit(canal, data);
   }
 }
 

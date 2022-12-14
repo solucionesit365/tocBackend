@@ -1,11 +1,17 @@
-import {Body, Controller, Post} from '@nestjs/common';
-import {ticketsInstance} from 'src/tickets/tickets.clase';
+import { Body, Controller, Post } from "@nestjs/common";
+import axios from "axios";
+import { movimientosInstance } from "src/movimientos/movimientos.clase";
 
-
-@Controller('test')
+@Controller("test")
 export class TestController {
-    @Post('test')
-  imprimirAlgo(@Body() parms) {
-    return ticketsInstance.anularTicket(2);
+  @Post("test")
+  async imprimirAlgo(@Body() _parms) {
+    try {
+      return await movimientosInstance.construirArrayVentas();
+      return 0;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
   }
 }

@@ -1,20 +1,25 @@
-import {parametrosInstance} from '../parametros/parametros.clase';
-import {MovimientosInterface} from './movimientos.interface';
-import * as schMovimientos from './movimientos.mongodb';
-import {impresoraInstance} from '../impresora/impresora.class';
-import {trabajadoresInstance} from '../trabajadores/trabajadores.clase';
-const moment = require('moment');
-const Ean13Utils = require('ean13-lib').Ean13Utils;
-const TIPO_ENTRADA = 'ENTRADA';
-const TIPO_SALIDA = 'SALIDA';
+import { parametrosInstance } from "../parametros/parametros.clase";
+import { MovimientosInterface } from "./movimientos.interface";
+import * as schMovimientos from "./movimientos.mongodb";
+// import { impresoraInstance } from "../impresora/impresora.class";
+// import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
+import { logger } from "../logger";
+import { TicketsInterface } from "../tickets/tickets.interface";
+import { ticketsInstance } from "src/tickets/tickets.clase";
+import { cajaInstance } from "src/caja/caja.clase";
+
+const moment = require("moment");
+const Ean13Utils = require("ean13-lib").Ean13Utils;
+// const TIPO_ENTRADA = "ENTRADA";
+// const TIPO_SALIDA = "SALIDA";
 
 function getNumeroTresDigitos(x: number) {
-  let devolver = '';
-  if (x< 100 && x >=10) {
-    devolver = '0' + x;
+  let devolver = "";
+  if (x < 100 && x >= 10) {
+    devolver = "0" + x;
   } else {
     if (x < 10 && x >= 0) {
-      devolver = '00' + x;
+      devolver = "00" + x;
     } else {
       devolver = x.toString();
     }
@@ -23,147 +28,195 @@ function getNumeroTresDigitos(x: number) {
 }
 
 export class MovimientosClase {
-  /* Devuelve un array de movimientos entre dos instantes de tiempo */
-  getMovimientosIntervalo(inicioTime: number, finalTime: number): Promise<MovimientosInterface[]> {
-    return schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
+  /* Eze v23 */
+  getMovimientosIntervalo = (inicioTime: number, finalTime: number) =>
+    schMovimientos.getMovimientosIntervalo(inicioTime, finalTime);
+
+  /* Eze 4.0 */
+  public async nuevoMovimiento(
+    valor: MovimientosInterface["valor"],
+    concepto: MovimientosInterface["concepto"],
+    tipo: MovimientosInterface["tipo"],
+    idTicket: MovimientosInterface["idTicket"],
+    idTrabajador: MovimientosInterface["idTrabajador"]
+  ) {
+    let codigoBarras = "";
+
+    if (tipo === "ENTREGA_DIARIA") {
+      codigoBarras = await this.generarCodigoBarrasSalida();
+      codigoBarras = String(Ean13Utils.generate(codigoBarras));
+    }
+
+    const nuevoMovimiento: MovimientosInterface = {
+      _id: Date.now(),
+      codigoBarras,
+      concepto,
+      enviado: false,
+      idTicket,
+      idTrabajador,
+      tipo,
+      valor,
+    };
+
+    return await schMovimientos.nuevoMovimiento(nuevoMovimiento);
   }
 
-  /*
-        Inserta una nueva salida de dinero en BBDD. Si el idTicket no se establece, es una salida manual.
-        En caso contrario, se trata de una salida provocada por un pago con tarjeta (por ejemplo).
-     */
-  public async nuevaSalida(cantidad: number, concepto: string, tipoExtra: string, imprimir: boolean = true, idTicket: number = -100) {
-    const parametros = parametrosInstance.getParametros();
-    let codigoBarras = '';
+  /* Eze v23 */
+  private async generarCodigoBarrasSalida(): Promise<string> {
     try {
-      if (tipoExtra != 'TARJETA' && tipoExtra != 'TKRS' && tipoExtra != 'TKRS_SIN_EXCESO' && tipoExtra != 'TKRS_CON_EXCESO' && tipoExtra != 'DEUDA') {
-        codigoBarras = await this.generarCodigoBarrasSalida();
-        codigoBarras = String(Ean13Utils.generate(codigoBarras));
+      const parametros = await parametrosInstance.getParametros();
+      const ultimoCodigoDeBarras = await schMovimientos.getUltimoCodigoBarras();
+
+      if (!ultimoCodigoDeBarras)
+        if (!(await schMovimientos.resetContadorCodigoBarras()))
+          throw "Error en inicializar contador de codigo de barras";
+
+      let ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
+
+      if (ultimoNumero == 999) {
+        if (!(await schMovimientos.resetContadorCodigoBarras()))
+          throw "Error en resetContadorCodigoBarras";
+      } else if (!(await schMovimientos.actualizarCodigoBarras())) {
+        throw "Error en actualizarCodigoBarras";
       }
+
+      ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
+
+      const codigoLicenciaStr = getNumeroTresDigitos(parametros.licencia);
+      const strNumeroCodigosDeBarras: string =
+        getNumeroTresDigitos(ultimoNumero);
+      let codigoFinal = "";
+      const digitYear = new Date().getFullYear().toString()[3];
+
+      codigoFinal = `98${codigoLicenciaStr}${digitYear}${getNumeroTresDigitos(
+        moment().dayOfYear()
+      )}${strNumeroCodigosDeBarras}`;
+      return codigoFinal;
     } catch (err) {
-      console.log(err);
-    }
-
-    const objSalida: MovimientosInterface = {
-      _id: Date.now(),
-      tipo: TIPO_SALIDA,
-      valor: Number(cantidad),
-      concepto: concepto,
-      idTrabajador: (await trabajadoresInstance.getCurrentTrabajador())._id,
-      codigoBarras: codigoBarras,
-      tipoExtra: tipoExtra,
-      idTicket: idTicket,
-      enviado: false,
-      enTransito: false,
-      intentos: 0,
-      comentario: '',
-    };
-    const resNuevaSalida = await schMovimientos.nuevaSalida(objSalida);
-
-    if (resNuevaSalida.acknowledged) {
-      if (imprimir) {
-        impresoraInstance.imprimirSalida(
-            objSalida.valor,
-            objSalida._id,
-            (await trabajadoresInstance.getCurrentTrabajador()).nombre,
-            parametros.nombreTienda,
-            objSalida.concepto,
-            parametros.tipoImpresora,
-            codigoBarras,
-        );
-      }
-      return true;
-    } else {
-      return false;
+      logger.Error(98, err);
+      return null;
     }
   }
 
-  /*
-        Inserta una nueva entrada de dinero en BBDD.
-        Se imprime por defecto.
-     */
-  public async nuevaEntrada(cantidad: number, concepto: string, imprimir: boolean = true) {
-    const parametros = parametrosInstance.getParametros();
-    const objSalida: MovimientosInterface = {
-      _id: Date.now(),
-      tipo: TIPO_ENTRADA,
-      valor: Number(cantidad),
-      concepto: concepto,
-      idTrabajador: (await trabajadoresInstance.getCurrentTrabajador())._id,
-      codigoBarras: '',
-      tipoExtra: TIPO_ENTRADA,
-      idTicket: -100,
-      enviado: false,
-      enTransito: false,
-      intentos: 0,
-      comentario: '',
-    };
-    const resNuevaSalida = await schMovimientos.nuevaSalida(objSalida);
+  /* Eze v23 */
+  getMovimientoMasAntiguo = () => schMovimientos.getMovimientoMasAntiguo();
 
-    if (resNuevaSalida.acknowledged) {
-      if (imprimir) {
-        impresoraInstance.imprimirEntrada(objSalida.valor, objSalida._id, (await trabajadoresInstance.getCurrentTrabajador()).nombre);
+  /* Eze v23 */
+  actualizarEstadoMovimiento = (movimiento: MovimientosInterface) =>
+    schMovimientos.actualizarEstadoMovimiento(movimiento);
+
+  /* Eze 4.0 */
+  construirArrayVentas = async () => {
+    const infoCaja = await cajaInstance.getInfoCajaAbierta();
+    if (infoCaja) {
+      const inicioCaja = infoCaja.inicioTime;
+      const final = Date.now();
+      const arrayTickets = await ticketsInstance.getTicketsIntervalo(
+        inicioCaja,
+        final
+      );
+      const arrayMovimientos = await this.getMovimientosIntervalo(
+        inicioCaja,
+        final
+      );
+
+      const arrayFinalTickets = [];
+
+      for (let i = 0; i < arrayTickets.length; i++) {
+        arrayFinalTickets.push(arrayTickets[i]);
+        arrayFinalTickets[i].movimientos = [];
+
+        for (let j = 0; j < arrayMovimientos.length; j++) {
+          if (arrayTickets[i]._id === arrayMovimientos[j].idTicket) {
+            arrayFinalTickets[i].movimientos.push(arrayMovimientos[j]);
+          }
+        }
       }
-      return true;
-    } else {
-      return false;
+
+      for (let i = 0; i < arrayFinalTickets.length; i++) {
+        if (arrayFinalTickets[i].consumoPersonal) {
+          arrayFinalTickets[i].tipoPago = "CONSUMO PERSONAL";
+          continue;
+        }
+
+        if (arrayFinalTickets[i].movimientos.length === 1) {
+          if (
+            arrayFinalTickets[i].movimientos[0].tipo === "TARJETA" &&
+            arrayFinalTickets[i].movimientos[0].valor > 0
+          ) {
+            arrayFinalTickets[i].tipoPago = "TARJETA";
+          } else if (
+            arrayFinalTickets[i].movimientos[0].tipo === "TKRS_SIN_EXCESO"
+          ) {
+            arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
+          } else if (arrayFinalTickets[i].movimientos[0].tipo === "DEUDA") {
+            arrayFinalTickets[i].tipoPago = "DEUDA";
+          } else {
+            arrayFinalTickets[i].tipoPago = "DESCONOCIDO";
+          }
+        } else if (arrayFinalTickets[i].movimientos.length === 0) {
+          arrayFinalTickets[i].tipoPago = "EFECTIVO";
+        } else if (arrayFinalTickets[i].movimientos.length > 1) {
+          // CASO TARJETA ANULADA
+          if (
+            arrayFinalTickets[i].movimientos.length === 2 &&
+            arrayFinalTickets[i].movimientos[0].tipo === "TARJETA"
+          ) {
+            const busqueda = {
+              original: false,
+              rectificativo: false,
+            };
+            for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
+              if (arrayFinalTickets[i].movimientos[j].tipo === "TARJETA") {
+                if (arrayFinalTickets[i].movimientos[j].valor > 0) {
+                  busqueda.original = true;
+                } else if (arrayFinalTickets[i].movimientos[j].valor < 0) {
+                  busqueda.rectificativo = true;
+                }
+              }
+            }
+            if (busqueda.original && busqueda.rectificativo) {
+              arrayFinalTickets[i].tipoPago = "DEVUELTO";
+            } else {
+              arrayFinalTickets[i].tipoPago = "NO FUNCIONA";
+            }
+          } else if (arrayFinalTickets[i].movimientos.length >= 2) {
+            for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
+              if (
+                arrayFinalTickets[i].movimientos[j].tipo === "TKRS_SIN_EXCESO"
+              ) {
+                if (
+                  arrayFinalTickets[i].movimientos[j].valor >=
+                  arrayFinalTickets[i].total
+                ) {
+                  arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
+                } else {
+                  arrayFinalTickets[i].tipoPago = "TKRS + EFECTIVO";
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return arrayFinalTickets;
     }
-  }
+    return null;
+    // const arrayTickets: TicketsInterface[] = await ticketsInstance.
 
-  private async generarCodigoBarrasSalida() {
-    const parametros = parametrosInstance.getParametros();
-    const ultimoCodigoDeBarras = await schMovimientos.getUltimoCodigoBarras();
-    if (ultimoCodigoDeBarras == null) {
-      if ((await schMovimientos.resetContadorCodigoBarras()).acknowledged == false) {
-        throw 'Error en inicializar contador de codigo de barras';
-      }
-    }
-
-    let objCodigoBarras = (await schMovimientos.getUltimoCodigoBarras()).ultimo;
-    if (objCodigoBarras == 999) {
-      const resResetContador = await schMovimientos.resetContadorCodigoBarras();
-      if (!resResetContador.acknowledged) {
-        throw 'Error en resetContadorCodigoBarras';
-      }
-    } else {
-      const resActualizarContador = await schMovimientos.actualizarCodigoBarras();
-      if (!resActualizarContador.acknowledged) {
-        throw 'Error en actualizarCodigoBarras';
-      }
-    }
-
-    objCodigoBarras = (await schMovimientos.getUltimoCodigoBarras()).ultimo;
-
-    const codigoLicenciaStr: string = getNumeroTresDigitos(parametros.licencia);
-    const strNumeroCodigosDeBarras: string = getNumeroTresDigitos(objCodigoBarras);
-    let codigoFinal: string = '';
-    const digitYear = new Date().getFullYear().toString()[3];
-
-
-    codigoFinal = `98${codigoLicenciaStr}${digitYear}${getNumeroTresDigitos(moment().dayOfYear())}${strNumeroCodigosDeBarras}`;
-    return codigoFinal;
-  }
-
-  getMovimientoMasAntiguo() {
-    return schMovimientos.getMovimientoMasAntiguo();
-  }
-
-  actualizarEstadoMovimiento(movimiento: MovimientosInterface) {
-    return schMovimientos.actualizarEstadoMovimiento(movimiento).then((res) => {
-      return res.acknowledged;
-    }).catch((err) => {
-      console.log(err);
-      return false;
-    });
-  }
-
-  /* Eze v.recortada */
-  async getMovimientosTarjeta() {
-    const fecha = new Date();
-    fecha.setHours(0, 0, 0, 0);
-    const inicioTime = fecha.valueOf();
-    return await schMovimientos.getMovimientosTarjeta(inicioTime, Date.now());
-  }
+    // const movimientosTicket = await schMovimientos.getMovimientosDelTicket(idTicket);
+    // if (movimientosTicket.length === 1) {
+    //   if (movimientosTicket[0].valor > 0 && movimientosTicket[0].tipo === "TARJETA") {
+    //     return "TARJETA";
+    //   }
+    // } else if (movimientosTicket.length === 0) {
+    //   return "EFECTIVO";
+    // } else if (movimientosTicket.length > 1) {
+    //   for (let i = 0; i < movimientosTicket.length; i++) {
+    //     console.log("controlar más adelante");
+    //   }
+    // }
+  };
 }
 
 export const movimientosInstance = new MovimientosClase();
