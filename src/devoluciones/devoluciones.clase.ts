@@ -28,7 +28,7 @@ export class Devoluciones {
       cliente: null,
     };
     await this.insertarDevolucion(objDevolucion);
-    //await impresoraInstance.imprimirTicket(nuevoIdTicket, true); NO VA, HE CREADO UNA NUEVA FUNCIÓN .imprimirDevolucion
+    await impresoraInstance.imprimirDevolucion(objDevolucion._id);
     if (await cestasInstance.borrarArticulosCesta(cesta._id, true, true)) {
       cestasInstance.actualizarCestas();
       return true;
