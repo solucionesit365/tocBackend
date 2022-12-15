@@ -6,7 +6,6 @@ import { articulosInstance } from "../articulos/articulos.clase";
 import { clienteInstance } from "../clientes/clientes.clase";
 import { familiasInstance } from "../familias/familias.class";
 import { nuevaInstancePromociones } from "../promociones/promociones.clase";
-import { paramsTicketInstance } from "../params-ticket/params-ticket.class";
 import { menusInstance } from "../menus/menus.clase";
 import { tecladoInstance } from "../teclado/teclado.clase";
 import { tarifasInstance } from "../tarifas/tarifas.class";
@@ -47,6 +46,8 @@ export class InstaladorController {
           objParams.token = resAuth.data.token;
           objParams.database = resAuth.data.database;
           objParams.visor = "";
+          objParams.header = resAuth.data.header;
+          objParams.footer = resAuth.data.footer;
           objParams.impresoraUsbInfo = {
             pid: "",
             vid: "",
@@ -74,43 +75,40 @@ export class InstaladorController {
       });
 
       if (res.data) {
-        const info1 = await trabajadoresInstance.insertarTrabajadores(
+        const trabajadores = await trabajadoresInstance.insertarTrabajadores(
           res.data.dependientas
         );
-        const info2 = await articulosInstance.insertarArticulos(
+        const articulos = await articulosInstance.insertarArticulos(
           res.data.articulos
         );
-        const info3 = await clienteInstance.insertarClientes(res.data.clientes);
-        const info4 = await familiasInstance.insertarFamilias(
+        const clientes = await clienteInstance.insertarClientes(
+          res.data.clientes
+        );
+        const familias = await familiasInstance.insertarFamilias(
           res.data.familias
         );
-        const info5 = await nuevaInstancePromociones.insertarPromociones(
+        const promociones = await nuevaInstancePromociones.insertarPromociones(
           res.data.promociones
         );
-        const info6 = await paramsTicketInstance.insertarParametrosTicket(
-          res.data.parametrosTicket
-        );
-        const info7 = await menusInstance.insertarMenus(res.data.menus);
-        const info8 = await tecladoInstance.insertarTeclas(res.data.teclas);
-        const info9 = await tarifasInstance.guardarTarifasEspeciales(
+        // const menus = await menusInstance.insertarMenus(res.data.menus);
+        const teclas = await tecladoInstance.insertarTeclas(res.data.teclas);
+        const tarifas = await tarifasInstance.guardarTarifasEspeciales(
           res.data.tarifasEspeciales
         );
 
         if (
-          info1 &&
-          info2 &&
-          info3 &&
-          info4 &&
-          info5 &&
-          info6 &&
-          info7 &&
-          info8 &&
-          info9
+          trabajadores &&
+          articulos &&
+          clientes &&
+          familias &&
+          promociones &&
+          teclas &&
+          tarifas
         ) {
           return true;
         }
         throw Error(
-          `Backend: res1: ${info1}, res2: ${info2}, res3: ${info3}, res4: ${info4}, res5: ${info5}, res6: ${info6}, res7: ${info7}, res8: ${info8}`
+          `Backend: res1: ${trabajadores}, res2: ${articulos}, res3: ${clientes}, res4: ${familias}, res5: ${promociones}, res7: ${teclas}, res8: ${tarifas}`
         );
       }
       throw Error("Error de autenticación en SanPedro");

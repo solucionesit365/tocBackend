@@ -1,12 +1,10 @@
 import { articulosInstance } from "../articulos/articulos.clase";
-import { paramsTicketInstance } from "../params-ticket/params-ticket.class";
 import { ticketsInstance } from "../tickets/tickets.clase";
 import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { TrabajadoresInterface } from "../trabajadores/trabajadores.interface";
 import { clienteInstance } from "../clientes/clientes.clase";
 import { parametrosInstance } from "../parametros/parametros.clase";
 import { Dispositivos } from "../dispositivos";
-import { devolucionesInstance } from "../devoluciones/devoluciones.clase";
 import axios from "axios";
 import { mqttInstance } from "../mqtt";
 import { ClientesInterface } from "../clientes/clientes.interface";
@@ -72,83 +70,43 @@ function dateToString2(fecha) {
 }
 
 export class Impresora {
+  /* Eze 4.0 */
   async bienvenidaCliente() {
     try {
       permisosImpresora();
-      //   var device = new escpos.USB('0x67b','0x2303');
       const device = await dispositivos.getDeviceVisor();
-      if (device != null) {
-        if (device === "MQTT") {
-          mqttInstance.enviarVisor("Bon Dia!!");
-          return;
-        }
-        const options = { encoding: "iso88591" };
-        const printer = new escpos.Screen(device, options);
 
-        try {
-          device.open(function () {
-            printer
-              // Espacios en blanco para limpiar el visor y volver a mostrar los datos en el sitio correcto
-              // .text("")
-              .clear()
-              // .moveUp()
-              // Información del artículo (artículo + precio)
-              .text("Bon Dia!!")
-              // .text(datosExtra)
-
-              .close();
-          });
-        } catch (error) {}
-      } else {
-        mqttInstance.loggerMQTT("Controlado: dispositivo es null");
-      }
+      if (device) mqttInstance.enviarVisor("Bon Dia!!");
+      else throw Error("Controlado: dispositivo es null");
     } catch (err) {
       mqttInstance.loggerMQTT(err.message);
     }
   }
+
+  /* Eze 4.0 */
   async despedirCliente() {
     try {
       permisosImpresora();
-      //   var device = new escpos.USB('0x67b','0x2303');
       const device = await dispositivos.getDeviceVisor();
-      if (device != null) {
-        if (device === "MQTT") {
-          mqttInstance.enviarVisor("Moltes Gracies !!                       ");
-          return;
-        }
-        const options = { encoding: "iso88591" };
-        const printer = new escpos.Screen(device, options);
-        try {
-          device.open(function () {
-            printer
-              // Espacios en blanco para limpiar el visor y volver a mostrar los datos en el sitio correcto
-              // .text("")
-              .clear()
-              // .moveUp()
-              // Información del artículo (artículo + precio)
-              .text(" Moltes Gracies !!")
-              // .text(datosExtra)
-              .close();
-          });
-        } catch (error) {}
-      } else {
-        mqttInstance.loggerMQTT("Controlado: dispositivo es null");
-      }
+
+      if (device)
+        mqttInstance.enviarVisor("Moltes Gracies !!                       ");
+      else throw Error("Controlado: dispositivo es null");
     } catch (err) {
-      mqttInstance.loggerMQTT("Error1: " + err);
-      // errorImpresora(err, event);
+      mqttInstance.loggerMQTT(err.message);
     }
   }
+
+  /* Eze 4.0 */
   async imprimirTicket(idTicket: number) {
-    const paramsTicket = await paramsTicketInstance.getParamsTicket();
     const ticket = await ticketsInstance.getTicketById(idTicket);
     const parametros = await parametrosInstance.getParametros();
-    const infoTrabajador: TrabajadoresInterface =
+    const trabajador: TrabajadoresInterface =
       await trabajadoresInstance.getTrabajadorById(ticket.idTrabajador);
 
     let sendObject = null;
 
-    if (ticket) {
+    if (ticket && trabajador) {
       if (ticket.idCliente && ticket.idCliente != "") {
         let infoCliente: ClientesInterface = null;
         infoCliente = await clienteInstance.getClienteById(ticket.idCliente);
@@ -160,13 +118,9 @@ export class Impresora {
           total: ticket.total,
           visa: await ticketsInstance.getFormaPago(ticket),
           tiposIva: ticket.cesta.detalleIva,
-          cabecera:
-            paramsTicket[0] !== undefined ? paramsTicket[0].valorDato : "",
-          pie: paramsTicket[1] !== undefined ? paramsTicket[1].valorDato : "",
-          nombreTrabajador:
-            infoTrabajador.nombreCorto != null
-              ? infoTrabajador.nombreCorto
-              : "",
+          cabecera: parametros.header,
+          pie: parametros.footer,
+          nombreTrabajador: trabajador.nombreCorto,
           impresora: parametros.tipoImpresora,
           infoClienteVip: null, // Mirar bien para terminar todo
           infoCliente: {
@@ -174,7 +128,6 @@ export class Impresora {
             puntos: puntos,
           },
         };
-        this._venta(sendObject);
       } else {
         sendObject = {
           numFactura: ticket._id,
@@ -182,20 +135,15 @@ export class Impresora {
           total: ticket.total,
           visa: await ticketsInstance.getFormaPago(ticket),
           tiposIva: ticket.cesta.detalleIva,
-          cabecera:
-            paramsTicket[0] !== undefined ? paramsTicket[0].valorDato : "",
-          pie: paramsTicket[1] !== undefined ? paramsTicket[1].valorDato : "",
-          nombreTrabajador:
-            infoTrabajador.nombreCorto != null
-              ? infoTrabajador.nombreCorto
-              : "",
+          cabecera: parametros.header,
+          pie: parametros.footer,
+          nombreTrabajador: trabajador.nombreCorto,
           impresora: parametros.tipoImpresora,
           infoClienteVip: null, // Mirar bien para terminar todo
           infoCliente: null,
         };
-
-        this._venta(sendObject);
       }
+      await this._venta(sendObject);
     }
   }
 
@@ -240,7 +188,6 @@ export class Impresora {
           .text(txt)
           .cut("PAPER_FULL_CUT")
           .close();
-        console.log(printer);
       });
     } catch (err) {
       mqttInstance.loggerMQTT("Error impresora: " + err);
@@ -264,36 +211,10 @@ export class Impresora {
     if (recibo != null && recibo != undefined) {
       strRecibo = recibo;
     }
-    try {
-      permisosImpresora();
 
-      // if(tipoImpresora === 'USB')
-      // {
-      //     const arrayDevices = escpos.USB.findPrinter();
-      //     if (arrayDevices.length > 0) {
-      //         /* Solo puede haber un dispositivo USB */
-      //         const dispositivoUnico = arrayDevices[0];
-      //         var device = new escpos.USB(dispositivoUnico); //USB
-      //     } else if (arrayDevices.length == 0) {
-      //         throw 'Error, no hay ningún dispositivo USB conectado';
-      //     } else {
-      //         throw 'Error, hay más de un dispositivo USB conectado';
-      //     }
-      // }
-      // else
-      // {
-      //     if(tipoImpresora === 'SERIE')
-      //     {
-      //         var device = new escpos.Serial('/dev/ttyS0', {
-      //             baudRate: 115200,
-      //             stopBit: 2
-      //         });
-      //     }
-      // }
-      const device = await dispositivos.getDevice();
-      if (device == null) {
-        throw "Error controlado: El dispositivo es null";
-      }
+    permisosImpresora();
+    const device = await dispositivos.getDevice();
+    if (device) {
       const printer = new escpos.Printer(device);
 
       let detalles = "";
@@ -463,9 +384,8 @@ export class Impresora {
           .cut("PAPER_FULL_CUT")
           .close();
       });
-    } catch (err) {
-      mqttInstance.loggerMQTT("Error impresora: " + err);
     }
+    throw Error("No se ha podido obtener el dispositivo");
   }
 
   async imprimirSalida(
@@ -953,6 +873,8 @@ export class Impresora {
       mqttInstance.loggerMQTT(err);
     }
   }
+
+  /* Eze 4.0 */
   async mostrarVisor(data) {
     let eur = "E";
 
@@ -1005,28 +927,11 @@ export class Impresora {
     try {
       permisosImpresora();
       const device = await dispositivos.getDeviceVisor();
-      if (device != null) {
-        if (device === "MQTT") {
-          console.log("Mqtt sended" + string + ".");
-          mqttInstance.enviarVisor(string.substring(0, 40));
-          return;
-        }
-        const options = { encoding: "iso88591" };
-        const printer = new escpos.Screen(device, options);
-
-        try {
-          device.open(function () {
-            printer.clear().text(string.substring(0, 40)).close();
-          });
-        } catch (error) {}
-      } else {
-        mqttInstance.loggerMQTT("Controlado: dispositivo es null");
-      }
+      if (device) mqttInstance.enviarVisor(string.substring(0, 40));
+      else throw Error("Controlado: dispositivo es null");
     } catch (err) {
       mqttInstance.loggerMQTT("Error2: " + err);
-      //     errorImpresora(err, event);
     }
-    mqttInstance.loggerMQTT("El visor da muchos problemas");
   }
 
   async imprimirEntregas() {

@@ -84,6 +84,8 @@ export class ParametrosClase {
       botonesConPrecios: "No",
       prohibirBuscarArticulos: "No",
       ultimoTicket: -1,
+      header: "",
+      footer: "",
       impresoraUsbInfo: { vid: "", pid: "" },
       token: undefined,
     };

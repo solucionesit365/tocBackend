@@ -42,7 +42,6 @@ export class TicketsClase {
   async getProximoId(): Promise<number> {
     const ultimoIdTicket = await this.getUltimoIdTicket();
     if (typeof ultimoIdTicket === "number") return ultimoIdTicket + 1;
-    console.log(69);
     throw Error("El ultimoIdTicket no es correcto");
   }
 

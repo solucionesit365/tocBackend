@@ -5,7 +5,6 @@ const client = mqtt.connect("mqtt://localhost");
 class Mqtt {
   public loggerMQTT(txt: string) {
     client.publish("hit.software/error", txt);
-    console.log(txt);
   }
 
   public enviarVisor(txt: string) {

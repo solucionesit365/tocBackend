@@ -10,7 +10,6 @@ export class TestController {
       return await movimientosInstance.construirArrayVentas();
       return 0;
     } catch (err) {
-      console.log(err);
       return null;
     }
   }

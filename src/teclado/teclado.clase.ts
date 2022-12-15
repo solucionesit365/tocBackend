@@ -13,50 +13,61 @@ export class TecladoClase {
     await schTeclas.insertarTeclas(arrayTeclas);
 
   /* Eze v23 */
-  async actualizarTeclado(): Promise<boolean> {
-    try {
-      const parametros = await parametrosInstance.getParametros();
-      const res: any = await axios.post(
-        "articulos/descargarArticulosEspeciales",
-        {
-          database: parametros.database,
-          codigoCliente: parametros.codigoTienda,
-        }
-      );
-      const resMenusSanPedro: any = await axios.post("menus/getMenus", {
-        database: parametros.database,
-        codigoTienda: parametros.codigoTienda,
-      });
-      const resMenus: any = await menusInstance.insertarMenus(
-        resMenusSanPedro.data.info
-      );
-      const res2: any = await articulosInstance.insertarArticulos(
-        res.data.info
-      );
+  // async actualizarTeclado(): Promise<boolean> {
+  //   try {
+  //     const parametros = await parametrosInstance.getParametros();
+  //     const res: any = await axios.post(
+  //       "articulos/descargarArticulosEspeciales",
+  //       {
+  //         database: parametros.database,
+  //         codigoCliente: parametros.codigoTienda,
+  //       }
+  //     );
+  //     const resMenusSanPedro: any = await axios.post("menus/getMenus", {
+  //       database: parametros.database,
+  //       codigoTienda: parametros.codigoTienda,
+  //     });
+  //     const resMenus: any = await menusInstance.insertarMenus(
+  //       resMenusSanPedro.data.info
+  //     );
+  //     const res2: any = await articulosInstance.insertarArticulos(
+  //       res.data.info
+  //     );
 
-      const infoTeclados: any = await axios.post("/teclas/descargarTeclados", {
-        database: parametros.database,
-        licencia: parametros.codigoTienda,
-      });
-      if (await tecladoInstance.insertarTeclas(infoTeclados.data.info)) {
-        const resPromociones: any = await axios.post(
-          "promociones/getPromociones",
-          {
-            database: parametros.database,
-            codigoTienda: parametros.codigoTienda,
-          }
-        );
-        if (resPromociones.data.info.lenght > 0)
-          return await nuevaInstancePromociones.insertarPromociones(
-            resPromociones.data.info
-          );
-        return true;
+  //     const infoTeclados: any = await axios.post("/teclas/descargarTeclados", {
+  //       database: parametros.database,
+  //       licencia: parametros.codigoTienda,
+  //     });
+  //     if (await tecladoInstance.insertarTeclas(infoTeclados.data.info)) {
+  //       const resPromociones: any = await axios.post(
+  //         "promociones/getPromociones",
+  //         {
+  //           database: parametros.database,
+  //           codigoTienda: parametros.codigoTienda,
+  //         }
+  //       );
+  //       if (resPromociones.data.info.lenght > 0)
+  //         return await nuevaInstancePromociones.insertarPromociones(
+  //           resPromociones.data.info
+  //         );
+  //       return true;
+  //     }
+  //     return false;
+  //   } catch (err) {
+  //     logger.Error(103, err);
+  //     return false;
+  //   }
+  // }
+
+  /* Eze 4.0 */
+  async actualizarTeclado(): Promise<boolean> {
+    const resTeclas: any = await axios.get("teclas/descargarTeclados");
+    if (resTeclas.data) {
+      if (resTeclas.data.length > 0) {
+        return await this.insertarTeclas(resTeclas.data);
       }
-      return false;
-    } catch (err) {
-      logger.Error(103, err);
-      return false;
     }
+    throw Error("No se ha podido actualizar el teclado backend");
   }
 
   async cambiarPosTecla(idArticle, nuevaPos, nombreMenu) {

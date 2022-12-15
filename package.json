@@ -32,6 +32,7 @@
     "@nestjs/platform-ws": "^9.0.5",
     "@nestjs/serve-static": "^3.0.0",
     "@nestjs/websockets": "^9.0.5",
+    "@types/escpos": "^2.5.2",
     "@types/mongodb": "^4.0.7",
     "@types/socket.io": "^3.0.2",
     "axios": "^0.23.0",
