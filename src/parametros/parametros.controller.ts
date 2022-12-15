@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Get } from "@nestjs/common";
 import { parametrosInstance } from "./parametros.clase";
 import axios from "axios";
-import { UtilesModule } from "src/utiles/utiles.module";
+import { UtilesModule } from "../utiles/utiles.module";
 import { logger } from "../logger";
 
 @Controller("parametros")
@@ -29,15 +29,22 @@ export class ParametrosController {
   }
 
   /* Eze 4.0 */
-  @Post("actualizarParametros")
+  @Get("actualizarParametros")
   async actualizarParametros() {
     try {
       const res: any = await axios.get("parametros/getParametros");
 
-      if (!res.data.error) {
-        const paramstpv = res.data.info;
-        return await parametrosInstance.setParametros(paramstpv);
+      if (res.data) {
+        delete res.data.database;
+        delete res.data.ultimoTicket;
+        delete res.data.tipoImpresora;
+        delete res.data.tipoDatafono;
+        delete res.data.token;
+        delete res.data.licencia;
+        delete res.data.impresoraUsbInfo;
+        return await parametrosInstance.setParametros(res.data);
       }
+
       return false;
     } catch (err) {
       logger.Error(42, err);

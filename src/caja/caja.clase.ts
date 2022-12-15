@@ -168,7 +168,6 @@ export class CajaClase {
           totalTarjeta += arrayMovimientos[i].valor;
           break;
         case "TKRS_CON_EXCESO":
-          totalSalidas += arrayMovimientos[i].valor;
           totalTkrsConExceso += arrayMovimientos[i].valor;
           break;
         case "TKRS_SIN_EXCESO":

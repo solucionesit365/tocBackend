@@ -42,7 +42,7 @@ export async function actualizarEstadoDevolucion(
 }
 
 /* Eze 4.0 */
-export async function getDevolucionByID(
+export async function getDevolucionById(
   id: ObjectId
 ): Promise<DevolucionesInterface> {
   const database = (await conexion).db("tocgame");

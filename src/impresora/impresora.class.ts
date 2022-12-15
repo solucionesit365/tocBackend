@@ -9,6 +9,8 @@ import axios from "axios";
 import { mqttInstance } from "../mqtt";
 import { ClientesInterface } from "../clientes/clientes.interface";
 import { ItemLista } from "../cestas/cestas.interface";
+import { devolucionesInstance } from "../devoluciones/devoluciones.clase";
+import { ObjectId } from "mongodb";
 
 const dispositivos = new Dispositivos();
 const escpos = require("escpos");
@@ -143,6 +145,35 @@ export class Impresora {
           infoCliente: null,
         };
       }
+      await this._venta(sendObject);
+    }
+  }
+  /* Eze 4.0 */
+  async imprimirDevolucion(idDevolucion: ObjectId) {
+    const devolucion = await devolucionesInstance.getDevolucionById(
+      idDevolucion
+    );
+    const parametros = await parametrosInstance.getParametros();
+    const trabajador: TrabajadoresInterface =
+      await trabajadoresInstance.getTrabajadorById(devolucion.idTrabajador);
+
+    let sendObject = null;
+
+    if (devolucion && trabajador) {
+      sendObject = {
+        numFactura: devolucion._id,
+        arrayCompra: devolucion.cesta.lista,
+        total: devolucion.total,
+        visa: null,
+        tiposIva: devolucion.cesta.detalleIva,
+        cabecera: parametros.header,
+        pie: parametros.footer,
+        nombreTrabajador: trabajador.nombreCorto,
+        impresora: parametros.tipoImpresora,
+        infoClienteVip: null, // Mirar bien para terminar todo
+        infoCliente: null,
+      };
+
       await this._venta(sendObject);
     }
   }
@@ -384,8 +415,7 @@ export class Impresora {
           .cut("PAPER_FULL_CUT")
           .close();
       });
-    }
-    throw Error("No se ha podido obtener el dispositivo");
+    } else throw Error("No se ha podido obtener el dispositivo");
   }
 
   async imprimirSalida(

@@ -51,7 +51,7 @@ export class Devoluciones {
   ): Promise<boolean> => await schDevoluciones.insertarDevolucion(devolucion);
 
   /* Eze 4.0 */
-  getDevolucionByID = async (id: ObjectId) =>
-    await schDevoluciones.getDevolucionByID(id);
+  getDevolucionById = async (id: ObjectId) =>
+    await schDevoluciones.getDevolucionById(id);
 }
 export const devolucionesInstance = new Devoluciones();

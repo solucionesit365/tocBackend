@@ -1,4 +1,5 @@
 import { Controller, Post, Body } from "@nestjs/common";
+import { ObjectId } from "mongodb";
 import { logger } from "../logger";
 import { impresoraInstance } from "./impresora.class";
 
@@ -38,7 +39,15 @@ export class ImpresoraController {
   }
 
   @Post("testMqtt")
-  testMqtt() {
-    impresoraInstance.testMqtt("hola hehhe");
+  async testMqtt() {
+    try {
+      await impresoraInstance.imprimirDevolucion(
+        new ObjectId("639b1ea2d9aff66ec40a6ccf")
+      );
+      return true;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   }
 }
