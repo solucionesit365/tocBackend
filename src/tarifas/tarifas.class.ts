@@ -9,7 +9,10 @@ export class TarifasClass {
   async guardarTarifasEspeciales(
     arrayTarifas: TarifaInterface[]
   ): Promise<boolean> {
-    return await schTarifas.insertarTarifas(arrayTarifas);
+    if (arrayTarifas && arrayTarifas.length > 0) {
+      return await schTarifas.insertarTarifas(arrayTarifas);
+    }
+    return null;
   }
 
   /* Eze 4.0 */

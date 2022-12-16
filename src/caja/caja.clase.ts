@@ -104,7 +104,7 @@ export class CajaClase {
 
     if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual)) {
       const ultimaCaja = await this.getUltimoCierre();
-      impresoraInstance.imprimirCaja(ultimaCaja);
+      impresoraInstance.imprimirCajaAsync(ultimaCaja);
       return await this.resetCajaAbierta();
     }
     return false;

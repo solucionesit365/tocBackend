@@ -90,20 +90,16 @@ export class InstaladorController {
         const promociones = await nuevaInstancePromociones.insertarPromociones(
           res.data.promociones
         );
-        // const menus = await menusInstance.insertarMenus(res.data.menus);
+        
         const teclas = await tecladoInstance.insertarTeclas(res.data.teclas);
         const tarifas = await tarifasInstance.guardarTarifasEspeciales(
           res.data.tarifasEspeciales
         );
 
-        if (
+        if ( // Solo los datos obligatorios
           trabajadores &&
           articulos &&
-          clientes &&
-          familias &&
-          promociones &&
-          teclas &&
-          tarifas
+          teclas
         ) {
           return true;
         }

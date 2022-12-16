@@ -15,6 +15,7 @@ import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { MovimientosInterface } from "../movimientos/movimientos.interface";
 import * as moment from "moment";
 import { CajaSincro } from "../caja/caja.interface";
+import { logger } from "src/logger";
 moment.locale("es");
 const dispositivos = new Dispositivos();
 const escpos = require("escpos");
@@ -570,7 +571,7 @@ export class Impresora {
     }
   }
 
-  /* E */
+  /* Eze 4.0 */
   async imprimirCaja(caja: CajaSincro) {
     const fechaInicio = new Date(caja.inicioTime);
     const fechaFinal = new Date(caja.finalTime);
@@ -801,6 +802,247 @@ export class Impresora {
       });
     } else {
       throw Error("No se ha encontrado el dispositivo");
+    }
+  }
+  /* Eze 4.0 */
+  async imprimirCajaAsync(caja: CajaSincro) {
+    try {
+      const fechaInicio = new Date(caja.inicioTime);
+      const fechaFinal = new Date(caja.finalTime);
+      const arrayMovimientos =
+        await movimientosInstance.getMovimientosIntervalo(
+          caja.inicioTime,
+          caja.finalTime
+        );
+      const parametros = await parametrosInstance.getParametros();
+      const trabajadorApertura = await trabajadoresInstance.getTrabajadorById(
+        caja.idDependientaApertura
+      );
+      const trabajadorCierre = await trabajadoresInstance.getTrabajadorById(
+        caja.idDependientaCierre
+      );
+      let sumaTarjetas = 0;
+      let textoMovimientos = "";
+
+      for (let i = 0; i < arrayMovimientos.length; i++) {
+        const auxFecha = new Date(arrayMovimientos[i]._id);
+        switch (arrayMovimientos[i].tipo) {
+          case "TARJETA":
+            sumaTarjetas += arrayMovimientos[i].valor;
+            break;
+          case "TKRS_CON_EXCESO":
+            break;
+          case "TKRS_SIN_EXCESO":
+            break;
+          case "DEUDA":
+            break;
+          case "CONSUMO_PERSONAL":
+            break;
+          case "ENTREGA_DIARIA":
+            textoMovimientos += `${
+              i + 1
+            }: Salida:\n           Cantidad: -${arrayMovimientos[
+              i
+            ].valor.toFixed(
+              2
+            )}\n           Fecha: ${auxFecha.getDate()}/${auxFecha.getMonth()}/${auxFecha.getFullYear()}  ${auxFecha.getHours()}:${auxFecha.getMinutes()}\n           Concepto: ${
+              arrayMovimientos[i].concepto
+            }\n`;
+            break;
+          case "ENTRADA_DINERO":
+            textoMovimientos += `${
+              i + 1
+            }: Entrada:\n            Cantidad: +${arrayMovimientos[
+              i
+            ].valor.toFixed(
+              2
+            )}\n            Fecha: ${auxFecha.getDate()}/${auxFecha.getMonth()}/${auxFecha.getFullYear()}  ${auxFecha.getHours()}:${auxFecha.getMinutes()}\n            Concepto: ${
+              arrayMovimientos[i].concepto
+            }\n`;
+            break;
+          case "DATAFONO_3G":
+            sumaTarjetas += arrayMovimientos[i].valor;
+            break;
+        }
+      }
+
+      textoMovimientos =
+        `\nTotal targeta:      ${sumaTarjetas.toFixed(2)}\n` + textoMovimientos;
+
+      permisosImpresora();
+
+      const device = await dispositivos.getDevice();
+      if (device) {
+        const options = { encoding: "ISO-8859-15" }; // "GB18030" };
+        const printer = new escpos.Printer(device, options);
+        const mesInicial = fechaInicio.getMonth() + 1;
+        const mesFinal = fechaFinal.getMonth() + 1;
+        device.open(function () {
+          printer
+            .setCharacterCodeTable(19)
+            .encode("CP858")
+            .font("a")
+            .style("b")
+            .align("CT")
+            .size(1, 1)
+            .text("BOTIGA : " + parametros.nombreTienda)
+            .size(0, 0)
+            .text("Resum caixa")
+            .text("")
+            .align("LT")
+            .text("Resp. apertura   : " + trabajadorApertura.nombre)
+            .text("Resp. cierre   : " + trabajadorCierre.nombre)
+            .text(
+              `Inici: ${fechaInicio.getDate()}-${mesInicial}-${fechaInicio.getFullYear()} ${
+                (fechaInicio.getHours() < 10 ? "0" : "") +
+                fechaInicio.getHours()
+              }:${
+                (fechaInicio.getMinutes() < 10 ? "0" : "") +
+                fechaInicio.getMinutes()
+              }`
+            )
+            .text(
+              `Final: ${fechaFinal.getDate()}-${mesFinal}-${fechaFinal.getFullYear()} ${
+                (fechaFinal.getHours() < 10 ? "0" : "") + fechaFinal.getHours()
+              }:${
+                (fechaFinal.getMinutes() < 10 ? "0" : "") +
+                fechaFinal.getMinutes()
+              }`
+            )
+            .text("")
+            .size(0, 1)
+            .text("Calaix fet       :      " + caja.calaixFetZ.toFixed(2))
+            .text("Descuadre        :      " + caja.descuadre.toFixed(2))
+            .text("Clients atesos   :      " + caja.nClientes)
+            .text("Recaudat         :      " + caja.recaudado.toFixed(2))
+            .text("Datafon 3g       :      " + caja.totalDatafono3G)
+            .text("Canvi inicial    :      " + caja.totalApertura.toFixed(2))
+            .text("Canvi final      :      " + caja.totalCierre.toFixed(2))
+            .text("")
+            .size(0, 0)
+            .text("Moviments de caixa")
+            .text("")
+            .text("")
+            .text(textoMovimientos)
+            .text("")
+            .text("")
+            .text("")
+            .text(
+              "       0.01 --> " +
+                caja.detalleApertura[0]["valor"].toFixed(2) +
+                "      " +
+                "0.01 --> " +
+                caja.detalleCierre[0]["valor"].toFixed(2)
+            )
+            .text(
+              "       0.02 --> " +
+                caja.detalleApertura[1]["valor"].toFixed(2) +
+                "      " +
+                "0.02 --> " +
+                caja.detalleCierre[1]["valor"].toFixed(2)
+            )
+            .text(
+              "       0.05 --> " +
+                caja.detalleApertura[2]["valor"].toFixed(2) +
+                "      " +
+                "0.05 --> " +
+                caja.detalleCierre[2]["valor"].toFixed(2)
+            )
+            .text(
+              "       0.10 --> " +
+                caja.detalleApertura[3]["valor"].toFixed(2) +
+                "      " +
+                "0.10 --> " +
+                caja.detalleCierre[3]["valor"].toFixed(2)
+            )
+            .text(
+              "       0.20 --> " +
+                caja.detalleApertura[4]["valor"].toFixed(2) +
+                "      " +
+                "0.20 --> " +
+                caja.detalleCierre[4]["valor"].toFixed(2)
+            )
+            .text(
+              "       0.50 --> " +
+                caja.detalleApertura[5]["valor"].toFixed(2) +
+                "      " +
+                "0.50 --> " +
+                caja.detalleCierre[5]["valor"].toFixed(2)
+            )
+            .text(
+              "       1.00 --> " +
+                caja.detalleApertura[6]["valor"].toFixed(2) +
+                "      " +
+                "1.00 --> " +
+                caja.detalleCierre[6]["valor"].toFixed(2)
+            )
+            .text(
+              "       2.00 --> " +
+                caja.detalleApertura[7]["valor"].toFixed(2) +
+                "      " +
+                "2.00 --> " +
+                caja.detalleCierre[7]["valor"].toFixed(2)
+            )
+            .text(
+              "       5.00 --> " +
+                caja.detalleApertura[8]["valor"].toFixed(2) +
+                "      " +
+                "5.00 --> " +
+                caja.detalleCierre[8]["valor"].toFixed(2)
+            )
+            .text(
+              "       10.00 --> " +
+                caja.detalleApertura[9]["valor"].toFixed(2) +
+                "     " +
+                "10.00 --> " +
+                caja.detalleCierre[9]["valor"].toFixed(2)
+            )
+            .text(
+              "       20.00 --> " +
+                caja.detalleApertura[10]["valor"].toFixed(2) +
+                "    " +
+                "20.00 --> " +
+                caja.detalleCierre[10]["valor"].toFixed(2)
+            )
+            .text(
+              "       50.00 --> " +
+                caja.detalleApertura[11]["valor"].toFixed(2) +
+                "    " +
+                "50.00 --> " +
+                caja.detalleCierre[11]["valor"].toFixed(2)
+            )
+            .text(
+              "       100.00 --> " +
+                caja.detalleApertura[12]["valor"].toFixed(2) +
+                "   " +
+                "100.00 --> " +
+                caja.detalleCierre[12]["valor"].toFixed(2)
+            )
+            .text(
+              "       200.00 --> " +
+                caja.detalleApertura[13]["valor"].toFixed(2) +
+                "   " +
+                "200.00 --> " +
+                caja.detalleCierre[13]["valor"].toFixed(2)
+            )
+            .text(
+              "       500.00 --> " +
+                caja.detalleApertura[14]["valor"].toFixed(2) +
+                "   " +
+                "500.00 --> " +
+                caja.detalleCierre[14]["valor"].toFixed(2)
+            )
+            .text("")
+            .text("")
+            .text("")
+            .cut()
+            .close();
+        });
+      } else {
+        throw Error("No se ha encontrado el dispositivo");
+      }
+    } catch (err) {
+      logger.Error(145, err);
     }
   }
 

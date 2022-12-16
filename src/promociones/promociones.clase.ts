@@ -789,7 +789,12 @@ export class NuevaPromocion {
   /* Eze 4.0 */
   public insertarPromociones = async (
     arrayPromociones: PromocionesInterface[]
-  ) => await schPromociones.insertarPromociones(arrayPromociones);
+  ) => {
+    if (arrayPromociones && arrayPromociones.length > 0) {
+      await schPromociones.insertarPromociones(arrayPromociones);
+    }
+    return null;
+  }
 }
 
 export const nuevaInstancePromociones = new NuevaPromocion();
