@@ -10,7 +10,6 @@ export interface MovimientosInterface {
 }
 
 export type TiposMovientos =
-  | "EFECTIVO"
   | "TARJETA"
   | "TKRS_CON_EXCESO"
   | "TKRS_SIN_EXCESO"

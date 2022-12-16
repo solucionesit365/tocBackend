@@ -7,6 +7,7 @@ import { logger } from "../logger";
 import { TicketsInterface } from "../tickets/tickets.interface";
 import { ticketsInstance } from "src/tickets/tickets.clase";
 import { cajaInstance } from "src/caja/caja.clase";
+import { impresoraInstance } from "src/impresora/impresora.class";
 
 const moment = require("moment");
 const Ean13Utils = require("ean13-lib").Ean13Utils;
@@ -42,7 +43,7 @@ export class MovimientosClase {
   ) {
     let codigoBarras = "";
 
-    if (tipo === "ENTREGA_DIARIA") {
+    if (concepto === "Entrega Diària") {
       codigoBarras = await this.generarCodigoBarrasSalida();
       codigoBarras = String(Ean13Utils.generate(codigoBarras));
     }
@@ -58,44 +59,42 @@ export class MovimientosClase {
       valor,
     };
 
-    return await schMovimientos.nuevoMovimiento(nuevoMovimiento);
+    if (await schMovimientos.nuevoMovimiento(nuevoMovimiento)) {
+      await impresoraInstance.imprimirSalida(nuevoMovimiento);
+      return true;
+    }
+    return false;
   }
 
-  /* Eze v23 */
+  /* Eze 4.0 */
   private async generarCodigoBarrasSalida(): Promise<string> {
-    try {
-      const parametros = await parametrosInstance.getParametros();
-      const ultimoCodigoDeBarras = await schMovimientos.getUltimoCodigoBarras();
+    const parametros = await parametrosInstance.getParametros();
+    const ultimoCodigoDeBarras = await schMovimientos.getUltimoCodigoBarras();
 
-      if (!ultimoCodigoDeBarras)
-        if (!(await schMovimientos.resetContadorCodigoBarras()))
-          throw "Error en inicializar contador de codigo de barras";
+    if (!ultimoCodigoDeBarras)
+      if (!(await schMovimientos.resetContadorCodigoBarras()))
+        throw "Error en inicializar contador de codigo de barras";
 
-      let ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
+    let ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
 
-      if (ultimoNumero == 999) {
-        if (!(await schMovimientos.resetContadorCodigoBarras()))
-          throw "Error en resetContadorCodigoBarras";
-      } else if (!(await schMovimientos.actualizarCodigoBarras())) {
-        throw "Error en actualizarCodigoBarras";
-      }
-
-      ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
-
-      const codigoLicenciaStr = getNumeroTresDigitos(parametros.licencia);
-      const strNumeroCodigosDeBarras: string =
-        getNumeroTresDigitos(ultimoNumero);
-      let codigoFinal = "";
-      const digitYear = new Date().getFullYear().toString()[3];
-
-      codigoFinal = `98${codigoLicenciaStr}${digitYear}${getNumeroTresDigitos(
-        moment().dayOfYear()
-      )}${strNumeroCodigosDeBarras}`;
-      return codigoFinal;
-    } catch (err) {
-      logger.Error(98, err);
-      return null;
+    if (ultimoNumero == 999) {
+      if (!(await schMovimientos.resetContadorCodigoBarras()))
+        throw "Error en resetContadorCodigoBarras";
+    } else if (!(await schMovimientos.actualizarCodigoBarras())) {
+      throw "Error en actualizarCodigoBarras";
     }
+
+    ultimoNumero = await schMovimientos.getUltimoCodigoBarras();
+
+    const codigoLicenciaStr = getNumeroTresDigitos(parametros.licencia);
+    const strNumeroCodigosDeBarras: string = getNumeroTresDigitos(ultimoNumero);
+    let codigoFinal = "";
+    const digitYear = new Date().getFullYear().toString()[3];
+
+    codigoFinal = `98${codigoLicenciaStr}${digitYear}${getNumeroTresDigitos(
+      moment().dayOfYear()
+    )}${strNumeroCodigosDeBarras}`;
+    return codigoFinal;
   }
 
   /* Eze v23 */

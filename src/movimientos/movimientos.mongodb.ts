@@ -33,7 +33,9 @@ export async function getUltimoCodigoBarras(): Promise<
 > {
   const database = (await conexion).db("tocgame");
   const codigoBarras = database.collection<CuentaCodigoBarras>("codigo-barras");
-  return (await codigoBarras.findOne({ _id: "CUENTA" })).ultimo;
+  const docCodigoBarras = await codigoBarras.findOne({ _id: "CUENTA" });
+  if (docCodigoBarras) return docCodigoBarras.ultimo;
+  else return null;
 }
 
 /* Eze 4.0 */

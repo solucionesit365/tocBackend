@@ -2,6 +2,7 @@ import { Controller, Post, Get, Body } from "@nestjs/common";
 import { UtilesModule } from "../utiles/utiles.module";
 import { cajaInstance } from "./caja.clase";
 import { logger } from "../logger";
+import { impresoraInstance } from "src/impresora/impresora.class";
 
 @Controller("caja")
 export class CajaController {
@@ -83,6 +84,20 @@ export class CajaController {
       return await cajaInstance.getUltimoCierre();
     } catch (err) {
       logger.Error(140, err);
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
+  @Post("imprimirUltimoCierre")
+  async imprimirUltimoCierre() {
+    try {
+      const ultimoCierre = await cajaInstance.getUltimoCierre();
+      if (ultimoCierre) impresoraInstance.imprimirCaja(ultimoCierre);
+
+      throw Error("No se ha podido obtener el último cierre");
+    } catch (err) {
+      logger.Error(144, err);
       return false;
     }
   }

@@ -11,7 +11,11 @@ import { ClientesInterface } from "../clientes/clientes.interface";
 import { ItemLista } from "../cestas/cestas.interface";
 import { devolucionesInstance } from "../devoluciones/devoluciones.clase";
 import { ObjectId } from "mongodb";
-
+import { movimientosInstance } from "../movimientos/movimientos.clase";
+import { MovimientosInterface } from "../movimientos/movimientos.interface";
+import * as moment from "moment";
+import { CajaSincro } from "../caja/caja.interface";
+moment.locale("es");
 const dispositivos = new Dispositivos();
 const escpos = require("escpos");
 const exec = require("child_process").exec;
@@ -39,7 +43,7 @@ function random() {
   return numero.toString(16).slice(0, 8);
 }
 
-/* Función auxiliar */
+/* Función auxiliar borrar cuando sea posible */
 function dateToString2(fecha) {
   let fechaFinal = null;
   if (typeof fecha === "string" || typeof fecha === "number") {
@@ -418,40 +422,16 @@ export class Impresora {
     } else throw Error("No se ha podido obtener el dispositivo");
   }
 
-  async imprimirSalida(
-    cantidad: number,
-    fecha: number,
-    nombreTrabajador: string,
-    nombreTienda: string,
-    concepto: string,
-    tipoImpresora: string,
-    codigoBarras: string
-  ) {
-    try {
-      const fechaStr = dateToString2(fecha);
-      permisosImpresora();
-
-      // if(tipoImpresora === 'USB')
-      // {
-      //     const arrayDevices = escpos.USB.findPrinter();
-      //     if (arrayDevices.length > 0) {
-      //         /* Solo puede haber un dispositivo USB */
-      //         const dispositivoUnico = arrayDevices[0];
-      //         var device = new escpos.USB(dispositivoUnico); //USB
-      //     } else if (arrayDevices.length == 0) {
-      //         throw 'Error, no hay ningún dispositivo USB conectado';
-      //     } else {
-      //         throw 'Error, hay más de un dispositivo USB conectado';
-      //     }
-      // }
-      // else if(tipoImpresora === 'SERIE') {
-      //     var device = new escpos.Serial('/dev/ttyS0', {
-      //         baudRate: 115000,
-      //         stopBit: 2
-      //     });
-      // }
-      const device = await dispositivos.getDevice();
-
+  /* Eze 4.0 */
+  async imprimirSalida(movimiento: MovimientosInterface) {
+    const parametros = await parametrosInstance.getParametros();
+    const fechaStr = moment(movimiento._id).format("llll");
+    const trabajador = await trabajadoresInstance.getTrabajadorById(
+      movimiento.idTrabajador
+    );
+    permisosImpresora();
+    const device = await dispositivos.getDevice();
+    if (device) {
       const options = { encoding: "GB18030" };
       const printer = new escpos.Printer(device, options);
       device.open(function () {
@@ -462,29 +442,30 @@ export class Impresora {
           .style("b")
           .align("CT")
           .size(0, 0)
-          .text(nombreTienda)
+          .text(parametros.nombreTienda)
           .text(fechaStr)
-          .text("Dependienta: " + nombreTrabajador)
-          .text("Retirada efectivo: " + cantidad)
+          .text("Dependienta: " + trabajador.nombre)
+          .text("Retirada efectivo: " + movimiento.valor)
           .size(1, 1)
-          .text(cantidad)
+          .text(movimiento.valor)
           .size(0, 0)
           .text("Concepto")
           .size(1, 1)
-          .text(concepto)
+          .text(movimiento.concepto)
           .text("")
-          .barcode(codigoBarras.slice(0, 12), "EAN13", 4)
+          .barcode(movimiento.codigoBarras.slice(0, 12), "EAN13", 4)
           .text("")
           .text("")
           .text("")
           .cut()
           .close();
       });
-    } catch (err) {
-      mqttInstance.loggerMQTT(err);
+    } else {
+      throw Error("No se ha podido encontrar el dispositivo");
     }
   }
 
+  /* Falta */
   async imprimirEntrada(
     totalIngresado: number,
     fecha: number,
@@ -589,49 +570,48 @@ export class Impresora {
     }
   }
 
-  async imprimirCaja(
-    calaixFet,
-    nombreTrabajador,
-    descuadre,
-    nClientes,
-    recaudado,
-    arrayMovimientos: any[],
-    nombreTienda,
-    fI,
-    fF,
-    cInicioCaja,
-    cFinalCaja,
-    totalDatafono3G,
-    detalleApertura,
-    detalleCierre,
-    tipoImpresora
-  ) {
-    try {
-      const fechaInicio = new Date(fI);
-      const fechaFinal = new Date(fF);
-      let sumaTarjetas = 0;
-      let textoMovimientos = "";
-      for (let i = 0; i < arrayMovimientos.length; i++) {
-        const auxFecha = new Date(arrayMovimientos[i]._id);
-        if (arrayMovimientos[i].tipo === TIPO_SALIDA_DINERO) {
-          if (
-            arrayMovimientos[i].concepto == "Targeta" ||
-            arrayMovimientos[i].concepto == "Targeta 3G"
-          ) {
-            sumaTarjetas += arrayMovimientos[i].valor;
-          } else {
-            textoMovimientos += `${
-              i + 1
-            }: Salida:\n           Cantidad: -${arrayMovimientos[
-              i
-            ].valor.toFixed(
-              2
-            )}\n           Fecha: ${auxFecha.getDate()}/${auxFecha.getMonth()}/${auxFecha.getFullYear()}  ${auxFecha.getHours()}:${auxFecha.getMinutes()}\n           Concepto: ${
-              arrayMovimientos[i].concepto
-            }\n`;
-          }
-        }
-        if (arrayMovimientos[i].tipo === TIPO_ENTRADA_DINERO) {
+  /* E */
+  async imprimirCaja(caja: CajaSincro) {
+    const fechaInicio = new Date(caja.inicioTime);
+    const fechaFinal = new Date(caja.finalTime);
+    const arrayMovimientos = await movimientosInstance.getMovimientosIntervalo(
+      caja.inicioTime,
+      caja.finalTime
+    );
+    const parametros = await parametrosInstance.getParametros();
+    const trabajadorApertura = await trabajadoresInstance.getTrabajadorById(
+      caja.idDependientaApertura
+    );
+    const trabajadorCierre = await trabajadoresInstance.getTrabajadorById(
+      caja.idDependientaCierre
+    );
+    let sumaTarjetas = 0;
+    let textoMovimientos = "";
+
+    for (let i = 0; i < arrayMovimientos.length; i++) {
+      const auxFecha = new Date(arrayMovimientos[i]._id);
+      switch (arrayMovimientos[i].tipo) {
+        case "TARJETA":
+          sumaTarjetas += arrayMovimientos[i].valor;
+          break;
+        case "TKRS_CON_EXCESO":
+          break;
+        case "TKRS_SIN_EXCESO":
+          break;
+        case "DEUDA":
+          break;
+        case "CONSUMO_PERSONAL":
+          break;
+        case "ENTREGA_DIARIA":
+          textoMovimientos += `${
+            i + 1
+          }: Salida:\n           Cantidad: -${arrayMovimientos[i].valor.toFixed(
+            2
+          )}\n           Fecha: ${auxFecha.getDate()}/${auxFecha.getMonth()}/${auxFecha.getFullYear()}  ${auxFecha.getHours()}:${auxFecha.getMinutes()}\n           Concepto: ${
+            arrayMovimientos[i].concepto
+          }\n`;
+          break;
+        case "ENTRADA_DINERO":
           textoMovimientos += `${
             i + 1
           }: Entrada:\n            Cantidad: +${arrayMovimientos[
@@ -641,35 +621,20 @@ export class Impresora {
           )}\n            Fecha: ${auxFecha.getDate()}/${auxFecha.getMonth()}/${auxFecha.getFullYear()}  ${auxFecha.getHours()}:${auxFecha.getMinutes()}\n            Concepto: ${
             arrayMovimientos[i].concepto
           }\n`;
-        }
+          break;
+        case "DATAFONO_3G":
+          sumaTarjetas += arrayMovimientos[i].valor;
+          break;
       }
-      textoMovimientos =
-        `\nTotal targeta:      ${sumaTarjetas.toFixed(2)}\n` + textoMovimientos;
+    }
 
-      permisosImpresora();
-      // if(tipoImpresora === 'USB')
-      // {
-      //     const arrayDevices = escpos.USB.findPrinter();
-      //     if (arrayDevices.length > 0) {
-      //         /* Solo puede haber un dispositivo USB */
-      //         const dispositivoUnico = arrayDevices[0];
-      //         var device = new escpos.USB(dispositivoUnico); //USB
-      //     } else if (arrayDevices.length == 0) {
-      //         throw 'Error, no hay ningún dispositivo USB conectado';
-      //     } else {
-      //         throw 'Error, hay más de un dispositivo USB conectado';
-      //     }
-      // }
-      // else {
-      //     if(tipoImpresora === 'SERIE')
-      //     {
-      //         var device = new escpos.Serial('/dev/ttyS0', {
-      //             baudRate: 115000,
-      //             stopBit: 2
-      //           })
-      //     }
-      // }
-      const device = await dispositivos.getDevice();
+    textoMovimientos =
+      `\nTotal targeta:      ${sumaTarjetas.toFixed(2)}\n` + textoMovimientos;
+
+    permisosImpresora();
+
+    const device = await dispositivos.getDevice();
+    if (device) {
       const options = { encoding: "ISO-8859-15" }; // "GB18030" };
       const printer = new escpos.Printer(device, options);
       const mesInicial = fechaInicio.getMonth() + 1;
@@ -682,12 +647,13 @@ export class Impresora {
           .style("b")
           .align("CT")
           .size(1, 1)
-          .text("BOTIGA : " + nombreTienda)
+          .text("BOTIGA : " + parametros.nombreTienda)
           .size(0, 0)
           .text("Resum caixa")
           .text("")
           .align("LT")
-          .text("Resp.   : " + nombreTrabajador)
+          .text("Resp. apertura   : " + trabajadorApertura.nombre)
+          .text("Resp. cierre   : " + trabajadorCierre.nombre)
           .text(
             `Inici: ${fechaInicio.getDate()}-${mesInicial}-${fechaInicio.getFullYear()} ${
               (fechaInicio.getHours() < 10 ? "0" : "") + fechaInicio.getHours()
@@ -706,13 +672,13 @@ export class Impresora {
           )
           .text("")
           .size(0, 1)
-          .text("Calaix fet       :      " + calaixFet.toFixed(2))
-          .text("Descuadre        :      " + descuadre.toFixed(2))
-          .text("Clients atesos   :      " + nClientes)
-          .text("Recaudat         :      " + recaudado.toFixed(2))
-          .text("Datafon 3g       :      " + totalDatafono3G)
-          .text("Canvi inicial    :      " + cInicioCaja.toFixed(2))
-          .text("Canvi final      :      " + cFinalCaja.toFixed(2))
+          .text("Calaix fet       :      " + caja.calaixFetZ.toFixed(2))
+          .text("Descuadre        :      " + caja.descuadre.toFixed(2))
+          .text("Clients atesos   :      " + caja.nClientes)
+          .text("Recaudat         :      " + caja.recaudado.toFixed(2))
+          .text("Datafon 3g       :      " + caja.totalDatafono3G)
+          .text("Canvi inicial    :      " + caja.totalApertura.toFixed(2))
+          .text("Canvi final      :      " + caja.totalCierre.toFixed(2))
           .text("")
           .size(0, 0)
           .text("Moviments de caixa")
@@ -724,108 +690,108 @@ export class Impresora {
           .text("")
           .text(
             "       0.01 --> " +
-              detalleApertura[0]["valor"].toFixed(2) +
+              caja.detalleApertura[0]["valor"].toFixed(2) +
               "      " +
               "0.01 --> " +
-              detalleCierre[0]["valor"].toFixed(2)
+              caja.detalleCierre[0]["valor"].toFixed(2)
           )
           .text(
             "       0.02 --> " +
-              detalleApertura[1]["valor"].toFixed(2) +
+              caja.detalleApertura[1]["valor"].toFixed(2) +
               "      " +
               "0.02 --> " +
-              detalleCierre[1]["valor"].toFixed(2)
+              caja.detalleCierre[1]["valor"].toFixed(2)
           )
           .text(
             "       0.05 --> " +
-              detalleApertura[2]["valor"].toFixed(2) +
+              caja.detalleApertura[2]["valor"].toFixed(2) +
               "      " +
               "0.05 --> " +
-              detalleCierre[2]["valor"].toFixed(2)
+              caja.detalleCierre[2]["valor"].toFixed(2)
           )
           .text(
             "       0.10 --> " +
-              detalleApertura[3]["valor"].toFixed(2) +
+              caja.detalleApertura[3]["valor"].toFixed(2) +
               "      " +
               "0.10 --> " +
-              detalleCierre[3]["valor"].toFixed(2)
+              caja.detalleCierre[3]["valor"].toFixed(2)
           )
           .text(
             "       0.20 --> " +
-              detalleApertura[4]["valor"].toFixed(2) +
+              caja.detalleApertura[4]["valor"].toFixed(2) +
               "      " +
               "0.20 --> " +
-              detalleCierre[4]["valor"].toFixed(2)
+              caja.detalleCierre[4]["valor"].toFixed(2)
           )
           .text(
             "       0.50 --> " +
-              detalleApertura[5]["valor"].toFixed(2) +
+              caja.detalleApertura[5]["valor"].toFixed(2) +
               "      " +
               "0.50 --> " +
-              detalleCierre[5]["valor"].toFixed(2)
+              caja.detalleCierre[5]["valor"].toFixed(2)
           )
           .text(
             "       1.00 --> " +
-              detalleApertura[6]["valor"].toFixed(2) +
+              caja.detalleApertura[6]["valor"].toFixed(2) +
               "      " +
               "1.00 --> " +
-              detalleCierre[6]["valor"].toFixed(2)
+              caja.detalleCierre[6]["valor"].toFixed(2)
           )
           .text(
             "       2.00 --> " +
-              detalleApertura[7]["valor"].toFixed(2) +
+              caja.detalleApertura[7]["valor"].toFixed(2) +
               "      " +
               "2.00 --> " +
-              detalleCierre[7]["valor"].toFixed(2)
+              caja.detalleCierre[7]["valor"].toFixed(2)
           )
           .text(
             "       5.00 --> " +
-              detalleApertura[8]["valor"].toFixed(2) +
+              caja.detalleApertura[8]["valor"].toFixed(2) +
               "      " +
               "5.00 --> " +
-              detalleCierre[8]["valor"].toFixed(2)
+              caja.detalleCierre[8]["valor"].toFixed(2)
           )
           .text(
             "       10.00 --> " +
-              detalleApertura[9]["valor"].toFixed(2) +
+              caja.detalleApertura[9]["valor"].toFixed(2) +
               "     " +
               "10.00 --> " +
-              detalleCierre[9]["valor"].toFixed(2)
+              caja.detalleCierre[9]["valor"].toFixed(2)
           )
           .text(
             "       20.00 --> " +
-              detalleApertura[10]["valor"].toFixed(2) +
+              caja.detalleApertura[10]["valor"].toFixed(2) +
               "    " +
               "20.00 --> " +
-              detalleCierre[10]["valor"].toFixed(2)
+              caja.detalleCierre[10]["valor"].toFixed(2)
           )
           .text(
             "       50.00 --> " +
-              detalleApertura[11]["valor"].toFixed(2) +
+              caja.detalleApertura[11]["valor"].toFixed(2) +
               "    " +
               "50.00 --> " +
-              detalleCierre[11]["valor"].toFixed(2)
+              caja.detalleCierre[11]["valor"].toFixed(2)
           )
           .text(
             "       100.00 --> " +
-              detalleApertura[12]["valor"].toFixed(2) +
+              caja.detalleApertura[12]["valor"].toFixed(2) +
               "   " +
               "100.00 --> " +
-              detalleCierre[12]["valor"].toFixed(2)
+              caja.detalleCierre[12]["valor"].toFixed(2)
           )
           .text(
             "       200.00 --> " +
-              detalleApertura[13]["valor"].toFixed(2) +
+              caja.detalleApertura[13]["valor"].toFixed(2) +
               "   " +
               "200.00 --> " +
-              detalleCierre[13]["valor"].toFixed(2)
+              caja.detalleCierre[13]["valor"].toFixed(2)
           )
           .text(
             "       500.00 --> " +
-              detalleApertura[14]["valor"].toFixed(2) +
+              caja.detalleApertura[14]["valor"].toFixed(2) +
               "   " +
               "500.00 --> " +
-              detalleCierre[14]["valor"].toFixed(2)
+              caja.detalleCierre[14]["valor"].toFixed(2)
           )
           .text("")
           .text("")
@@ -833,8 +799,8 @@ export class Impresora {
           .cut()
           .close();
       });
-    } catch (err) {
-      mqttInstance.loggerMQTT(err);
+    } else {
+      throw Error("No se ha encontrado el dispositivo");
     }
   }
 

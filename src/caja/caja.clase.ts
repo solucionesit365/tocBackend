@@ -7,12 +7,12 @@ import {
 } from "./caja.interface";
 import * as schCajas from "./caja.mongodb";
 import * as schTickets from "../tickets/tickets.mongodb";
-import * as schMonedas from "../monedas/monedas.mongodb";
 import { TicketsInterface } from "../tickets/tickets.interface";
 import { MovimientosInterface } from "../movimientos/movimientos.interface";
 import { movimientosInstance } from "../movimientos/movimientos.clase";
 import { ObjectId } from "mongodb";
 import { logger } from "../logger";
+import { impresoraInstance } from "../impresora/impresora.class";
 
 export class CajaClase {
   /* Eze 4.0 */
@@ -102,10 +102,11 @@ export class CajaClase {
       finalTime
     );
 
-    if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual))
-      if (await schMonedas.setMonedas(guardarInfoMonedas))
-        return await this.resetCajaAbierta();
-
+    if (await this.nuevoItemSincroCajas(cajaAbiertaActual, cajaCerradaActual)) {
+      const ultimaCaja = await this.getUltimoCierre();
+      impresoraInstance.imprimirCaja(ultimaCaja);
+      return await this.resetCajaAbierta();
+    }
     return false;
   }
 
