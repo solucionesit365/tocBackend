@@ -425,44 +425,48 @@ export class Impresora {
 
   /* Eze 4.0 */
   async imprimirSalida(movimiento: MovimientosInterface) {
-    const parametros = await parametrosInstance.getParametros();
-    const fechaStr = moment(movimiento._id).format("llll");
-    const trabajador = await trabajadoresInstance.getTrabajadorById(
-      movimiento.idTrabajador
-    );
-    permisosImpresora();
-    const device = await dispositivos.getDevice();
-    if (device) {
-      const options = { encoding: "GB18030" };
-      const printer = new escpos.Printer(device, options);
-      device.open(function () {
-        printer
-          .setCharacterCodeTable(19)
-          .encode("CP858")
-          .font("a")
-          .style("b")
-          .align("CT")
-          .size(0, 0)
-          .text(parametros.nombreTienda)
-          .text(fechaStr)
-          .text("Dependienta: " + trabajador.nombre)
-          .text("Retirada efectivo: " + movimiento.valor)
-          .size(1, 1)
-          .text(movimiento.valor)
-          .size(0, 0)
-          .text("Concepto")
-          .size(1, 1)
-          .text(movimiento.concepto)
-          .text("")
-          .barcode(movimiento.codigoBarras.slice(0, 12), "EAN13", 4)
-          .text("")
-          .text("")
-          .text("")
-          .cut()
-          .close();
-      });
-    } else {
-      throw Error("No se ha podido encontrar el dispositivo");
+    try {
+      const parametros = await parametrosInstance.getParametros();
+      const fechaStr = moment(movimiento._id).format("llll");
+      const trabajador = await trabajadoresInstance.getTrabajadorById(
+        movimiento.idTrabajador
+      );
+      permisosImpresora();
+      const device = await dispositivos.getDevice();
+      if (device) {
+        const options = { encoding: "GB18030" };
+        const printer = new escpos.Printer(device, options);
+        device.open(function () {
+          printer
+            .setCharacterCodeTable(19)
+            .encode("CP858")
+            .font("a")
+            .style("b")
+            .align("CT")
+            .size(0, 0)
+            .text(parametros.nombreTienda)
+            .text(fechaStr)
+            .text("Dependienta: " + trabajador.nombre)
+            .text("Retirada efectivo: " + movimiento.valor)
+            .size(1, 1)
+            .text(movimiento.valor)
+            .size(0, 0)
+            .text("Concepto")
+            .size(1, 1)
+            .text(movimiento.concepto)
+            .text("")
+            .barcode(movimiento.codigoBarras.slice(0, 12), "EAN13", 4)
+            .text("")
+            .text("")
+            .text("")
+            .cut()
+            .close();
+        });
+      } else {
+        throw Error("No se ha podido encontrar el dispositivo");
+      }
+    } catch (err) {
+      logger.Error(146, err);
     }
   }
 
@@ -600,8 +604,6 @@ export class Impresora {
         case "TKRS_SIN_EXCESO":
           break;
         case "DEUDA":
-          break;
-        case "CONSUMO_PERSONAL":
           break;
         case "ENTREGA_DIARIA":
           textoMovimientos += `${
@@ -835,8 +837,6 @@ export class Impresora {
           case "TKRS_SIN_EXCESO":
             break;
           case "DEUDA":
-            break;
-          case "CONSUMO_PERSONAL":
             break;
           case "ENTREGA_DIARIA":
             textoMovimientos += `${

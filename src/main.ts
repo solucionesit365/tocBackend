@@ -5,12 +5,15 @@ import {
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
 import axios from "axios";
-require("./sincro");
-require("./sockets.gateway");
-//axios.defaults.baseURL = "http://localhost:3001";
-axios.defaults.baseURL = "https://sanpedro.cloud";
 import { parametrosInstance } from "./parametros/parametros.clase";
 import { logger } from "./logger";
+require("./sincro");
+require("./sockets.gateway");
+let URL_SANPEDRO = "";
+if (process.env.npm_lifecycle_event === "start:dev")
+  URL_SANPEDRO = "http://localhost:3001";
+else URL_SANPEDRO = "https://sanpedro.cloud";
+axios.defaults.baseURL = URL_SANPEDRO;
 
 parametrosInstance
   .getParametros()

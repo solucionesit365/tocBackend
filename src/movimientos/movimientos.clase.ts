@@ -4,7 +4,10 @@ import * as schMovimientos from "./movimientos.mongodb";
 // import { impresoraInstance } from "../impresora/impresora.class";
 // import { trabajadoresInstance } from "../trabajadores/trabajadores.clase";
 import { logger } from "../logger";
-import { TicketsInterface } from "../tickets/tickets.interface";
+import {
+  SuperTicketInterface,
+  TicketsInterface,
+} from "../tickets/tickets.interface";
 import { ticketsInstance } from "src/tickets/tickets.clase";
 import { cajaInstance } from "src/caja/caja.clase";
 import { impresoraInstance } from "src/impresora/impresora.class";
@@ -60,7 +63,7 @@ export class MovimientosClase {
     };
 
     if (await schMovimientos.nuevoMovimiento(nuevoMovimiento)) {
-      await impresoraInstance.imprimirSalida(nuevoMovimiento);
+      impresoraInstance.imprimirSalida(nuevoMovimiento);
       return true;
     }
     return false;
@@ -119,10 +122,14 @@ export class MovimientosClase {
         final
       );
 
-      const arrayFinalTickets = [];
+      const arrayFinalTickets: SuperTicketInterface[] = [];
 
       for (let i = 0; i < arrayTickets.length; i++) {
-        arrayFinalTickets.push(arrayTickets[i]);
+        arrayFinalTickets.push({
+          ...arrayTickets[i],
+          tipoPago: null,
+          movimientos: null,
+        });
         arrayFinalTickets[i].movimientos = [];
 
         for (let j = 0; j < arrayMovimientos.length; j++) {
@@ -133,69 +140,9 @@ export class MovimientosClase {
       }
 
       for (let i = 0; i < arrayFinalTickets.length; i++) {
-        if (arrayFinalTickets[i].consumoPersonal) {
-          arrayFinalTickets[i].tipoPago = "CONSUMO PERSONAL";
-          continue;
-        }
-
-        if (arrayFinalTickets[i].movimientos.length === 1) {
-          if (
-            arrayFinalTickets[i].movimientos[0].tipo === "TARJETA" &&
-            arrayFinalTickets[i].movimientos[0].valor > 0
-          ) {
-            arrayFinalTickets[i].tipoPago = "TARJETA";
-          } else if (
-            arrayFinalTickets[i].movimientos[0].tipo === "TKRS_SIN_EXCESO"
-          ) {
-            arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
-          } else if (arrayFinalTickets[i].movimientos[0].tipo === "DEUDA") {
-            arrayFinalTickets[i].tipoPago = "DEUDA";
-          } else {
-            arrayFinalTickets[i].tipoPago = "DESCONOCIDO";
-          }
-        } else if (arrayFinalTickets[i].movimientos.length === 0) {
-          arrayFinalTickets[i].tipoPago = "EFECTIVO";
-        } else if (arrayFinalTickets[i].movimientos.length > 1) {
-          // CASO TARJETA ANULADA
-          if (
-            arrayFinalTickets[i].movimientos.length === 2 &&
-            arrayFinalTickets[i].movimientos[0].tipo === "TARJETA"
-          ) {
-            const busqueda = {
-              original: false,
-              rectificativo: false,
-            };
-            for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
-              if (arrayFinalTickets[i].movimientos[j].tipo === "TARJETA") {
-                if (arrayFinalTickets[i].movimientos[j].valor > 0) {
-                  busqueda.original = true;
-                } else if (arrayFinalTickets[i].movimientos[j].valor < 0) {
-                  busqueda.rectificativo = true;
-                }
-              }
-            }
-            if (busqueda.original && busqueda.rectificativo) {
-              arrayFinalTickets[i].tipoPago = "DEVUELTO";
-            } else {
-              arrayFinalTickets[i].tipoPago = "NO FUNCIONA";
-            }
-          } else if (arrayFinalTickets[i].movimientos.length >= 2) {
-            for (let j = 0; j < arrayFinalTickets[i].movimientos.length; j++) {
-              if (
-                arrayFinalTickets[i].movimientos[j].tipo === "TKRS_SIN_EXCESO"
-              ) {
-                if (
-                  arrayFinalTickets[i].movimientos[j].valor >=
-                  arrayFinalTickets[i].total
-                ) {
-                  arrayFinalTickets[i].tipoPago = "T.RESTAURANT";
-                } else {
-                  arrayFinalTickets[i].tipoPago = "TKRS + EFECTIVO";
-                }
-              }
-            }
-          }
-        }
+        arrayFinalTickets[i].tipoPago = this.calcularFormaPago(
+          arrayFinalTickets[i]
+        );
       }
 
       return arrayFinalTickets;
@@ -209,67 +156,72 @@ export class MovimientosClase {
       ticket._id
     );
     if (arrayMovimientos?.length > 0) {
-      return this.calcularFormaPago(ticket, arrayMovimientos);
+      return this.calcularFormaPago({
+        ...ticket,
+        movimientos: arrayMovimientos,
+        tipoPago: null,
+      });
     }
     return null;
   }
 
   /* Eze 4.0 */
-  private calcularFormaPago(
-    ticket: TicketsInterface,
-    arrayMovimientos: MovimientosInterface[]
-  ): FormaPago {
-    if (ticket.consumoPersonal) return "CONSUMO_PERSONAL";
+  private calcularFormaPago(superTicket: SuperTicketInterface): FormaPago {
+    if (superTicket.consumoPersonal) return "CONSUMO_PERSONAL";
 
-    if (arrayMovimientos.length === 1) {
-      if (
-        arrayMovimientos[0].tipo === "TARJETA" &&
-        arrayMovimientos[0].valor > 0
-      ) {
+    if (superTicket.movimientos.length === 1) {
+      if (superTicket.movimientos[0].tipo === "TARJETA") {
         return "TARJETA";
-      } else if (arrayMovimientos[0].tipo === "TKRS_SIN_EXCESO") {
-        return "TKRS";
-      } else if (arrayMovimientos[0].tipo === "DEUDA") {
+      } else if (superTicket.movimientos[0].tipo === "TKRS_SIN_EXCESO") {
+        if (superTicket.total > superTicket.movimientos[0].valor)
+          return "TKRS + EFECTIVO";
+        else return "TKRS";
+      } else if (superTicket.movimientos[0].tipo === "DEUDA") {
         return "DEUDA";
       } else {
-        return "DESCONOCIDO";
+        throw Error("Forma de pago desconocida");
       }
-    } else if (arrayMovimientos.length === 0) {
+    } else if (superTicket.movimientos.length === 0) {
       return "EFECTIVO";
-    } else if (arrayMovimientos.length > 1) {
+    } else if (superTicket.movimientos.length === 2) {
       // CASO TARJETA ANULADA
       if (
-        arrayMovimientos.length === 2 &&
-        arrayMovimientos[0].tipo === "TARJETA"
+        superTicket.movimientos[0].tipo === "TARJETA" &&
+        superTicket.movimientos[1].tipo === "TARJETA"
       ) {
-        const busqueda = {
-          original: false,
-          rectificativo: false,
-        };
-        for (let j = 0; j < arrayMovimientos.length; j++) {
-          if (arrayMovimientos[j].tipo === "TARJETA") {
-            if (arrayMovimientos[j].valor > 0) {
-              busqueda.original = true;
-            } else if (arrayMovimientos[j].valor < 0) {
-              busqueda.rectificativo = true;
-            }
+        const debeSerCero =
+          superTicket.movimientos[0].valor + superTicket.movimientos[1].valor;
+        if (debeSerCero === 0) return "DEVUELTO";
+        throw Error("2 movimientos de tarjeta y la suma de ambos no es cero");
+      } else {
+        let tkrsSinExceso = false;
+        let tkrsConExceso = false;
+        let indexSinExceso = null;
+
+        for (let i = 0; i < 2; i++) {
+          if (superTicket.movimientos[i].tipo === "TKRS_SIN_EXCESO") {
+            tkrsSinExceso = true;
+            indexSinExceso = i;
           }
+
+          if (superTicket.movimientos[i].tipo === "TKRS_CON_EXCESO")
+            tkrsConExceso = true;
         }
-        if (busqueda.original && busqueda.rectificativo) {
-          return "DEVUELTO";
-        } else {
-          return "DESCONOCIDO";
+        if (tkrsSinExceso && tkrsConExceso) {
+          if (
+            superTicket.movimientos[indexSinExceso].valor === superTicket.total
+          )
+            return "TKRS";
+          else if (
+            superTicket.movimientos[0].valor +
+              superTicket.movimientos[1].valor <
+            superTicket.total
+          )
+            return "TKRS + EFECTIVO";
         }
-      } else if (arrayMovimientos.length >= 2) {
-        for (let j = 0; j < arrayMovimientos.length; j++) {
-          if (arrayMovimientos[j].tipo === "TKRS_SIN_EXCESO") {
-            if (arrayMovimientos[j].valor >= ticket.total) {
-              return "TKRS";
-            } else {
-              return "TKRS + EFECTIVO";
-            }
-          }
-        }
+        throw Error(
+          "2 movimientos que no son tarjeta y no se cumple con los requisitos del tkrs"
+        );
       }
     }
   }

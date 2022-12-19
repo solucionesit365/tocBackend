@@ -117,7 +117,7 @@ export class TicketsController {
               ticket._id,
               idTrabajador
             );
-          } else if (tipo !== "EFECTIVO") {
+          } else if (tipo !== "EFECTIVO" && tipo != "CONSUMO_PERSONAL") {
             throw Error(
               "Falta información del tkrs o bien ninguna forma de pago es correcta"
             );

@@ -56,6 +56,9 @@ export class NuevaPromocion {
   ): Promise<boolean> {
     let unidadesTotales = unidades;
     let index1 = null;
+
+    if (cesta.modo === "CONSUMO_PERSONAL") return false;
+
     if (cesta.idCliente) {
       const cliente = await clienteInstance.getClienteById(cesta.idCliente);
       if (cliente.albaran === true) {

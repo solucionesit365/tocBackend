@@ -1,5 +1,6 @@
 import { ClientesInterface } from "../clientes/clientes.interface";
 import { CestasInterface } from "../cestas/cestas.interface";
+import { FormaPago, MovimientosInterface } from "../movimientos/movimientos.interface";
 
 export interface TicketsInterface {
   _id: number;
@@ -10,4 +11,9 @@ export interface TicketsInterface {
   idCliente: ClientesInterface["id"];
   consumoPersonal?: boolean;
   enviado: boolean;
+}
+
+export interface SuperTicketInterface extends TicketsInterface {
+  tipoPago: FormaPago,
+  movimientos: MovimientosInterface[]
 }

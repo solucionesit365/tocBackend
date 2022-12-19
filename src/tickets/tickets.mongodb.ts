@@ -152,6 +152,24 @@ export async function actualizarEstadoTicket(
   ).acknowledged;
 }
 
+/* Eze v4 */
+export async function setTicketEnviado(
+  idTicket: TicketsInterface["_id"]
+): Promise<boolean> {
+  const database = (await conexion).db("tocgame");
+  const tickets = database.collection<TicketsInterface>("tickets");
+  return (
+    await tickets.updateOne(
+      { _id: idTicket },
+      {
+        $set: {
+          enviado: true,
+        },
+      }
+    )
+  ).acknowledged;
+}
+
 /* Eze v23 */
 export async function borrarTicket(idTicket: number): Promise<boolean> {
   const database = (await conexion).db("tocgame");

@@ -103,6 +103,10 @@ export class TicketsClase {
   actualizarEstadoTicket = (ticket: TicketsInterface) =>
     schTickets.actualizarEstadoTicket(ticket);
 
+  /* Eze 4.0 */
+  setTicketEnviado = (idTicket: TicketsInterface["_id"]) =>
+    schTickets.setTicketEnviado(idTicket);
+
   actualizarTickets = async () => {
     const arrayVentas = await movimientosInstance.construirArrayVentas();
     if (arrayVentas) io.emit("cargarVentas", arrayVentas.reverse());

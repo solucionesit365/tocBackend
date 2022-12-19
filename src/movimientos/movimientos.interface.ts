@@ -14,7 +14,6 @@ export type TiposMovientos =
   | "TKRS_CON_EXCESO"
   | "TKRS_SIN_EXCESO"
   | "DEUDA"
-  | "CONSUMO_PERSONAL"
   | "ENTREGA_DIARIA"
   | "ENTRADA_DINERO"
   | "DATAFONO_3G";
@@ -31,5 +30,4 @@ export type FormaPago =
   | "CONSUMO_PERSONAL"
   | "DEUDA"
   | "TKRS + EFECTIVO"
-  | "DESCONOCIDO"
   | "DEVUELTO";
