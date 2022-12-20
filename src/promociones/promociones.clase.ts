@@ -13,6 +13,7 @@ import {
   InfoPromoAplicar,
 } from "./promociones.interface";
 import * as schPromociones from "./promociones.mongodb";
+import { TicketsInterface } from "../tickets/tickets.interface";
 
 export class NuevaPromocion {
   private promosIndividuales: PromocionesInterface[] = [];
@@ -797,6 +798,67 @@ export class NuevaPromocion {
       await schPromociones.insertarPromociones(arrayPromociones);
     }
     return null;
+  };
+
+  /* Eze 4.0 */
+  public deshacerPromociones(ticket: TicketsInterface) {
+    for (let i = 0; i < ticket.cesta.lista.length; i++) {
+      if (ticket.cesta.lista[i].promocion) {
+        if (ticket.cesta.lista[i].promocion.tipoPromo === "COMBO") {
+          ticket.cesta.lista.push({
+            arraySuplementos: null,
+            gramos: null,
+            idArticulo: ticket.cesta.lista[i].promocion.idArticuloPrincipal,
+            regalo: false,
+            promocion: null,
+            unidades:
+              ticket.cesta.lista[i].promocion.unidadesOferta *
+              ticket.cesta.lista[i].promocion.cantidadArticuloPrincipal,
+            subtotal:
+              ticket.cesta.lista[i].promocion.precioRealArticuloPrincipal *
+              ticket.cesta.lista[i].promocion.unidadesOferta *
+              ticket.cesta.lista[i].promocion.cantidadArticuloPrincipal,
+            nombre: "ArtículoDentroDePromo",
+          });
+          ticket.cesta.lista.push({
+            arraySuplementos: null,
+            gramos: null,
+            idArticulo: ticket.cesta.lista[i].promocion.idArticuloSecundario,
+            regalo: false,
+            promocion: null,
+            unidades:
+              ticket.cesta.lista[i].promocion.unidadesOferta *
+              ticket.cesta.lista[i].promocion.cantidadArticuloSecundario,
+            subtotal:
+              ticket.cesta.lista[i].promocion.precioRealArticuloSecundario *
+              ticket.cesta.lista[i].promocion.unidadesOferta *
+              ticket.cesta.lista[i].promocion.cantidadArticuloSecundario,
+            nombre: "ArtículoDentroDePromo",
+          });
+          ticket.cesta.lista.splice(i, 1);
+        } else if (ticket.cesta.lista[i].promocion.tipoPromo === "INDIVIDUAL") {
+          ticket.cesta.lista.push({
+            arraySuplementos: null,
+            gramos: null,
+            idArticulo: ticket.cesta.lista[i].promocion.idArticuloPrincipal,
+            regalo: false,
+            promocion: null,
+            unidades:
+              ticket.cesta.lista[i].promocion.unidadesOferta *
+              ticket.cesta.lista[i].promocion.cantidadArticuloPrincipal,
+            subtotal:
+              ticket.cesta.lista[i].promocion.precioRealArticuloPrincipal *
+              ticket.cesta.lista[i].promocion.unidadesOferta *
+              ticket.cesta.lista[i].promocion.cantidadArticuloPrincipal,
+            nombre: "ArtículoDentroDePromo",
+          });
+          ticket.cesta.lista.splice(i, 1);
+        } else
+          throw Error(
+            "Tipo de promoción no es válido, no se puede deshacer promo"
+          );
+      }
+    }
   }
 }
 

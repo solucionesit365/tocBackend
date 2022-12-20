@@ -1,16 +1,16 @@
 // import { ticketsInstance } from "./tickets/tickets.clase";
-// import {
-//   sincronizarTickets,
-//   // sincronizarCajas,
-//   // sincronizarMovimientos,
-//   // sincronizarFichajes,
-//   // sincronizarDevoluciones,
-// } from "./sincro";
+import {
+  // sincronizarTickets,
+  // sincronizarCajas,
+  // sincronizarMovimientos,
+  sincronizarFichajes,
+  // sincronizarDevoluciones,
+} from "./sincro";
 // import { cajaInstance } from "./caja/caja.clase";
 // import { movimientosInstance } from "./movimientos/movimientos.clase";
-// import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
+import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
 // import { devolucionesInstance } from "./devoluciones/devoluciones.clase";
-// import { logger } from "./logger";
+import { logger } from "./logger";
 
 let URL_SANPEDRO = "";
 if (process.env.npm_lifecycle_event === "start:dev")
@@ -99,24 +99,24 @@ function emitSocket(canal: string, datos: any = null) {
 //   }
 // });
 
-// socket.on("resFichajes", (data) => {
-//   if (data.error == false) {
-//     trabajadoresInstance
-//       .actualizarEstadoFichaje(data.fichaje)
-//       .then((res) => {
-//         if (res) {
-//           sincronizarFichajes();
-//         } else {
-//           logger.Error(28, "Error al actualizar el estado del fichaje");
-//         }
-//       })
-//       .catch((err) => {
-//         logger.Error(29, err);
-//       });
-//   } else {
-//     logger.Error(30, data.mensaje);
-//   }
-// });
+socket.on("resFichajes", (data) => {
+  if (data.error == false) {
+    trabajadoresInstance
+      .actualizarEstadoFichaje(data.fichaje)
+      .then((res) => {
+        if (res) {
+          sincronizarFichajes();
+        } else {
+          logger.Error(28, "Error al actualizar el estado del fichaje");
+        }
+      })
+      .catch((err) => {
+        logger.Error(29, err);
+      });
+  } else {
+    logger.Error(30, data.mensaje);
+  }
+});
 
 // socket.on("resSincroDevoluciones", (data) => {
 //   if (!data.error) {

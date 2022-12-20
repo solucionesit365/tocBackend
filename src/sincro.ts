@@ -13,6 +13,7 @@ import { limpiezaMovimientos } from "./movimientos/movimientos.mongodb";
 import { tarifasInstance } from "./tarifas/tarifas.class";
 import { logger } from "./logger";
 import axios from "axios";
+import { nuevaInstancePromociones } from "./promociones/promociones.clase";
 
 let enProcesoTickets = false;
 let enProcesoMovimientos = false;
@@ -25,7 +26,7 @@ async function sincronizarTickets(continuar: boolean = false) {
       if (parametros != null) {
         const ticket = await ticketsInstance.getTicketMasAntiguo();
         if (ticket) {
-          // AQUÍ DESHACER OFERTAS PARA ENVIAR AL SANPEDRO
+          nuevaInstancePromociones.deshacerPromociones(ticket);
           const res = await axios.post("tickets/enviarTicket", { ticket });
           if (res.data) {
             if (await ticketsInstance.setTicketEnviado(ticket._id))
@@ -43,32 +44,25 @@ async function sincronizarTickets(continuar: boolean = false) {
   }
 }
 
-// function sincronizarCajas() {
-//   parametrosInstance
-//     .getParametros()
-//     .then((parametros) => {
-//       if (parametros != null) {
-//         cajaInstance
-//           .getCajaSincroMasAntigua()
-//           .then((resCaja) => {
-//             if (resCaja) {
-//               emitSocket("sincroCajas", {
-//                 parametros,
-//                 infoCaja: resCaja,
-//               });
-//             }
-//           })
-//           .catch((err) => {
-//             logger.Error(6, err);
-//           });
-//       } else {
-//         logger.Error(7, "No hay parámetros definidos en la BBDD");
-//       }
-//     })
-//     .catch((err) => {
-//       logger.Error(8, err);
-//     });
-// }
+async function sincronizarCajas() {
+  try {
+    const caja = await cajaInstance.getCajaSincroMasAntigua();
+    if (caja) {
+      const resCaja = await axios.post("cajas/enviarCaja", { caja });
+      if (resCaja.data) {
+        if (await cajaInstance.confirmarCajaEnviada(caja._id)) {
+          sincronizarCajas();
+        } else {
+          throw Error(
+            "La caja está guardada en Hit, pero no se ha podido marcar como enviada en el Mongo"
+          );
+        }
+      }
+    }
+  } catch (err) {
+    logger.Error("sincro.ts sincronizarCajas()", err);
+  }
+}
 
 // async function sincronizarMovimientos(continuar: boolean = false) {
 //   try {
@@ -95,32 +89,32 @@ async function sincronizarTickets(continuar: boolean = false) {
 //   }
 // }
 
-// function sincronizarFichajes() {
-//   parametrosInstance
-//     .getParametros()
-//     .then((parametros) => {
-//       if (parametros != null) {
-//         trabajadoresInstance
-//           .getFichajeMasAntiguo()
-//           .then((res) => {
-//             if (res != null) {
-//               emitSocket("sincroFichajes", {
-//                 parametros,
-//                 fichaje: res,
-//               });
-//             }
-//           })
-//           .catch((err) => {
-//             logger.Error(11, err);
-//           });
-//       } else {
-//         logger.Error(12, "No hay parámetros definidos en la BBDD");
-//       }
-//     })
-//     .catch((err) => {
-//       logger.Error(13, err);
-//     });
-// }
+export function sincronizarFichajes() {
+  parametrosInstance
+    .getParametros()
+    .then((parametros) => {
+      if (parametros != null) {
+        trabajadoresInstance
+          .getFichajeMasAntiguo()
+          .then((res) => {
+            if (res != null) {
+              emitSocket("sincroFichajes", {
+                parametros,
+                fichaje: res,
+              });
+            }
+          })
+          .catch((err) => {
+            logger.Error(11, err);
+          });
+      } else {
+        logger.Error(12, "No hay parámetros definidos en la BBDD");
+      }
+    })
+    .catch((err) => {
+      logger.Error(13, err);
+    });
+}
 
 // function sincronizarDevoluciones() {
 //   parametrosInstance
@@ -181,9 +175,9 @@ function limpiezaProfunda(): void {
 }
 
 setInterval(sincronizarTickets, 8000);
-// setInterval(sincronizarCajas, 40000);
+setInterval(sincronizarCajas, 40000);
 // setInterval(sincronizarMovimientos, 50000);
-// setInterval(sincronizarFichajes, 20000);
+setInterval(sincronizarFichajes, 20000);
 // setInterval(sincronizarDevoluciones, 60000);
 setInterval(actualizarTeclados, 3600000);
 setInterval(actualizarTarifas, 3600000);
