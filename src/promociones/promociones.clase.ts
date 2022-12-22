@@ -58,7 +58,8 @@ export class NuevaPromocion {
     let unidadesTotales = unidades;
     let index1 = null;
 
-    if (cesta.modo === "CONSUMO_PERSONAL") return false;
+    if (cesta.modo === "CONSUMO_PERSONAL" || cesta.modo === "DEVOLUCION")
+      return false;
 
     if (cesta.idCliente) {
       const cliente = await clienteInstance.getClienteById(cesta.idCliente);

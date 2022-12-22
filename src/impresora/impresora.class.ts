@@ -155,31 +155,35 @@ export class Impresora {
   }
   /* Eze 4.0 */
   async imprimirDevolucion(idDevolucion: ObjectId) {
-    const devolucion = await devolucionesInstance.getDevolucionById(
-      idDevolucion
-    );
-    const parametros = await parametrosInstance.getParametros();
-    const trabajador: TrabajadoresInterface =
-      await trabajadoresInstance.getTrabajadorById(devolucion.idTrabajador);
-
-    let sendObject = null;
-
-    if (devolucion && trabajador) {
-      sendObject = {
-        numFactura: devolucion._id,
-        arrayCompra: devolucion.cesta.lista,
-        total: devolucion.total,
-        visa: null,
-        tiposIva: devolucion.cesta.detalleIva,
-        cabecera: parametros.header,
-        pie: parametros.footer,
-        nombreTrabajador: trabajador.nombreCorto,
-        impresora: parametros.tipoImpresora,
-        infoClienteVip: null, // Mirar bien para terminar todo
-        infoCliente: null,
-      };
-
-      await this._venta(sendObject);
+    try {
+      const devolucion = await devolucionesInstance.getDevolucionById(
+        idDevolucion
+      );
+      const parametros = await parametrosInstance.getParametros();
+      const trabajador: TrabajadoresInterface =
+        await trabajadoresInstance.getTrabajadorById(devolucion.idTrabajador);
+  
+      let sendObject = null;
+  
+      if (devolucion && trabajador) {
+        sendObject = {
+          numFactura: devolucion._id,
+          arrayCompra: devolucion.cesta.lista,
+          total: devolucion.total,
+          visa: null,
+          tiposIva: devolucion.cesta.detalleIva,
+          cabecera: parametros.header,
+          pie: parametros.footer,
+          nombreTrabajador: trabajador.nombreCorto,
+          impresora: parametros.tipoImpresora,
+          infoClienteVip: null, // Mirar bien para terminar todo
+          infoCliente: null,
+        };
+  
+        await this._venta(sendObject);
+      }
+    } catch (err) {
+      logger.Error("imprimirDevolucion()", err);
     }
   }
 
