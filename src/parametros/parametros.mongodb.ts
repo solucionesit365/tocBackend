@@ -68,12 +68,11 @@ export async function setIpPaytef(ip: string): Promise<boolean> {
 }
 
 /* Eze 4.0 */
-export async function actualizarPropiedad(claveValor: any): Promise<boolean> {
+export async function actualizarPropiedad(params: any): Promise<boolean> {
   const database = (await conexion).db("tocgame");
   const parametros = database.collection("parametros");
-  return (
-    await parametros.updateOne({ _id: "PARAMETROS" }, { $set: { claveValor } })
-  ).acknowledged;
+  return (await parametros.updateOne({ _id: "PARAMETROS" }, { $set: params }))
+    .acknowledged;
 }
 
 /* Eze 4.0 */

@@ -30,9 +30,11 @@ export class ParametrosController {
 
   /* Eze 4.0 */
   @Post("setPropiedad")
-  async setPropiedad(@Body() { claveValor }) {
+  async setPropiedad(@Body() { parametros }) {
     try {
-      if (claveValor) return await parametrosInstance.setPropiedad(claveValor);
+      if (parametros) {
+        return await parametrosInstance.setPropiedad(parametros);
+      } 
 
       throw Error("Faltan datos en parametros/setPropiedad");
     } catch (err) {

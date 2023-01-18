@@ -36,6 +36,18 @@ io.on("connection", (socket) => {
   });
 
   /* Eze 4.0 */
+  socket.on("cargarConfiguracion", async (data) => {
+    try {
+      socket.emit(
+        "cargarConfiguracion",
+        await parametrosInstance.getParametros()
+      );
+    } catch (err) {
+      logger.Error(36, err);
+    }
+  });
+
+  /* Eze 4.0 */
   socket.on("cargarTrabajadores", async (data) => {
     try {
       socket.emit(
