@@ -148,4 +148,22 @@ export class CestasController {
       logger.Error(133, err);
     }
   }
+
+  // @Post("addSuplementos")
+  // async addSuplementos(
+  //   @Body() { idCesta, suplementos, idArticuloGeneral, unidades }
+  // ) {
+  //   try {
+  //     if (idCesta && suplementos?.length > 0 && idArticuloGeneral && unidades)
+  //       return await cestasInstance.addItemConSuplementos(
+  //         idCesta,
+  //         suplementos,
+  //         idArticuloGeneral,
+  //         unidades
+  //       );
+  //     throw Error("Es necesario un array con suplementos");
+  //   } catch (err) {
+  //     logger.Error("cestas.controller @addSuplementos", err);
+  //   }
+  // }
 }

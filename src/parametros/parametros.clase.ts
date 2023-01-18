@@ -59,8 +59,13 @@ export class ParametrosClase {
     await schParametros.setVidAndPid(vid, pid);
 
   /* Eze 4.0 */
-  setTipoImpresora = async (tipo: ParametrosInterface["tipoImpresora"]): Promise<boolean> => 
-  await schParametros.setTipoImpresora(tipo);
+  setTipoImpresora = async (
+    tipo: ParametrosInterface["tipoImpresora"]
+  ): Promise<boolean> => await schParametros.setTipoImpresora(tipo);
+
+  /* Eze 4.0 */
+  setPropiedad = async (claveValor: any) =>
+    await schParametros.actualizarPropiedad(claveValor);
 
   /* Eze 4.0 */
   setIpPaytef = async (ip: string): Promise<boolean> =>

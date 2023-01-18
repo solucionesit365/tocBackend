@@ -32,6 +32,19 @@ export class ArticulosController {
     }
   }
 
+  @Post("getSuplementos")
+  async getSuplementos(@Body() { arrayIdSuplementos }) {
+    try {
+      if (arrayIdSuplementos)
+        return await articulosInstance.getSuplementos(arrayIdSuplementos);
+
+      throw Error("Error, faltan datos en getArticulo controller");
+    } catch (err) {
+      logger.Error("articulos.controller.ts @getSuplementos", err);
+      return null;
+    }
+  }
+
   // @Post("editarArticulo")
   // editarArticulo(@Body() params) {
   //   if (

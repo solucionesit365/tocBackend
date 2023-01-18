@@ -29,6 +29,19 @@ export class ParametrosController {
   }
 
   /* Eze 4.0 */
+  @Post("setPropiedad")
+  async setPropiedad(@Body() { claveValor }) {
+    try {
+      if (claveValor) return await parametrosInstance.setPropiedad(claveValor);
+
+      throw Error("Faltan datos en parametros/setPropiedad");
+    } catch (err) {
+      logger.Error("parametros.controller.ts @setPropiedad");
+      return false;
+    }
+  }
+
+  /* Eze 4.0 */
   @Get("actualizarParametros")
   async actualizarParametros() {
     try {

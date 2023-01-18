@@ -380,7 +380,7 @@ export class CestaClase {
 
   /* Eze 4.0 */
   async getDetalleIvaSuplementos(
-    arraySuplementos: ItemLista["arraySuplementos"],
+    arraySuplementos: ArticulosInterface[],
     idCliente: ClientesInterface["id"]
   ): Promise<DetalleIvaInterface> {
     let objetoIva: DetalleIvaInterface = {
@@ -397,16 +397,15 @@ export class CestaClase {
 
     for (let i = 0; i < arraySuplementos.length; i++) {
       let articulo = await articulosInstance.getInfoArticulo(
-        arraySuplementos[i]
+        arraySuplementos[i]._id
       );
       articulo = await articulosInstance.getPrecioConTarifa(
         articulo,
         idCliente
       );
-      objetoIva = construirObjetoIvas(
-        articulo.precioConIva,
-        articulo.tipoIva,
-        1
+      objetoIva = fusionarObjetosDetalleIva(
+        construirObjetoIvas(articulo.precioConIva, articulo.tipoIva, 1),
+        objetoIva
       );
     }
     return objetoIva;
@@ -444,16 +443,49 @@ export class CestaClase {
     throw Error("Error en updateCesta borrarArticulosCesta()");
   }
 
-  /* Eze 4.0 */
-  async addSuplementos(
-    idCesta: CestasInterface["_id"],
-    arraySuplementos: ItemLista["arraySuplementos"],
-    indexCesta: number
-  ) {
-    const cesta = await this.getCestaById(idCesta);
-    cesta.lista[indexCesta].arraySuplementos = arraySuplementos;
-    return await this.updateCesta(cesta);
-  }
+  // /* Eze 4.0 */
+  // async addItemConSuplementos(
+  //   idCesta: CestasInterface["_id"],
+  //   arraySuplementos: ArticulosInterface[],
+  //   idArticuloGeneral: ArticulosInterface["_id"],
+  //   unidades: number
+  // ) {
+  //   const cesta = await this.getCestaById(idCesta);
+
+  //   const objPushSuplementos: ItemLista["arraySuplementos"] = [];
+  //   for (let i = 0; i < arraySuplementos.length; i++) {
+  //     objPushSuplementos.push({
+  //       id: arraySuplementos[i]._id,
+  //       nombre: arraySuplementos[i].nombre,
+  //       precioConIva: arraySuplementos[i].precioConIva,
+  //     });
+  //   }
+
+  //   const articuloGeneral: ArticulosInterface =
+  //     await articulosInstance.getInfoArticulo(idArticuloGeneral);
+  //   if (cesta.idCliente) {
+  //     const articuloConTarifa = await articulosInstance.getPrecioConTarifa(
+  //       articuloGeneral,
+  //       cesta.idCliente
+  //     );
+  //     articuloGeneral.precioBase = articuloConTarifa.precioBase;
+  //     articuloGeneral.precioConIva = articuloConTarifa.precioConIva;
+  //   }
+
+  //   if (
+  //     await this.clickTeclaArticulo(
+  //       idArticuloGeneral,
+  //       0,
+  //       idCesta,
+  //       unidades,
+  //       objPushSuplementos
+  //     )
+  //   ) {
+  //     this.actualizarCestas();
+  //     return true;
+  //   }
+  //   throw Error("No se ha podido insertar el artículo con suplemento");
+  // }
 
   /* Eze 4.0 */
   updateCesta = async (cesta: CestasInterface) =>
