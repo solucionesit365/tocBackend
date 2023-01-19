@@ -6,6 +6,7 @@ import { logger } from "./logger";
 import { movimientosInstance } from "./movimientos/movimientos.clase";
 import { parametrosInstance } from "./parametros/parametros.clase";
 import { paytefInstance } from "./paytef/paytef.class";
+import { nuevaInstancePromociones } from "./promociones/promociones.clase";
 import { tecladoInstance } from "./teclado/teclado.clase";
 import { ticketsInstance } from "./tickets/tickets.clase";
 import { trabajadoresInstance } from "./trabajadores/trabajadores.clase";
@@ -101,6 +102,15 @@ io.on("connection", (socket) => {
       );
     } catch (err) {
       logger.Error(118, err);
+    }
+  });
+
+  /* Eze 4.0 */
+  socket.on("recargarPromociones", async () => {
+    try {
+      await nuevaInstancePromociones.recargarPromosCache();
+    } catch (err) {
+      logger.Error("sockets.gateway.ts recargarPromociones", err);
     }
   });
 });

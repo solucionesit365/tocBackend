@@ -41,6 +41,14 @@ export class NuevaPromocion {
       });
   }
 
+  async getPromosCombo() {
+    return await schPromociones.getPromosCombo();
+  }
+
+  async getPromosIndividuales() {
+    return await schPromociones.getPromosIndividuales();
+  }
+
   async descargarPromociones() {
     const resPromos = (await axios.get("promociones/getPromocionesNueva"))
       .data as PromocionesInterface[];
@@ -48,6 +56,11 @@ export class NuevaPromocion {
       return await schPromociones.insertarPromociones(resPromos);
     }
     throw Error("No hay promociones para descargar");
+  }
+
+  public async recargarPromosCache() {
+    this.promosCombo = await this.getPromosCombo();
+    this.promosIndividuales = await this.getPromosIndividuales();
   }
 
   public async gestionarPromociones(
