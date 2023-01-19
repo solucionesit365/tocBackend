@@ -84,7 +84,7 @@ export class CestasController {
   @Post("onlyCrearCestaParaMesa")
   async onlyCrearCesta(@Body() { indexMesa }) {
     try {
-      if (indexMesa) {
+      if (typeof indexMesa === "number") {
         const idCesta = await cestasInstance.crearCesta(indexMesa);
         cestasInstance.actualizarCestas();
         return idCesta;
