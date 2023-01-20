@@ -47,12 +47,18 @@ export class CestaClase {
         base1: 0,
         base2: 0,
         base3: 0,
+        base4: 0,
+        base5: 0,
         valorIva1: 0,
         valorIva2: 0,
         valorIva3: 0,
+        valorIva4: 0,
+        valorIva5: 0,
         importe1: 0,
         importe2: 0,
         importe3: 0,
+        importe4: 0,
+        importe5: 0,
       },
       lista: [],
       modo: "VENTA",
@@ -80,7 +86,9 @@ export class CestaClase {
   getTotalCesta = (cesta: CestasInterface) =>
     cesta.detalleIva.importe1 +
     cesta.detalleIva.importe2 +
-    cesta.detalleIva.importe3;
+    cesta.detalleIva.importe3 +
+    cesta.detalleIva.importe4 +
+    cesta.detalleIva.importe5;
 
   /* Eze 4.0 */
   async borrarItemCesta(
@@ -252,12 +260,18 @@ export class CestaClase {
       base1: 0,
       base2: 0,
       base3: 0,
+      base4: 0,
+      base5: 0,
       valorIva1: 0,
       valorIva2: 0,
       valorIva3: 0,
+      valorIva4: 0,
+      valorIva5: 0,
       importe1: 0,
       importe2: 0,
       importe3: 0,
+      importe4: 0,
+      importe5: 0,
     };
 
     if (itemPromocion.promocion.tipoPromo === "INDIVIDUAL") {
@@ -319,12 +333,18 @@ export class CestaClase {
       base1: 0,
       base2: 0,
       base3: 0,
+      base4: 0,
+      base5: 0,
       valorIva1: 0,
       valorIva2: 0,
       valorIva3: 0,
+      valorIva4: 0,
+      valorIva5: 0,
       importe1: 0,
       importe2: 0,
       importe3: 0,
+      importe4: 0,
+      importe5: 0,
     };
 
     for (let i = 0; i < cesta.lista.length; i++) {
@@ -372,7 +392,9 @@ export class CestaClase {
           cesta.lista[i].subtotal +=
             detalleDeSuplementos.importe1 +
             detalleDeSuplementos.importe2 +
-            detalleDeSuplementos.importe3;
+            detalleDeSuplementos.importe3 +
+            detalleDeSuplementos.importe4 +
+            detalleDeSuplementos.importe5;
         }
       }
     }
@@ -387,12 +409,18 @@ export class CestaClase {
       base1: 0,
       base2: 0,
       base3: 0,
+      base4: 0,
+      base5: 0,
       valorIva1: 0,
       valorIva2: 0,
       valorIva3: 0,
+      valorIva4: 0,
+      valorIva5: 0,
       importe1: 0,
       importe2: 0,
       importe3: 0,
+      importe4: 0,
+      importe5: 0,
     };
 
     for (let i = 0; i < arraySuplementos.length; i++) {
@@ -425,12 +453,18 @@ export class CestaClase {
         base1: 0,
         base2: 0,
         base3: 0,
+        base4: 0,
+        base5: 0,
         importe1: 0,
         importe2: 0,
         importe3: 0,
+        importe4: 0,
+        importe5: 0,
         valorIva1: 0,
         valorIva2: 0,
         valorIva3: 0,
+        valorIva4: 0,
+        valorIva5: 0,
       };
       if (borrarCliente) cesta.idCliente = "";
       if (borrarModo) cesta.modo = "VENTA";
